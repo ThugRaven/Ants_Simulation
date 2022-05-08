@@ -50,6 +50,7 @@ select {
 body {
 	font-family: 'Montserrat', sans-serif;
 	min-height: 100vh;
+	background-color: black;
 }
 
 canvas {

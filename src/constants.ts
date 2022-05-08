@@ -8,3 +8,5 @@ export enum MarkerTypes {
 	TO_FOOD = 2,
 	NO_FOOD = 3,
 }
+
+export const EVAPORATE_AMOUNT = 0.001;

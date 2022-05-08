@@ -1,4 +1,4 @@
-import { MarkerTypes } from '../constants';
+import { EVAPORATE_AMOUNT, MarkerTypes } from '../constants';
 
 export default class Marker {
 	ctx: CanvasRenderingContext2D;
@@ -30,6 +30,7 @@ export default class Marker {
 		} else if (this.type === MarkerTypes.NO_FOOD) {
 			hue = 230;
 		}
+
 		// let width = 10;
 		// let height = 10;
 		// let i = this.x - width * 0.5;
@@ -49,6 +50,12 @@ export default class Marker {
 		// this.ctx.fillRect(i, j, width, height);
 
 		this.ctx.fillStyle = `hsl(${hue}, 100%, 50%, ${this.intensity})`;
-		this.ctx.fillRect(this.x, this.y, 10, 10);
+		this.ctx.fillRect(this.x, this.y, 4, 4);
+	}
+
+	update() {
+		// this.intensity = Math.max(0, this.intensity - EVAPORATE_AMOUNT);
+		this.intensity = this.intensity < 0 ? 0 : this.intensity - EVAPORATE_AMOUNT;
+		// this.intensity -= EVAPORATE_AMOUNT;
 	}
 }
