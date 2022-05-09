@@ -1,4 +1,4 @@
-import { EVAPORATE_AMOUNT, MarkerTypes } from '../constants';
+import { EVAPORATE_AMOUNT, MarkerOptions, MarkerTypes } from '../constants';
 
 export default class Marker {
 	ctx: CanvasRenderingContext2D;
@@ -50,7 +50,12 @@ export default class Marker {
 		// this.ctx.fillRect(i, j, width, height);
 
 		this.ctx.fillStyle = `hsl(${hue}, 100%, 50%, ${this.intensity})`;
-		this.ctx.fillRect(this.x, this.y, 4, 4);
+		this.ctx.fillRect(
+			this.x,
+			this.y,
+			MarkerOptions.WIDTH,
+			MarkerOptions.HEIGHT,
+		);
 	}
 
 	update() {

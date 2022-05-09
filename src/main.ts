@@ -1,9 +1,13 @@
-import { CanvasOptions, MarkerTypes } from './constants';
+import { CanvasOptions, MarkerOptions, MarkerTypes } from './constants';
 import Marker from './classes/Marker';
 import './style.css';
+import antImage from './assets/ant.png';
+import antImage2 from './assets/ant_2.png';
+import antImage3 from './assets/ant_svg.svg';
 
 const canvas = document.getElementById('canvas') as HTMLCanvasElement | null;
 const ctx = canvas?.getContext('2d');
+const antIcon = document.getElementById('antIcon') as SVGElement | null;
 
 // if (canvas?.getContext) {
 //   return
@@ -19,35 +23,78 @@ if (canvas != null && ctx != null) {
 
 	let count = 0;
 
-	for (let i = 0; i < canvas.width; i++) {
-		for (let j = 0; j < canvas.height; j++) {
-			if (i % 4 == 0 && j % 4 == 0) {
-				let random = Math.floor(Math.random() * 3) + 1;
-				let type = 0;
+	for (let i = 0; i < Math.floor(canvas.width / MarkerOptions.WIDTH); i++) {
+		for (let j = 0; j < Math.floor(canvas.height / MarkerOptions.HEIGHT); j++) {
+			let random = Math.floor(Math.random() * 3) + 1;
+			let type = 0;
 
-				if (random == 1) {
-					type = MarkerTypes.TO_HOME;
-				} else if (random == 2) {
-					type = MarkerTypes.TO_FOOD;
-				} else {
-					type = MarkerTypes.NO_FOOD;
-				}
-				count++;
-				let marker = new Marker(ctx, i, j, type, Math.random());
-				markers.push(marker);
-				marker.draw();
+			if (random == 1) {
+				type = MarkerTypes.TO_HOME;
+			} else if (random == 2) {
+				type = MarkerTypes.TO_FOOD;
+			} else {
+				type = MarkerTypes.NO_FOOD;
 			}
+
+			count++;
+			let marker = new Marker(
+				ctx,
+				i * MarkerOptions.WIDTH,
+				j * MarkerOptions.HEIGHT,
+				type,
+				Math.random(),
+			);
+			markers.push(marker);
+			marker.draw();
 		}
 	}
 
 	let lastUpdateTime = 0;
 	const SPEED = 10;
+	let frames = 0;
 
+	let ant = new Image();
+	ant.src = antImage;
+	ant.onload = () => {
+		ctx.drawImage(ant, 50, 50, 370 / 15, 552 / 15);
+	};
+
+	let ant2 = new Image();
+	ant2.src = antImage2;
+	ant2.onload = () => {
+		ctx.drawImage(ant2, 100, 50, 25, 35);
+	};
+
+	ctx.translate(0, 0);
+	let ant3 = new Path2D(
+		'm 95.622276,163.1294 v 5.26257 l 2.944768,2.07434 -0.97677,1.07966 0.0045,4.21225 2.291972,1.56002 v 0.49978 l -1.099034,0.42216 -3.162998,-2.15442 -0.01589,-2.62243 -4.904581,-3.26317 v 0.74725 l 4.264005,3.04289 v 2.52634 l 3.607365,2.39706 v 1.16695 l -1.563396,0.8346 -3.51128,-2.36551 h -4.476611 l 0.40638,0.6575 3.733553,0.002 3.913626,2.60228 1.49741,-0.97774 v 2.38976 l -1.461511,-0.97046 -4.101838,2.69278 -0.01362,2.73451 -2.294165,1.4193 v 0.60411 h 0.502454 l 2.448252,-1.66435 v -2.5227 l 3.497295,-2.33638 1.52727,1.08692 1.527258,1.08449 -3.599373,2.38974 v 5.41105 l 4.101843,2.78231 h 0.16258 0.16008 l 4.1018,-2.78231 v -5.41105 l -3.59934,-2.38974 1.52727,-1.08449 1.52727,-1.08692 3.49729,2.33638 v 2.5227 l 2.4483,1.66435 h 0.50245 v -0.60411 l -2.29416,-1.4193 -0.0136,-2.73451 -4.10179,-2.69278 -1.46151,0.97046 v -2.38976 l 1.49741,0.97774 3.91362,-2.60228 3.73354,-0.002 0.40638,-0.6575 h -4.47636 l -3.51131,2.36551 -1.56342,-0.8346 v -1.16695 l 3.60738,-2.39706 v -2.52634 l 4.26396,-3.04289 v -0.74725 l -4.90458,3.26317 -0.0159,2.62243 -3.16296,2.15442 -1.09904,-0.42216 v -0.49978 l 2.29198,-1.56002 0.005,-4.21225 -0.97677,-1.07966 2.94473,-2.07434 v -5.26257 h -0.65627 v 4.88846 l -3.01684,2.07677 -1.57337,-0.84187 -1.57554,0.84187 -3.016767,-2.07677 v -4.88846 z',
+	);
+	ctx.save();
+	ctx.fillStyle = 'white';
+	ctx.stroke();
+	ctx.fill(ant3);
+	ctx.restore();
+
+	if (antIcon) {
+		let xml = new XMLSerializer().serializeToString(antIcon);
+
+		let svg64 = btoa(xml);
+		let b64Start = 'data:image/svg+xml;base64,';
+		let image64 = b64Start + svg64;
+
+		let ant4 = new Image();
+		ant4.src = image64;
+		ant4.onload = () => {
+			ctx.drawImage(ant4, 150, 50, 25, 35);
+		};
+	}
+
+	console.time('perf');
 	function main(currentTime: number) {
 		window.requestAnimationFrame(main);
-		const deltaTime = currentTime - lastUpdateTime;
+		const deltaTime = (currentTime - lastUpdateTime) / 1000;
 
-		if (deltaTime / 1000 < 1 / SPEED) {
+		if (deltaTime < 1 / SPEED) {
 			return;
 		}
 		console.log('update');
@@ -56,15 +103,18 @@ if (canvas != null && ctx != null) {
 		for (let i = 0; i < markers.length; i++) {
 			// console.log(markers[i].intensity);
 			// console.log(`i: ${i}, x: ${markers[i].x}, y: ${markers[i].y}`);
-
 			markers[i].draw();
 			markers[i].update();
 		}
 
+		frames++;
+		if (frames == 100) {
+			console.timeEnd('perf');
+		}
 		lastUpdateTime = currentTime;
 	}
 
-	window.requestAnimationFrame(main);
+	// window.requestAnimationFrame(main);
 
 	console.log(count);
 }
