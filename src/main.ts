@@ -2,6 +2,7 @@ import { CanvasOptions, MarkerOptions, MarkerTypes } from './constants';
 import Marker from './classes/Marker';
 import './style.css';
 import Ant from './classes/Ant';
+import { createVector } from './classes/Vector';
 
 const canvas = document.getElementById('canvas') as HTMLCanvasElement | null;
 const ctx = canvas?.getContext('2d');
@@ -15,6 +16,9 @@ let markers: Marker[] = [];
 let mainLoopAnimationFrame = -1;
 let ant: Ant | null = null;
 
+let mouseX = 0;
+let mouseY = 0;
+
 window.addEventListener('keydown', (e) => {
 	switch (e.code) {
 		case 'Space':
@@ -24,6 +28,11 @@ window.addEventListener('keydown', (e) => {
 		default:
 			break;
 	}
+});
+
+window.addEventListener('mousemove', (e) => {
+	mouseX = e.pageX;
+	mouseY = e.pageY;
 });
 
 setup();
@@ -91,7 +100,6 @@ function setup() {
 					x: 16,
 					y: 16,
 				},
-				angle: Math.PI / 2,
 			});
 			ant.draw();
 		};
@@ -120,9 +128,9 @@ function main(currentTime: number) {
 
 	const deltaTime = (currentTime - lastUpdateTime) / 1000;
 
-	if (deltaTime < 1 / SPEED) {
-		return;
-	}
+	// if (deltaTime < 1 / SPEED) {
+	// 	return;
+	// }
 	console.log('update');
 	ctx?.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -134,7 +142,9 @@ function main(currentTime: number) {
 	}
 
 	if (ant) {
-		ant.direction += Math.PI / 25;
+		let target = createVector(mouseX, mouseY);
+		ant.seek(target);
+		ant.update();
 		ant.draw();
 	}
 
