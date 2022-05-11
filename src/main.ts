@@ -9,6 +9,7 @@ const ctx = canvas?.getContext('2d');
 const antIcon = document.getElementById('antIcon') as SVGElement | null;
 
 let isRunning = false;
+let isDrawingMarkers = true;
 let lastUpdateTime = 0;
 const SPEED = 10;
 let frames = 0;
@@ -24,7 +25,9 @@ window.addEventListener('keydown', (e) => {
 		case 'Space':
 			toggleLoop();
 			break;
-
+		case 'KeyM':
+			toggleMarkers();
+			break;
 		default:
 			break;
 	}
@@ -121,6 +124,10 @@ function toggleLoop() {
 	}
 }
 
+function toggleMarkers() {
+	isDrawingMarkers = !isDrawingMarkers;
+}
+
 function main(currentTime: number) {
 	if (canvas == null || ctx == null) return;
 
@@ -137,8 +144,10 @@ function main(currentTime: number) {
 	for (let i = 0; i < markers.length; i++) {
 		// console.log(markers[i].intensity);
 		// console.log(`i: ${i}, x: ${markers[i].x}, y: ${markers[i].y}`);
-		markers[i].draw();
 		markers[i].update();
+		if (isDrawingMarkers) {
+			markers[i].draw();
+		}
 	}
 
 	if (ant) {
