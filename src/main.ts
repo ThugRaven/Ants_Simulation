@@ -11,6 +11,7 @@ const antIcon = document.getElementById('antIcon') as SVGElement | null;
 
 let isRunning = false;
 let isDrawingMarkers = true;
+let isDebugMode = false;
 let lastUpdateTime = 0;
 const SPEED = 10;
 let frames = 0;
@@ -29,6 +30,8 @@ window.addEventListener('keydown', (e) => {
 		case 'KeyM':
 			toggleMarkers();
 			break;
+		case 'KeyD':
+			toggleDebug();
 		default:
 			break;
 	}
@@ -131,6 +134,14 @@ function toggleMarkers() {
 	isDrawingMarkers = !isDrawingMarkers;
 }
 
+function toggleDebug() {
+	isDebugMode = !isDebugMode;
+
+	if (ant) {
+		ant.debug = isDebugMode;
+	}
+}
+
 function main(currentTime: number) {
 	if (canvas == null || ctx == null) return;
 
@@ -155,8 +166,10 @@ function main(currentTime: number) {
 
 	if (ant) {
 		let target = createVector(mouseX, mouseY);
-		ctx.fillStyle = 'red';
-		circle(ctx, target.x, target.y, 4);
+		if (isDebugMode) {
+			ctx.fillStyle = 'red';
+			circle(ctx, target.x, target.y, 4);
+		}
 		ant.seek(target);
 		ant.update();
 		ant.draw();

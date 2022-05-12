@@ -7,6 +7,7 @@ interface AntOptions {
 		x: number;
 		y: number;
 	};
+	debug?: boolean;
 }
 
 export default class Ant {
@@ -18,6 +19,7 @@ export default class Ant {
 	maxSpeed: number;
 	maxForce: number;
 	state: number;
+	debug: boolean;
 
 	constructor(
 		ctx: CanvasRenderingContext2D,
@@ -32,15 +34,19 @@ export default class Ant {
 		this.maxSpeed = 4;
 		this.maxForce = 0.25;
 		this.state = AntStates.TO_FOOD;
+		this.debug = options.debug || false;
 	}
 
 	seek(target: Vector) {
-		line(this.ctx, target.x, target.y, this.pos.x, this.pos.y);
+		if (this.debug) {
+			this.ctx.strokeStyle = 'white';
+			line(this.ctx, target.x, target.y, this.pos.x, this.pos.y);
+		}
+
 		let force = target.sub(this.pos);
 		force.setMag(this.maxSpeed);
 		force.sub(this.vel);
 		force.limit(this.maxForce);
-		this.ctx.strokeStyle = 'white';
 		this.applyForce(force);
 	}
 
@@ -58,27 +64,23 @@ export default class Ant {
 	draw() {
 		let antCenter = 0 - AntOptions.IMG_WIDTH / 2;
 
-		this.ctx.fillStyle = 'white';
-		circle(this.ctx, this.pos.x, this.pos.y, 3);
-
 		this.ctx.save();
 		this.ctx.translate(this.pos.x, this.pos.y);
-		// this.ctx.translate(this.pos.x, this.pos.y);
 		this.ctx.rotate(this.vel.heading() + Math.PI / 2);
-		// this.ctx.rotate(this.vel.heading());
-		// this.ctx.translate(-horizontalCenter, -verticalCenter);
 
-		this.ctx.strokeStyle = '#FF0000';
-		this.ctx.lineWidth = 2;
-		this.ctx.strokeRect(
-			antCenter,
-			0,
-			AntOptions.IMG_WIDTH,
-			AntOptions.IMG_HEIGHT,
-		);
+		if (this.debug) {
+			this.ctx.strokeStyle = '#FF0000';
+			this.ctx.lineWidth = 2;
+			this.ctx.strokeRect(
+				antCenter,
+				0,
+				AntOptions.IMG_WIDTH,
+				AntOptions.IMG_HEIGHT,
+			);
 
-		this.ctx.fillStyle = 'red';
-		circle(this.ctx, antCenter, 0, 3);
+			this.ctx.fillStyle = 'red';
+			circle(this.ctx, antCenter, 0, 3);
+		}
 
 		this.ctx.drawImage(
 			this.antIcon,
@@ -89,5 +91,10 @@ export default class Ant {
 		);
 
 		this.ctx.restore();
+
+		if (this.debug) {
+			this.ctx.fillStyle = 'white';
+			circle(this.ctx, this.pos.x, this.pos.y, 3);
+		}
 	}
 }
