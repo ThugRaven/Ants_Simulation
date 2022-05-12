@@ -24,14 +24,8 @@ export default class Ant {
 		antIcon: HTMLImageElement,
 		options: AntOptions,
 	) {
-		let horizontalCenter =
-			(options.pos.x + options.pos.x + AntOptions.IMG_WIDTH) / 2;
-		let verticalCenter =
-			(options.pos.y + options.pos.y + AntOptions.IMG_HEIGHT) / 2;
-
 		this.ctx = ctx;
 		this.antIcon = antIcon;
-		// this.pos = createVector(horizontalCenter, verticalCenter);
 		this.pos = createVector(options.pos.x, options.pos.y);
 		this.vel = createVector(0, 0);
 		this.acc = createVector(0, 0);
@@ -62,37 +56,38 @@ export default class Ant {
 	}
 
 	draw() {
-		let horizontalCenter = (this.pos.x + this.pos.x + AntOptions.IMG_WIDTH) / 2;
-		let verticalCenter = (this.pos.y + this.pos.y + AntOptions.IMG_HEIGHT) / 2;
-
-		this.ctx.save();
-		this.ctx.translate(horizontalCenter, verticalCenter);
-		// this.ctx.translate(this.pos.x, this.pos.y);
-		this.ctx.rotate(this.vel.heading() + Math.PI / 2);
-		this.ctx.translate(-horizontalCenter, -verticalCenter);
-
-		this.ctx.strokeStyle = '#FF0000';
-		this.ctx.lineWidth = 2;
-		this.ctx.strokeRect(
-			this.pos.x,
-			this.pos.y,
-			AntOptions.IMG_WIDTH,
-			AntOptions.IMG_HEIGHT,
-		);
+		let antCenter = 0 - AntOptions.IMG_WIDTH / 2;
 
 		this.ctx.fillStyle = 'white';
 		circle(this.ctx, this.pos.x, this.pos.y, 3);
 
+		this.ctx.save();
+		this.ctx.translate(this.pos.x, this.pos.y);
+		// this.ctx.translate(this.pos.x, this.pos.y);
+		this.ctx.rotate(this.vel.heading() + Math.PI / 2);
+		// this.ctx.rotate(this.vel.heading());
+		// this.ctx.translate(-horizontalCenter, -verticalCenter);
+
+		this.ctx.strokeStyle = '#FF0000';
+		this.ctx.lineWidth = 2;
+		this.ctx.strokeRect(
+			antCenter,
+			0,
+			AntOptions.IMG_WIDTH,
+			AntOptions.IMG_HEIGHT,
+		);
+
+		this.ctx.fillStyle = 'red';
+		circle(this.ctx, antCenter, 0, 3);
+
 		this.ctx.drawImage(
 			this.antIcon,
-			this.pos.x,
-			this.pos.y,
+			antCenter,
+			0,
 			AntOptions.IMG_WIDTH,
 			AntOptions.IMG_HEIGHT,
 		);
 
 		this.ctx.restore();
-
-		// this.ctx.setTransform(1, 0, 0, 1, 0, 0);
 	}
 }
