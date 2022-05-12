@@ -3,6 +3,7 @@ import Marker from './classes/Marker';
 import './style.css';
 import Ant from './classes/Ant';
 import { createVector } from './classes/Vector';
+import { circle, line } from './classes/Shapes';
 
 const canvas = document.getElementById('canvas') as HTMLCanvasElement | null;
 const ctx = canvas?.getContext('2d');
@@ -102,6 +103,8 @@ function setup() {
 				pos: {
 					x: 16,
 					y: 16,
+					// x: canvas.width / 2,
+					// y: canvas.height / 2,
 				},
 			});
 			ant.draw();
@@ -152,6 +155,8 @@ function main(currentTime: number) {
 
 	if (ant) {
 		let target = createVector(mouseX, mouseY);
+		ctx.fillStyle = 'red';
+		circle(ctx, target.x, target.y, 4);
 		ant.seek(target);
 		ant.update();
 		ant.draw();

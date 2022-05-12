@@ -1,4 +1,5 @@
 import { AntOptions, AntStates } from '../constants';
+import { circle, line } from './Shapes';
 import { createVector, Vector } from './Vector';
 
 interface AntOptions {
@@ -40,10 +41,12 @@ export default class Ant {
 	}
 
 	seek(target: Vector) {
+		line(this.ctx, target.x, target.y, this.pos.x, this.pos.y);
 		let force = target.sub(this.pos);
 		force.setMag(this.maxSpeed);
 		force.sub(this.vel);
 		force.limit(this.maxForce);
+		this.ctx.strokeStyle = 'white';
 		this.applyForce(force);
 	}
 
@@ -67,6 +70,18 @@ export default class Ant {
 		// this.ctx.translate(this.pos.x, this.pos.y);
 		this.ctx.rotate(this.vel.heading() + Math.PI / 2);
 		this.ctx.translate(-horizontalCenter, -verticalCenter);
+
+		this.ctx.strokeStyle = '#FF0000';
+		this.ctx.lineWidth = 2;
+		this.ctx.strokeRect(
+			this.pos.x,
+			this.pos.y,
+			AntOptions.IMG_WIDTH,
+			AntOptions.IMG_HEIGHT,
+		);
+
+		this.ctx.fillStyle = 'white';
+		circle(this.ctx, this.pos.x, this.pos.y, 3);
 
 		this.ctx.drawImage(
 			this.antIcon,
