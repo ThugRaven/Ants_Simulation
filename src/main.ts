@@ -16,8 +16,10 @@ let lastUpdateTime = 0;
 const SPEED = 10;
 let frames = 0;
 let markers: Marker[] = [];
+let ants: Ant[] = [];
 let mainLoopAnimationFrame = -1;
 let ant: Ant | null = null;
+let selectedAnt: Ant | null = null;
 
 let mouseX = 0;
 let mouseY = 0;
@@ -40,6 +42,10 @@ window.addEventListener('keydown', (e) => {
 window.addEventListener('mousemove', (e) => {
 	mouseX = e.pageX;
 	mouseY = e.pageY;
+});
+
+canvas?.addEventListener('click', () => {
+	selectedAnt = selectAnt();
 });
 
 setup();
@@ -102,15 +108,26 @@ function setup() {
 		ant4.onload = () => {
 			ctx.drawImage(ant4, 100, 50, 24, 34);
 
-			ant = new Ant(ctx, ant4, {
-				pos: {
-					x: 16,
-					y: 16,
-					// x: canvas.width / 2,
-					// y: canvas.height / 2,
-				},
-			});
-			ant.draw();
+			// ant = new Ant(ctx, ant4, {
+			// 	id: 1,
+			// 	pos: {
+			// 		x: 16,
+			// 		y: 16,
+			// 		// x: canvas.width / 2,
+			// 		// y: canvas.height / 2,
+			// 	},
+			// });
+			for (let i = 0; i < 10; i++) {
+				ant = new Ant(ctx, ant4, {
+					id: i + 1,
+					pos: {
+						x: Math.floor(Math.random() * canvas.width),
+						y: Math.floor(Math.random() * canvas.height),
+					},
+				});
+				ant.draw();
+				ants.push(ant);
+			}
 		};
 	}
 
@@ -137,9 +154,35 @@ function toggleMarkers() {
 function toggleDebug() {
 	isDebugMode = !isDebugMode;
 
-	if (ant) {
-		ant.debug = isDebugMode;
+	if (ants.length > 0 && selectedAnt) {
+		for (const ant of ants) {
+			if (ant.id === selectedAnt.id) {
+				ant.debug = isDebugMode;
+			} else {
+				ant.debug = false;
+			}
+		}
 	}
+}
+
+function selectAnt() {
+	if (ants.length <= 0) return null;
+
+	let selectedAnt = null;
+	let minDist = Infinity;
+	let mouseVector = createVector(mouseX, mouseY);
+	let radius = 25;
+
+	for (const ant of ants) {
+		let dist = ant.pos.dist(mouseVector);
+		if (dist < minDist && dist < radius) {
+			minDist = dist;
+			selectedAnt = ant;
+		}
+	}
+
+	console.log(selectedAnt);
+	return selectedAnt;
 }
 
 function main(currentTime: number) {
@@ -164,8 +207,11 @@ function main(currentTime: number) {
 		}
 	}
 
-	if (ant) {
-		let target = createVector(mouseX, mouseY);
+	let target = createVector(mouseX, mouseY);
+
+	for (const ant of ants) {
+		// console.log(ant);
+
 		if (isDebugMode) {
 			ctx.fillStyle = 'red';
 			circle(ctx, target.x, target.y, 4);
@@ -174,6 +220,17 @@ function main(currentTime: number) {
 		ant.update();
 		ant.draw();
 	}
+
+	// if (ant) {
+	// 	let target = createVector(mouseX, mouseY);
+	// 	if (isDebugMode) {
+	// 		ctx.fillStyle = 'red';
+	// 		circle(ctx, target.x, target.y, 4);
+	// 	}
+	// 	ant.seek(target);
+	// 	ant.update();
+	// 	ant.draw();
+	// }
 
 	frames++;
 	if (frames == 100) {

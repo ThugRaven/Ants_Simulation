@@ -3,6 +3,7 @@ import { circle, line } from './Shapes';
 import { createVector, Vector } from './Vector';
 
 interface AntOptions {
+	id: number;
 	pos: {
 		x: number;
 		y: number;
@@ -13,6 +14,7 @@ interface AntOptions {
 export default class Ant {
 	ctx: CanvasRenderingContext2D;
 	antIcon: HTMLImageElement;
+	id: number;
 	pos: Vector;
 	vel: Vector;
 	acc: Vector;
@@ -28,6 +30,7 @@ export default class Ant {
 	) {
 		this.ctx = ctx;
 		this.antIcon = antIcon;
+		this.id = options.id;
 		this.pos = createVector(options.pos.x, options.pos.y);
 		this.vel = createVector(0, 0);
 		this.acc = createVector(0, 0);
@@ -43,7 +46,7 @@ export default class Ant {
 			line(this.ctx, target.x, target.y, this.pos.x, this.pos.y);
 		}
 
-		let force = target.sub(this.pos);
+		let force = target.copy().sub(this.pos);
 		force.setMag(this.maxSpeed);
 		force.sub(this.vel);
 		force.limit(this.maxForce);
