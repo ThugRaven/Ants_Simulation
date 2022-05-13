@@ -9,6 +9,11 @@ const canvas = document.getElementById('canvas') as HTMLCanvasElement | null;
 const ctx = canvas?.getContext('2d');
 const antIcon = document.getElementById('antIcon') as SVGElement | null;
 
+const antId = document.querySelector<HTMLSpanElement>('[data-id]');
+const antPos = document.querySelector<HTMLSpanElement>('[data-pos]');
+const antVel = document.querySelector<HTMLSpanElement>('[data-vel]');
+const antState = document.querySelector<HTMLSpanElement>('[data-state]');
+
 let isRunning = false;
 let isDrawingMarkers = true;
 let isDebugMode = false;
@@ -185,6 +190,19 @@ function selectAnt() {
 	return selectedAnt;
 }
 
+function updateAntInfo() {
+	if (!selectedAnt) return;
+
+	antId!.textContent = selectedAnt.id.toString();
+	antPos!.textContent = `${selectedAnt.pos.x.toFixed(
+		2,
+	)} : ${selectedAnt.pos.y.toFixed(2)}`;
+	antVel!.textContent = `${selectedAnt.vel.x.toFixed(
+		2,
+	)} : ${selectedAnt.vel.y.toFixed(2)}`;
+	antState!.textContent = selectedAnt.state.toString();
+}
+
 function main(currentTime: number) {
 	if (canvas == null || ctx == null) return;
 
@@ -219,6 +237,10 @@ function main(currentTime: number) {
 		ant.seek(target);
 		ant.update();
 		ant.draw();
+
+		if (ant.id === selectedAnt?.id) {
+			updateAntInfo();
+		}
 	}
 
 	// if (ant) {
