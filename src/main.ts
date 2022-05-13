@@ -17,6 +17,8 @@ const antState = document.querySelector<HTMLSpanElement>('[data-state]');
 let isRunning = false;
 let isDrawingMarkers = true;
 let isDebugMode = false;
+let isAntMenuShown = false;
+
 let lastUpdateTime = 0;
 const SPEED = 10;
 let frames = 0;
@@ -173,7 +175,7 @@ function toggleDebug() {
 function selectAnt() {
 	if (ants.length <= 0) return null;
 
-	let selectedAnt = null;
+	let newAnt = selectedAnt;
 	let minDist = Infinity;
 	let mouseVector = createVector(mouseX, mouseY);
 	let radius = 25;
@@ -182,12 +184,12 @@ function selectAnt() {
 		let dist = ant.pos.dist(mouseVector);
 		if (dist < minDist && dist < radius) {
 			minDist = dist;
-			selectedAnt = ant;
+			newAnt = ant;
 		}
 	}
 
-	console.log(selectedAnt);
-	return selectedAnt;
+	console.log(newAnt);
+	return newAnt;
 }
 
 function updateAntInfo() {
