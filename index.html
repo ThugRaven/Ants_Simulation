@@ -12,12 +12,14 @@
 		/>
 		<title>Ants Simulation</title>
 	</head>
-	<body class="bg-black min-h-screen">
-		<main>
-			<canvas id="canvas"></canvas>
+	<body class="bg-black h-screen overflow-hidden">
+		<main id="canvas-container">
+			<div id="camera-container" class="origin-top-left">
+				<canvas id="canvas" class="outline outline-white outline-1"></canvas>
+			</div>
 		</main>
 		<aside
-			class="fixed top-0 right-0 bg-neutral-800 text-white p-4 flex flex-col items-center justify-center"
+			class="fixed top-2 right-2 rounded-lg bg-neutral-800 text-white p-4 flex flex-col items-center justify-center"
 		>
 			<h2 class="text-4xl font-bold">Ant preview</h2>
 			<div
@@ -70,13 +72,31 @@
 					<span class="text-neutral-100" data-state>-</span>
 				</li>
 			</ul>
-			<button
-				class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 px-4 py-2 rounded-lg"
-			>
-				Zoom
-			</button>
+			<div class="flex w-full items-center justify-evenly">
+				<button
+					class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 px-4 py-2 rounded-lg"
+				>
+					Zoom
+				</button>
+			</div>
 		</aside>
-
+		<button
+			id="btn-fullscreen"
+			class="bg-neutral-800 hover:bg-neutral-700 focus-visible:bg-neutral-700 p-3 rounded-lg fixed bottom-2 right-2"
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				height="24px"
+				viewBox="0 0 24 24"
+				width="24px"
+				class="w-8 h-8 fill-white"
+			>
+				<path d="M0 0h24v24H0V0z" fill="none" />
+				<path
+					d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"
+				/>
+			</svg>
+		</button>
 		<script type="module" src="/src/main.ts"></script>
 	</body>
 </html>

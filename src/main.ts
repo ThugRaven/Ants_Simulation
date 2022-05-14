@@ -5,8 +5,17 @@ import Ant from './classes/Ant';
 import { createVector } from './classes/Vector';
 import { circle, line } from './classes/Shapes';
 
-const canvas = document.getElementById('canvas') as HTMLCanvasElement | null;
-const ctx = canvas?.getContext('2d');
+const canvasContainer = document.getElementById(
+	'canvas-container',
+) as HTMLElement;
+const cameraContainer = document.getElementById(
+	'camera-container',
+) as HTMLDivElement;
+const btnFullscreen = document.getElementById(
+	'btn-fullscreen',
+) as HTMLButtonElement;
+const canvas = document.getElementById('canvas') as HTMLCanvasElement;
+const ctx = canvas.getContext('2d');
 const antIcon = document.getElementById('antIcon') as SVGElement | null;
 
 const antId = document.querySelector<HTMLSpanElement>('[data-id]');
@@ -17,7 +26,6 @@ const antState = document.querySelector<HTMLSpanElement>('[data-state]');
 let isRunning = false;
 let isDrawingMarkers = true;
 let isDebugMode = false;
-let isAntMenuShown = false;
 
 let lastUpdateTime = 0;
 const SPEED = 10;
@@ -30,6 +38,16 @@ let selectedAnt: Ant | null = null;
 
 let mouseX = 0;
 let mouseY = 0;
+let canvasScale = 1;
+let isPanning = false;
+let panStart = {
+	x: 0,
+	y: 0,
+};
+let cameraOffset = {
+	x: 0,
+	y: 0,
+};
 
 window.addEventListener('keydown', (e) => {
 	switch (e.code) {
@@ -51,14 +69,23 @@ window.addEventListener('mousemove', (e) => {
 	mouseY = e.pageY;
 });
 
-canvas?.addEventListener('click', () => {
+window.addEventListener('click', () => {
 	selectedAnt = selectAnt();
 });
 
+window.addEventListener('wheel', (e) => {
+	zoomCanvas(e);
+});
+
+btnFullscreen.addEventListener('click', () => {
+	alignCamera();
+});
+
+setupCamera();
 setup();
 
 function setup() {
-	if (canvas == null || ctx == null) return;
+	if (ctx == null) return;
 
 	canvas.width = CanvasOptions.WIDTH;
 	canvas.height = CanvasOptions.HEIGHT;
@@ -177,7 +204,10 @@ function selectAnt() {
 
 	let newAnt = selectedAnt;
 	let minDist = Infinity;
-	let mouseVector = createVector(mouseX, mouseY);
+	let mouseVector = createVector(
+		mouseX / canvasScale - cameraOffset.x,
+		mouseY / canvasScale - cameraOffset.y,
+	);
 	let radius = 25;
 
 	for (const ant of ants) {
@@ -205,8 +235,71 @@ function updateAntInfo() {
 	antState!.textContent = selectedAnt.state.toString();
 }
 
+function setupCamera() {
+	window.addEventListener('mousedown', (e) => {
+		isPanning = true;
+
+		panStart.x = e.clientX / canvasScale - cameraOffset.x;
+		panStart.y = e.clientY / canvasScale - cameraOffset.y;
+	});
+
+	window.addEventListener('mousemove', (e) => {
+		if (!isPanning) return;
+
+		panCanvas(e);
+	});
+
+	window.addEventListener('mouseup', () => {
+		isPanning = false;
+	});
+}
+
+function zoomCanvas(event: WheelEvent) {
+	let zoomOffset = {
+		x: 0,
+		y: 0,
+	};
+
+	zoomOffset.x = event.clientX / canvasScale - cameraOffset.x;
+	zoomOffset.y = event.clientY / canvasScale - cameraOffset.y;
+
+	canvasScale += event.deltaY * -0.0025;
+	canvasScale = Math.min(Math.max(0.5, canvasScale), 16);
+
+	cameraOffset.x = event.clientX / canvasScale - zoomOffset.x;
+	cameraOffset.y = event.clientY / canvasScale - zoomOffset.y;
+
+	setCamera();
+}
+
+function panCanvas(event: MouseEvent) {
+	cameraOffset.x = event.clientX / canvasScale - panStart.x;
+	cameraOffset.y = event.clientY / canvasScale - panStart.y;
+
+	console.log(cameraOffset);
+
+	setCamera();
+}
+
+function setCamera() {
+	cameraContainer.style.transform = `scale(${canvasScale}) translate(${cameraOffset.x}px, ${cameraOffset.y}px)`;
+}
+
+function alignCamera() {
+	let canvasCenter = {
+		x: window.innerWidth / 2 - canvas.width / 2,
+		y: window.innerHeight / 2 - canvas.height / 2,
+	};
+
+	canvasScale = 1;
+	cameraOffset.x = canvasCenter.x;
+	cameraOffset.y = canvasCenter.y;
+
+	setCamera();
+}
+
 function main(currentTime: number) {
-	if (canvas == null || ctx == null) return;
+	if (ctx == null) return;
 
 	mainLoopAnimationFrame = window.requestAnimationFrame(main);
 
@@ -216,7 +309,7 @@ function main(currentTime: number) {
 	// 	return;
 	// }
 	console.log('update');
-	ctx?.clearRect(0, 0, canvas.width, canvas.height);
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 	for (let i = 0; i < markers.length; i++) {
 		// console.log(markers[i].intensity);
@@ -227,7 +320,18 @@ function main(currentTime: number) {
 		}
 	}
 
-	let target = createVector(mouseX, mouseY);
+	console.log(mouseX);
+	console.log(cameraOffset.x);
+	console.log(canvasScale);
+
+	let target = createVector(
+		// (mouseX - cameraOffset.x * canvasScale) / canvasScale,
+		// (mouseY - cameraOffset.y * canvasScale) / canvasScale,
+		mouseX / canvasScale - cameraOffset.x,
+		mouseY / canvasScale - cameraOffset.y,
+	);
+
+	console.log(target.x);
 
 	for (const ant of ants) {
 		// console.log(ant);
