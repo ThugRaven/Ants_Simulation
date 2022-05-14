@@ -12,13 +12,17 @@
 		/>
 		<title>Ants Simulation</title>
 	</head>
-	<body>
+	<body class="bg-black min-h-screen">
 		<main>
 			<canvas id="canvas"></canvas>
 		</main>
-		<aside class="options__menu">
-			<h2>Ant preview</h2>
-			<div class="menu__ant-preview">
+		<aside
+			class="fixed top-0 right-0 bg-neutral-800 text-white p-4 flex flex-col items-center justify-center"
+		>
+			<h2 class="text-4xl font-bold">Ant preview</h2>
+			<div
+				class="bg-neutral-700 w-full flex items-center justify-center rounded-lg my-2"
+			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					version="1.1"
@@ -27,7 +31,7 @@
 					width="24"
 					fill="#FFFFFF"
 					id="antIcon"
-					class="menu__ant-icon"
+					class="m-2 rotate-90 w-1/4 h-full"
 				>
 					<g transform="translate(-88.87054,-162.53213)">
 						<path
@@ -36,27 +40,41 @@
 					</g>
 				</svg>
 			</div>
-			<input type="color" class="menu__ant-picker" />
-			<h3 class="menu__header">Selected ant</h3>
-			<ul class="menu__ant-info">
-				<li>
-					<span class="item__title">ID</span>
-					<span class="item__value" data-id>1</span>
+			<input type="color" class="w-full m-0 bg-neutral-800" />
+			<h3 class="text-2xl mt-2">Selected ant</h3>
+			<ul
+				class="flex flex-col items-center justify-center w-full gap-2 list-none my-2"
+			>
+				<li
+					class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+				>
+					<span class="text-lg font-bold">ID</span>
+					<span class="text-neutral-100" data-id>-</span>
 				</li>
-				<li>
-					<span class="item__title">Position</span>
-					<span class="item__value" data-pos>125 : 50</span>
+				<li
+					class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+				>
+					<span class="text-lg font-bold">Position</span>
+					<span class="text-neutral-100" data-pos>- : -</span>
 				</li>
-				<li>
-					<span class="item__title">Velocity</span>
-					<span class="item__value" data-vel>125 : 50</span>
+				<li
+					class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+				>
+					<span class="text-lg font-bold">Velocity</span>
+					<span class="text-neutral-100" data-vel>- : -</span>
 				</li>
-				<li>
-					<span class="item__title">State</span>
-					<span class="item__value" data-state>To Food</span>
+				<li
+					class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+				>
+					<span class="text-lg font-bold">State</span>
+					<span class="text-neutral-100" data-state>-</span>
 				</li>
 			</ul>
-			<button class="menu__ant-zoom button">Zoom</button>
+			<button
+				class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 px-4 py-2 rounded-lg"
+			>
+				Zoom
+			</button>
 		</aside>
 
 		<script type="module" src="/src/main.ts"></script>
