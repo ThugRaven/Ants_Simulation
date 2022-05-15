@@ -85,6 +85,9 @@ window.addEventListener('mousemove', (e) => {
 
 window.addEventListener('click', () => {
 	selectedAnt = selectAnt();
+	if (isDebugMode) {
+		toggleAntDebug();
+	}
 });
 
 window.addEventListener('wheel', (e) => {
@@ -207,6 +210,10 @@ function toggleMarkers() {
 function toggleDebug() {
 	isDebugMode = !isDebugMode;
 
+	toggleAntDebug();
+}
+
+function toggleAntDebug() {
 	if (ants.length > 0 && selectedAnt) {
 		for (const ant of ants) {
 			if (ant.id === selectedAnt.id) {
