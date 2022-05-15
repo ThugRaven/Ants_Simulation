@@ -1,4 +1,9 @@
-import { CanvasOptions, MarkerOptions, MarkerTypes } from './constants';
+import {
+	AntOptions,
+	CanvasOptions,
+	MarkerOptions,
+	MarkerTypes,
+} from './constants';
 import Marker from './classes/Marker';
 import './style.css';
 import Ant from './classes/Ant';
@@ -219,7 +224,7 @@ function toggleFollow() {
 	if (isFollowing) {
 		canvasScale = 5;
 	}
-	btnFollow.classList.toggle('border-lime-500');
+	btnFollow.classList.toggle('border-green-500');
 	btnFollow.classList.toggle('border-red-500');
 }
 
@@ -232,7 +237,7 @@ function selectAnt() {
 		mouseX / canvasScale - cameraOffset.x,
 		mouseY / canvasScale - cameraOffset.y,
 	);
-	let radius = 25;
+	let radius = AntOptions.IMG_HEIGHT / 2;
 
 	for (const ant of ants) {
 		let dist = ant.pos.dist(mouseVector);
@@ -314,8 +319,6 @@ function alignCamera() {
 		x: window.innerWidth / 2 - canvas.width / 2,
 		y: window.innerHeight / 2 - canvas.height / 2,
 	};
-
-	console.log(canvasCenter);
 
 	canvasScale = 1;
 	cameraOffset.x = canvasCenter.x;
