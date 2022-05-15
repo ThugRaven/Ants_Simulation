@@ -3,10 +3,17 @@ export function circle(
 	x: number,
 	y: number,
 	radius: number,
+	fill: boolean = true,
+	stroke: boolean = false,
 ) {
 	ctx.beginPath();
 	ctx.arc(x, y, radius, 0, Math.PI * 2);
-	ctx.fill();
+	if (fill) {
+		ctx.fill();
+	}
+	if (stroke) {
+		ctx.stroke();
+	}
 }
 
 export function line(
