@@ -22,6 +22,7 @@ export default class Ant {
 	maxForce: number;
 	state: number;
 	debug: boolean;
+	wanderTheta: number;
 
 	constructor(
 		ctx: CanvasRenderingContext2D,
@@ -38,6 +39,7 @@ export default class Ant {
 		this.maxForce = 0.25;
 		this.state = AntStates.TO_FOOD;
 		this.debug = options.debug || false;
+		this.wanderTheta = Math.PI / 2;
 	}
 
 	seek(target: Vector) {
@@ -51,6 +53,43 @@ export default class Ant {
 		force.sub(this.vel);
 		force.limit(this.maxForce);
 		this.applyForce(force);
+	}
+
+	wander() {
+		let wanderPoint = this.vel.copy();
+		wanderPoint.setMag(100);
+		wanderPoint.add(this.pos);
+
+		let wanderRadius = 50;
+
+		if (this.debug) {
+			this.ctx.fillStyle = 'red';
+			circle(this.ctx, wanderPoint.x, wanderPoint.y, 4);
+
+			this.ctx.strokeStyle = 'white';
+			circle(this.ctx, wanderPoint.x, wanderPoint.y, wanderRadius, false, true);
+
+			line(this.ctx, this.pos.x, this.pos.y, wanderPoint.x, wanderPoint.y);
+		}
+
+		let theta = this.wanderTheta + this.vel.heading();
+		let x = wanderRadius * Math.cos(theta);
+		let y = wanderRadius * Math.sin(theta);
+		wanderPoint.add(x, y);
+		this.ctx.fillStyle = 'green';
+
+		if (this.debug) {
+			circle(this.ctx, wanderPoint.x, wanderPoint.y, 8);
+			line(this.ctx, this.pos.x, this.pos.y, wanderPoint.x, wanderPoint.y);
+		}
+
+		let steer = wanderPoint.sub(this.pos);
+		steer.setMag(this.maxForce);
+		this.applyForce(steer);
+
+		let displaceRange = AntOptions.DISPLACE_RANGE_WANDER;
+		this.wanderTheta +=
+			Math.random() * (displaceRange + displaceRange) - displaceRange;
 	}
 
 	applyForce(force: Vector) {

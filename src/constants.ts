@@ -30,4 +30,5 @@ export enum AntStates {
 export const AntOptions = {
 	IMG_WIDTH: 24,
 	IMG_HEIGHT: 34,
+	DISPLACE_RANGE_WANDER: 0.3,
 } as const;

@@ -381,7 +381,8 @@ function main(currentTime: number) {
 			ctx.fillStyle = 'red';
 			circle(ctx, target.x, target.y, 4);
 		}
-		ant.seek(target);
+		// ant.seek(target);
+		ant.wander();
 		ant.update();
 		ant.draw();
 
