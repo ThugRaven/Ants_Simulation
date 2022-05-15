@@ -1,5 +1,6 @@
 import { AntOptions, AntStates } from '../constants';
 import { circle, line } from './Shapes';
+import { random } from './Utils';
 import { createVector, Vector } from './Vector';
 
 interface AntOptions {
@@ -39,7 +40,7 @@ export default class Ant {
 		this.maxForce = 0.25;
 		this.state = AntStates.TO_FOOD;
 		this.debug = options.debug || false;
-		this.wanderTheta = Math.PI / 2;
+		this.wanderTheta = random(0, Math.PI * 2);
 	}
 
 	seek(target: Vector) {
@@ -57,10 +58,10 @@ export default class Ant {
 
 	wander() {
 		let wanderPoint = this.vel.copy();
-		wanderPoint.setMag(100);
+		wanderPoint.setMag(AntOptions.WANDER_POINT_MAGNITUDE);
 		wanderPoint.add(this.pos);
 
-		let wanderRadius = 50;
+		let wanderRadius = AntOptions.WANDER_POINT_RADIUS;
 
 		if (this.debug) {
 			this.ctx.fillStyle = 'red';
@@ -87,9 +88,8 @@ export default class Ant {
 		steer.setMag(this.maxForce);
 		this.applyForce(steer);
 
-		let displaceRange = AntOptions.DISPLACE_RANGE_WANDER;
-		this.wanderTheta +=
-			Math.random() * (displaceRange + displaceRange) - displaceRange;
+		let displaceRange = AntOptions.WANDER_DISPLACE_RANGE;
+		this.wanderTheta += random(-displaceRange, displaceRange);
 	}
 
 	applyForce(force: Vector) {
