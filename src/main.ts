@@ -61,6 +61,13 @@ window.addEventListener('keydown', (e) => {
 			break;
 		case 'KeyD':
 			toggleDebug();
+			break;
+		case 'KeyF':
+			toggleFollow();
+			break;
+		case 'KeyC':
+			alignCamera();
+			break;
 		default:
 			break;
 	}
@@ -84,7 +91,7 @@ btnFullscreen.addEventListener('click', () => {
 });
 
 btnFollow.addEventListener('click', () => {
-	isFollowing = !isFollowing;
+	toggleFollow();
 });
 
 setup();
@@ -206,6 +213,16 @@ function toggleDebug() {
 	}
 }
 
+function toggleFollow() {
+	isFollowing = !isFollowing;
+
+	if (isFollowing) {
+		canvasScale = 5;
+	}
+	btnFollow.classList.toggle('border-lime-500');
+	btnFollow.classList.toggle('border-red-500');
+}
+
 function selectAnt() {
 	if (ants.length <= 0) return null;
 
@@ -298,6 +315,8 @@ function alignCamera() {
 		y: window.innerHeight / 2 - canvas.height / 2,
 	};
 
+	console.log(canvasCenter);
+
 	canvasScale = 1;
 	cameraOffset.x = canvasCenter.x;
 	cameraOffset.y = canvasCenter.y;
@@ -306,8 +325,6 @@ function alignCamera() {
 }
 
 function followAntCamera(x: number, y: number) {
-	canvasScale = 5;
-
 	let antCenter = {
 		x: window.innerWidth / 2 / canvasScale - x,
 		y: window.innerHeight / 2 / canvasScale - y,
