@@ -22,10 +22,12 @@ const antId = document.querySelector<HTMLSpanElement>('[data-id]');
 const antPos = document.querySelector<HTMLSpanElement>('[data-pos]');
 const antVel = document.querySelector<HTMLSpanElement>('[data-vel]');
 const antState = document.querySelector<HTMLSpanElement>('[data-state]');
+const btnFollow = document.getElementById('btn-follow') as HTMLButtonElement;
 
 let isRunning = false;
 let isDrawingMarkers = true;
 let isDebugMode = false;
+let isFollowing = false;
 
 let lastUpdateTime = 0;
 const SPEED = 10;
@@ -81,8 +83,13 @@ btnFullscreen.addEventListener('click', () => {
 	alignCamera();
 });
 
-setupCamera();
+btnFollow.addEventListener('click', () => {
+	isFollowing = !isFollowing;
+});
+
 setup();
+setupCamera();
+alignCamera();
 
 function setup() {
 	if (ctx == null) return;
@@ -298,6 +305,20 @@ function alignCamera() {
 	setCamera();
 }
 
+function followAntCamera(x: number, y: number) {
+	canvasScale = 5;
+
+	let antCenter = {
+		x: window.innerWidth / 2 / canvasScale - x,
+		y: window.innerHeight / 2 / canvasScale - y,
+	};
+
+	cameraOffset.x = antCenter.x;
+	cameraOffset.y = antCenter.y;
+
+	setCamera();
+}
+
 function main(currentTime: number) {
 	if (ctx == null) return;
 
@@ -346,6 +367,9 @@ function main(currentTime: number) {
 
 		if (ant.id === selectedAnt?.id) {
 			updateAntInfo();
+			if (isFollowing) {
+				followAntCamera(ant.pos.x, ant.pos.y);
+			}
 		}
 	}
 
