@@ -1,6 +1,7 @@
 import {
 	AntOptions,
 	CanvasOptions,
+	MarkerColors,
 	MarkerOptions,
 	MarkerTypes,
 } from './constants';
@@ -9,6 +10,7 @@ import './style.css';
 import Ant from './classes/Ant';
 import { createVector } from './classes/Vector';
 import { circle, line } from './classes/Shapes';
+import WorldGrid, { calcWorldSize } from './classes/WorldGrid';
 
 const canvasContainer = document.getElementById(
 	'canvas-container',
@@ -20,6 +22,9 @@ const btnFullscreen = document.getElementById(
 	'btn-fullscreen',
 ) as HTMLButtonElement;
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
+const canvasMarkers = document.getElementById(
+	'canvas-markers',
+) as HTMLCanvasElement;
 const ctx = canvas.getContext('2d');
 const antIcon = document.getElementById('antIcon') as SVGElement | null;
 
@@ -55,6 +60,28 @@ let cameraOffset = {
 	x: 0,
 	y: 0,
 };
+
+// Grids
+let [width, height] = calcWorldSize({
+	width: CanvasOptions.WIDTH,
+	height: CanvasOptions.HEIGHT,
+	cellSize: MarkerOptions.SIZE,
+});
+
+let markersGrid = new WorldGrid(canvasMarkers, {
+	width: width / MarkerOptions.SIZE,
+	height: height / MarkerOptions.SIZE,
+	cellSize: 1,
+});
+canvasMarkers.style.transform = `scale(${MarkerOptions.SIZE})`;
+let ctxMarkers = markersGrid.create();
+
+let antGrid = new WorldGrid(canvas, {
+	width: width,
+	height: height,
+	cellSize: MarkerOptions.SIZE,
+});
+let ctxAnt = antGrid.create();
 
 window.addEventListener('keydown', (e) => {
 	switch (e.code) {
@@ -107,7 +134,7 @@ setupCamera();
 alignCamera();
 
 function setup() {
-	if (ctx == null) return;
+	if (ctxMarkers == null || ctx == null) return;
 
 	canvas.width = CanvasOptions.WIDTH;
 	canvas.height = CanvasOptions.HEIGHT;
@@ -116,8 +143,33 @@ function setup() {
 
 	let count = 0;
 
-	for (let i = 0; i < Math.floor(canvas.width / MarkerOptions.WIDTH); i++) {
-		for (let j = 0; j < Math.floor(canvas.height / MarkerOptions.HEIGHT); j++) {
+	// for (let i = 0; i < Math.floor(canvas.width / MarkerOptions.WIDTH); i++) {
+	// 	for (let j = 0; j < Math.floor(canvas.height / MarkerOptions.HEIGHT); j++) {
+	// 		let random = Math.floor(Math.random() * 3) + 1;
+	// 		let type = 0;
+
+	// 		if (random == 1) {
+	// 			type = MarkerTypes.TO_HOME;
+	// 		} else if (random == 2) {
+	// 			type = MarkerTypes.TO_FOOD;
+	// 		} else {
+	// 			type = MarkerTypes.NO_FOOD;
+	// 		}
+
+	// 		count++;
+	// 		let marker = new Marker(
+	// 			ctx,
+	// 			i * MarkerOptions.WIDTH,
+	// 			j * MarkerOptions.HEIGHT,
+	// 			type,
+	// 			Math.random(),
+	// 		);
+	// 		markers.push(marker);
+	// 		marker.draw();
+	// 	}
+	// }
+	for (let x = 0; x < canvasMarkers.height; x++) {
+		for (let y = 0; y < canvasMarkers.width; y++) {
 			let random = Math.floor(Math.random() * 3) + 1;
 			let type = 0;
 
@@ -130,13 +182,7 @@ function setup() {
 			}
 
 			count++;
-			let marker = new Marker(
-				ctx,
-				i * MarkerOptions.WIDTH,
-				j * MarkerOptions.HEIGHT,
-				type,
-				Math.random(),
-			);
+			let marker = new Marker(ctxMarkers, y, x, type, Math.random());
 			markers.push(marker);
 			marker.draw();
 		}
@@ -312,8 +358,6 @@ function panCanvas(event: MouseEvent) {
 	cameraOffset.x = event.clientX / canvasScale - panStart.x;
 	cameraOffset.y = event.clientY / canvasScale - panStart.y;
 
-	console.log(cameraOffset);
-
 	setCamera();
 }
 
@@ -347,7 +391,7 @@ function followAntCamera(x: number, y: number) {
 }
 
 function main(currentTime: number) {
-	if (ctx == null) return;
+	if (ctxMarkers == null || ctx == null) return;
 
 	mainLoopAnimationFrame = window.requestAnimationFrame(main);
 
@@ -358,14 +402,44 @@ function main(currentTime: number) {
 	// }
 	console.log('update');
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	ctxMarkers.clearRect(0, 0, canvas.width, canvas.height);
 
-	for (let i = 0; i < markers.length; i++) {
-		// console.log(markers[i].intensity);
-		// console.log(`i: ${i}, x: ${markers[i].x}, y: ${markers[i].y}`);
-		markers[i].update();
-		if (isDrawingMarkers) {
-			markers[i].draw();
+	// for (let i = 0; i < markers.length; i++) {
+	// 	// console.log(markers[i].intensity);
+	// 	// console.log(`i: ${i}, x: ${markers[i].x}, y: ${markers[i].y}`);
+	// 	markers[i].update();
+	// 	if (isDrawingMarkers) {
+	// 		markers[i].draw();
+	// 	}
+	// }
+
+	if (isDebugMode) {
+		console.time('Time to draw markers');
+	}
+	if (isDrawingMarkers) {
+		let foodImageData = ctxMarkers.createImageData(
+			canvasMarkers.width,
+			canvasMarkers.height,
+		);
+
+		for (let i = 0; i < foodImageData.data.length; i += 4) {
+			let [r, g, b] = MarkerColors[markers[i / 4].type];
+			// Modify pixel data
+			foodImageData.data[i + 0] = r; // R value
+			foodImageData.data[i + 1] = g; // G value
+			foodImageData.data[i + 2] = b; // B value
+			foodImageData.data[i + 3] = 255 * markers[i / 4].intensity; // A value
+
+			markers[i / 4].update();
 		}
+		ctxMarkers.putImageData(foodImageData, 0, 0);
+	} else {
+		for (let i = 0; i < markers.length; i++) {
+			markers[i].update();
+		}
+	}
+	if (isDebugMode) {
+		console.timeEnd('Time to draw markers');
 	}
 
 	console.log(mouseX);

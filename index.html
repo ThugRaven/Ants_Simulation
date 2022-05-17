@@ -15,7 +15,14 @@
 	<body class="bg-black h-screen overflow-hidden">
 		<main id="canvas-container">
 			<div id="camera-container" class="origin-top-left">
-				<canvas id="canvas" class="outline outline-white outline-1"></canvas>
+				<canvas
+					id="canvas-markers"
+					class="outline outline-white outline-1 origin-top-left"
+				></canvas>
+				<canvas
+					id="canvas"
+					class="outline outline-white outline-1 absolute inset-0"
+				></canvas>
 			</div>
 		</main>
 		<aside

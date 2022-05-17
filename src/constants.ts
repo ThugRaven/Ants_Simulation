@@ -13,9 +13,16 @@ export enum MarkerTypes {
 	NO_FOOD = 2,
 }
 
+export const MarkerColors = {
+	0: [255, 0, 0],
+	1: [43, 255, 0],
+	2: [0, 42, 255],
+} as const;
+
 export const MarkerOptions = {
 	WIDTH: 16,
 	HEIGHT: 16,
+	SIZE: 16,
 } as const;
 
 export const EVAPORATE_AMOUNT = 0.001;
@@ -33,4 +40,8 @@ export const AntOptions = {
 	WANDER_DISPLACE_RANGE: 0.3,
 	WANDER_POINT_MAGNITUDE: 100,
 	WANDER_POINT_RADIUS: 50,
+} as const;
+
+export const FoodOptions = {
+	PICK_AMOUNT: 1,
 } as const;

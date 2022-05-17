@@ -50,12 +50,7 @@ export default class Marker {
 		// this.ctx.fillRect(i, j, width, height);
 
 		this.ctx.fillStyle = `hsl(${hue}, 100%, 50%, ${this.intensity})`;
-		this.ctx.fillRect(
-			this.x,
-			this.y,
-			MarkerOptions.WIDTH,
-			MarkerOptions.HEIGHT,
-		);
+		this.ctx.fillRect(this.x, this.y, 1, 1);
 	}
 
 	update() {
