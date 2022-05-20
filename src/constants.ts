@@ -43,5 +43,6 @@ export const AntOptions = {
 } as const;
 
 export const FoodOptions = {
+	SIZE: 8,
 	PICK_AMOUNT: 1,
 } as const;

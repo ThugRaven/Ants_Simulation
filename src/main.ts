@@ -1,6 +1,7 @@
 import {
 	AntOptions,
 	CanvasOptions,
+	FoodOptions,
 	MarkerColors,
 	MarkerOptions,
 	MarkerTypes,
@@ -9,8 +10,10 @@ import Marker from './classes/Marker';
 import './style.css';
 import Ant from './classes/Ant';
 import { createVector } from './classes/Vector';
-import { circle, line } from './classes/Shapes';
+import { circle } from './classes/Shapes';
 import WorldGrid, { calcWorldSize } from './classes/WorldGrid';
+import Food from './classes/Food';
+import { randomInt } from './classes/Utils';
 
 const canvasContainer = document.getElementById(
 	'canvas-container',
@@ -25,6 +28,7 @@ const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 const canvasMarkers = document.getElementById(
 	'canvas-markers',
 ) as HTMLCanvasElement;
+const canvasFood = document.getElementById('canvas-food') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d');
 const antIcon = document.getElementById('antIcon') as SVGElement | null;
 
@@ -43,6 +47,7 @@ let lastUpdateTime = 0;
 const SPEED = 10;
 let frames = 0;
 let markers: Marker[] = [];
+let foods: Food[] = [];
 let ants: Ant[] = [];
 let mainLoopAnimationFrame = -1;
 let ant: Ant | null = null;
@@ -75,6 +80,14 @@ let markersGrid = new WorldGrid(canvasMarkers, {
 });
 canvasMarkers.style.transform = `scale(${MarkerOptions.SIZE})`;
 let ctxMarkers = markersGrid.create();
+
+let foodGrid = new WorldGrid(canvasFood, {
+	width: width / (MarkerOptions.SIZE / FoodOptions.SIZE),
+	height: height / (MarkerOptions.SIZE / FoodOptions.SIZE),
+	cellSize: MarkerOptions.SIZE / FoodOptions.SIZE,
+});
+canvasFood.style.transform = `scale(${MarkerOptions.SIZE / FoodOptions.SIZE})`;
+let ctxFood = foodGrid.create();
 
 let antGrid = new WorldGrid(canvas, {
 	width: width,
@@ -134,7 +147,7 @@ setupCamera();
 alignCamera();
 
 function setup() {
-	if (ctxMarkers == null || ctx == null) return;
+	if (ctxMarkers == null || ctxFood == null || ctx == null) return;
 
 	canvas.width = CanvasOptions.WIDTH;
 	canvas.height = CanvasOptions.HEIGHT;
@@ -187,6 +200,21 @@ function setup() {
 			marker.draw();
 		}
 	}
+
+	for (let x = 0; x < canvasMarkers.height; x++) {
+		for (let y = 0; y < canvasMarkers.width; y++) {
+			if (Math.random() < 0.05) {
+				let food = new Food(ctxFood, y * 8, x * 8, 100);
+				foods.push(food);
+				food.draw();
+			}
+		}
+	}
+
+	console.log(foods);
+
+	// let food = new Food(ctxFood, 800 - 8, 600 - 8, 100);
+	// food.draw();
 
 	ctx.translate(0, 0);
 	let ant3 = new Path2D(
@@ -417,22 +445,22 @@ function main(currentTime: number) {
 		console.time('Time to draw markers');
 	}
 	if (isDrawingMarkers) {
-		let foodImageData = ctxMarkers.createImageData(
+		let markersImageData = ctxMarkers.createImageData(
 			canvasMarkers.width,
 			canvasMarkers.height,
 		);
 
-		for (let i = 0; i < foodImageData.data.length; i += 4) {
+		for (let i = 0; i < markersImageData.data.length; i += 4) {
 			let [r, g, b] = MarkerColors[markers[i / 4].type];
 			// Modify pixel data
-			foodImageData.data[i + 0] = r; // R value
-			foodImageData.data[i + 1] = g; // G value
-			foodImageData.data[i + 2] = b; // B value
-			foodImageData.data[i + 3] = 255 * markers[i / 4].intensity; // A value
+			markersImageData.data[i + 0] = r; // R value
+			markersImageData.data[i + 1] = g; // G value
+			markersImageData.data[i + 2] = b; // B value
+			markersImageData.data[i + 3] = 255 * markers[i / 4].intensity; // A value
 
 			markers[i / 4].update();
 		}
-		ctxMarkers.putImageData(foodImageData, 0, 0);
+		ctxMarkers.putImageData(markersImageData, 0, 0);
 	} else {
 		for (let i = 0; i < markers.length; i++) {
 			markers[i].update();
