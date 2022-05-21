@@ -1,4 +1,5 @@
 import { AntOptions, AntStates } from '../constants';
+import Food from './Food';
 import { circle, line } from './Shapes';
 import { random } from './Utils';
 import { createVector, Vector } from './Vector';
@@ -131,6 +132,36 @@ export default class Ant {
 
 			this.ctx.fillStyle = 'red';
 			circle(this.ctx, 0, 0, 4);
+
+			// FOV
+			this.ctx.beginPath();
+			this.ctx.arc(
+				0,
+				0,
+				AntOptions.PERCEPTION_RADIUS,
+				AntOptions.PERCEPTION_START_ANGLE,
+				AntOptions.PERCEPTION_END_ANGLE,
+			);
+			this.ctx.stroke();
+			this.ctx.strokeStyle = 'white';
+			this.ctx.beginPath();
+			this.ctx.arc(
+				0,
+				0,
+				AntOptions.PERCEPTION_RADIUS,
+				AntOptions.PERCEPTION_END_ANGLE,
+				AntOptions.PERCEPTION_START_ANGLE,
+			);
+			this.ctx.stroke();
+			let thetaLeft = AntOptions.PERCEPTION_START_ANGLE;
+			let thetaRight = AntOptions.PERCEPTION_END_ANGLE;
+			let xLeft = AntOptions.PERCEPTION_RADIUS * Math.cos(thetaLeft);
+			let yLeft = AntOptions.PERCEPTION_RADIUS * Math.sin(thetaLeft);
+			let xRight = AntOptions.PERCEPTION_RADIUS * Math.cos(thetaRight);
+			let yRight = AntOptions.PERCEPTION_RADIUS * Math.sin(thetaRight);
+			this.ctx.strokeStyle = 'red';
+			line(this.ctx, 0, 0, xLeft, yLeft);
+			line(this.ctx, 0, 0, xRight, yRight);
 		}
 
 		this.ctx.restore();
@@ -140,4 +171,6 @@ export default class Ant {
 			circle(this.ctx, this.pos.x, this.pos.y, 3);
 		}
 	}
+
+	search(foods: Food[]) {}
 }

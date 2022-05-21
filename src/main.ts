@@ -11,8 +11,9 @@ import './style.css';
 import Ant from './classes/Ant';
 import { createVector } from './classes/Vector';
 import { circle } from './classes/Shapes';
-import WorldGrid, { calcWorldSize } from './classes/WorldGrid';
+import WorldCanvas, { calcWorldSize } from './classes/WorldCanvas';
 import Food from './classes/Food';
+import WorldGrid from './classes/WorldGrid';
 import { randomInt } from './classes/Utils';
 
 const canvasContainer = document.getElementById(
@@ -36,12 +37,13 @@ const antId = document.querySelector<HTMLSpanElement>('[data-id]');
 const antPos = document.querySelector<HTMLSpanElement>('[data-pos]');
 const antVel = document.querySelector<HTMLSpanElement>('[data-vel]');
 const antState = document.querySelector<HTMLSpanElement>('[data-state]');
-const btnFollow = document.getElementById('btn-follow') as HTMLButtonElement;
+const btnTrack = document.getElementById('btn-track') as HTMLButtonElement;
 
 let isRunning = false;
 let isDrawingMarkers = true;
 let isDebugMode = false;
-let isFollowing = false;
+let isTracking = false;
+let isFoodMode = false;
 
 let lastUpdateTime = 0;
 const SPEED = 10;
@@ -73,7 +75,7 @@ let [width, height] = calcWorldSize({
 	cellSize: MarkerOptions.SIZE,
 });
 
-let markersGrid = new WorldGrid(canvasMarkers, {
+let markersGrid = new WorldCanvas(canvasMarkers, {
 	width: width / MarkerOptions.SIZE,
 	height: height / MarkerOptions.SIZE,
 	cellSize: 1,
@@ -81,7 +83,7 @@ let markersGrid = new WorldGrid(canvasMarkers, {
 canvasMarkers.style.transform = `scale(${MarkerOptions.SIZE})`;
 let ctxMarkers = markersGrid.create();
 
-let foodGrid = new WorldGrid(canvasFood, {
+let foodGrid = new WorldCanvas(canvasFood, {
 	width: width / (MarkerOptions.SIZE / FoodOptions.SIZE),
 	height: height / (MarkerOptions.SIZE / FoodOptions.SIZE),
 	cellSize: MarkerOptions.SIZE / FoodOptions.SIZE,
@@ -89,12 +91,23 @@ let foodGrid = new WorldGrid(canvasFood, {
 canvasFood.style.transform = `scale(${MarkerOptions.SIZE / FoodOptions.SIZE})`;
 let ctxFood = foodGrid.create();
 
-let antGrid = new WorldGrid(canvas, {
+let antGrid = new WorldCanvas(canvas, {
 	width: width,
 	height: height,
 	cellSize: MarkerOptions.SIZE,
 });
 let ctxAnt = antGrid.create();
+
+let worldGrid = new WorldGrid({
+	width: width / MarkerOptions.SIZE,
+	height: height / MarkerOptions.SIZE,
+	cellSize: 1,
+});
+
+let markersImageData = ctxMarkers?.createImageData(
+	worldGrid.width,
+	worldGrid.height,
+);
 
 window.addEventListener('keydown', (e) => {
 	switch (e.code) {
@@ -107,12 +120,14 @@ window.addEventListener('keydown', (e) => {
 		case 'KeyD':
 			toggleDebug();
 			break;
-		case 'KeyF':
-			toggleFollow();
+		case 'KeyT':
+			toggleTrack();
 			break;
 		case 'KeyC':
 			alignCamera();
 			break;
+		case 'KeyF':
+			toggleFoodMode();
 		default:
 			break;
 	}
@@ -123,10 +138,27 @@ window.addEventListener('mousemove', (e) => {
 	mouseY = e.pageY;
 });
 
-window.addEventListener('click', () => {
-	selectedAnt = selectAnt();
-	if (isDebugMode) {
-		toggleAntDebug();
+canvasContainer.addEventListener('click', (e) => {
+	console.log(e);
+	console.log(isPanning);
+
+	if (isPanning) return;
+
+	if (!isFoodMode) {
+		selectedAnt = selectAnt();
+		if (isDebugMode) {
+			toggleAntDebug();
+		}
+	} else {
+		let target = createVector(
+			// (mouseX - cameraOffset.x * canvasScale) / canvasScale,
+			// (mouseY - cameraOffset.y * canvasScale) / canvasScale,
+			Math.floor((mouseX / canvasScale - cameraOffset.x) / MarkerOptions.SIZE),
+			Math.floor((mouseY / canvasScale - cameraOffset.y) / MarkerOptions.SIZE),
+		);
+		console.log(target);
+
+		worldGrid.addFood(target.x, target.y, 10);
 	}
 });
 
@@ -138,8 +170,8 @@ btnFullscreen.addEventListener('click', () => {
 	alignCamera();
 });
 
-btnFollow.addEventListener('click', () => {
-	toggleFollow();
+btnTrack.addEventListener('click', () => {
+	toggleTrack();
 });
 
 setup();
@@ -181,37 +213,59 @@ function setup() {
 	// 		marker.draw();
 	// 	}
 	// }
-	for (let x = 0; x < canvasMarkers.height; x++) {
-		for (let y = 0; y < canvasMarkers.width; y++) {
-			let random = Math.floor(Math.random() * 3) + 1;
+
+	// for (let x = 0; x < canvasMarkers.height; x++) {
+	// 	for (let y = 0; y < canvasMarkers.width; y++) {
+	// 		let random = Math.floor(Math.random() * 3) + 1;
+	// 		let type = 0;
+
+	// 		if (random == 1) {
+	// 			type = MarkerTypes.TO_HOME;
+	// 		} else if (random == 2) {
+	// 			type = MarkerTypes.TO_FOOD;
+	// 		}
+
+	// 		count++;
+	// 		let marker = new Marker(ctxMarkers, y, x, [Math.random(), Math.random()]);
+	// 		markers.push(marker);
+	// 		marker.draw();
+	// 	}
+	// }
+
+	// for (let x = 0; x < canvasMarkers.height; x++) {
+	// 	for (let y = 0; y < canvasMarkers.width; y++) {
+	// 		if (Math.random() < 0.05) {
+	// 			let food = new Food(ctxFood, y * 8, x * 8, 100);
+	// 			foods.push(food);
+	// 			food.draw();
+	// 		}
+	// 	}
+	// }
+
+	for (let x = 0; x < worldGrid.width; x++) {
+		for (let y = 0; y < worldGrid.height; y++) {
+			let random = Math.floor(Math.random() * 2) + 1;
 			let type = 0;
 
 			if (random == 1) {
 				type = MarkerTypes.TO_HOME;
 			} else if (random == 2) {
 				type = MarkerTypes.TO_FOOD;
-			} else {
-				type = MarkerTypes.NO_FOOD;
 			}
 
-			count++;
-			let marker = new Marker(ctxMarkers, y, x, type, Math.random());
-			markers.push(marker);
-			marker.draw();
-		}
-	}
+			worldGrid.addMarker(x, y, type, Math.random());
 
-	for (let x = 0; x < canvasMarkers.height; x++) {
-		for (let y = 0; y < canvasMarkers.width; y++) {
 			if (Math.random() < 0.05) {
-				let food = new Food(ctxFood, y * 8, x * 8, 100);
-				foods.push(food);
-				food.draw();
+				// worldGrid.addFood(x, y, randomInt(0, 100));
 			}
 		}
 	}
 
-	console.log(foods);
+	if (markersImageData) {
+		worldGrid.drawMarkers(ctxMarkers, markersImageData);
+		worldGrid.drawFood(ctxFood);
+	}
+	console.log(worldGrid);
 
 	// let food = new Food(ctxFood, 800 - 8, 600 - 8, 100);
 	// food.draw();
@@ -299,14 +353,18 @@ function toggleAntDebug() {
 	}
 }
 
-function toggleFollow() {
-	isFollowing = !isFollowing;
+function toggleTrack() {
+	isTracking = !isTracking;
 
-	if (isFollowing) {
+	if (isTracking) {
 		canvasScale = 5;
 	}
-	btnFollow.classList.toggle('border-green-500');
-	btnFollow.classList.toggle('border-red-500');
+	btnTrack.classList.toggle('border-green-500');
+	btnTrack.classList.toggle('border-red-500');
+}
+
+function toggleFoodMode() {
+	isFoodMode = !isFoodMode;
 }
 
 function selectAnt() {
@@ -419,7 +477,7 @@ function followAntCamera(x: number, y: number) {
 }
 
 function main(currentTime: number) {
-	if (ctxMarkers == null || ctx == null) return;
+	if (ctxMarkers == null || ctxFood == null || ctx == null) return;
 
 	mainLoopAnimationFrame = window.requestAnimationFrame(main);
 
@@ -431,6 +489,7 @@ function main(currentTime: number) {
 	console.log('update');
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	ctxMarkers.clearRect(0, 0, canvas.width, canvas.height);
+	ctxFood.clearRect(0, 0, canvas.width, canvas.height);
 
 	// for (let i = 0; i < markers.length; i++) {
 	// 	// console.log(markers[i].intensity);
@@ -444,35 +503,39 @@ function main(currentTime: number) {
 	if (isDebugMode) {
 		console.time('Time to draw markers');
 	}
-	if (isDrawingMarkers) {
-		let markersImageData = ctxMarkers.createImageData(
-			canvasMarkers.width,
-			canvasMarkers.height,
-		);
 
-		for (let i = 0; i < markersImageData.data.length; i += 4) {
-			let [r, g, b] = MarkerColors[markers[i / 4].type];
-			// Modify pixel data
-			markersImageData.data[i + 0] = r; // R value
-			markersImageData.data[i + 1] = g; // G value
-			markersImageData.data[i + 2] = b; // B value
-			markersImageData.data[i + 3] = 255 * markers[i / 4].intensity; // A value
-
-			markers[i / 4].update();
-		}
-		ctxMarkers.putImageData(markersImageData, 0, 0);
+	// worldGrid.update();
+	if (isDrawingMarkers && markersImageData) {
+		worldGrid.drawMarkers(ctxMarkers, markersImageData);
+		worldGrid.drawFood(ctxFood);
 	} else {
-		for (let i = 0; i < markers.length; i++) {
-			markers[i].update();
-		}
+		worldGrid.update();
 	}
+	// if (isDrawingMarkers) {
+	// 	let markersImageData = ctxMarkers.createImageData(
+	// 		canvasMarkers.width,
+	// 		canvasMarkers.height,
+	// 	);
+
+	// 	for (let i = 0; i < markersImageData.data.length; i += 4) {
+	// 		let [r, g, b] = MarkerColors[markers[i / 4].type];
+	// 		// Modify pixel data
+	// 		markersImageData.data[i + 0] = r; // R value
+	// 		markersImageData.data[i + 1] = g; // G value
+	// 		markersImageData.data[i + 2] = b; // B value
+	// 		markersImageData.data[i + 3] = 255 * markers[i / 4].intensity; // A value
+
+	// 		markers[i / 4].update();
+	// 	}
+	// 	ctxMarkers.putImageData(markersImageData, 0, 0);
+	// } else {
+	// 	for (let i = 0; i < markers.length; i++) {
+	// 		markers[i].update();
+	// 	}
+	// }
 	if (isDebugMode) {
 		console.timeEnd('Time to draw markers');
 	}
-
-	console.log(mouseX);
-	console.log(cameraOffset.x);
-	console.log(canvasScale);
 
 	let target = createVector(
 		// (mouseX - cameraOffset.x * canvasScale) / canvasScale,
@@ -480,8 +543,6 @@ function main(currentTime: number) {
 		mouseX / canvasScale - cameraOffset.x,
 		mouseY / canvasScale - cameraOffset.y,
 	);
-
-	console.log(target.x);
 
 	for (const ant of ants) {
 		// console.log(ant);
@@ -492,12 +553,13 @@ function main(currentTime: number) {
 		}
 		// ant.seek(target);
 		ant.wander();
+		// ant.search();
 		ant.update();
 		ant.draw();
 
 		if (ant.id === selectedAnt?.id) {
 			updateAntInfo();
-			if (isFollowing) {
+			if (isTracking) {
 				followAntCamera(ant.pos.x, ant.pos.y);
 			}
 		}
