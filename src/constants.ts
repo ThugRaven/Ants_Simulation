@@ -49,3 +49,6 @@ export const FoodOptions = {
 	SIZE: 16,
 	PICK_AMOUNT: 1,
 } as const;
+
+// BUTTONS
+export const MIDDLE_BUTTON = 4;

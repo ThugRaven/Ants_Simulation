@@ -5,6 +5,7 @@ import {
 	MarkerColors,
 	MarkerOptions,
 	MarkerTypes,
+	MIDDLE_BUTTON,
 } from './constants';
 import Marker from './classes/Marker';
 import './style.css';
@@ -25,6 +26,7 @@ const cameraContainer = document.getElementById(
 const btnFullscreen = document.getElementById(
 	'btn-fullscreen',
 ) as HTMLButtonElement;
+const btnPan = document.getElementById('btn-pan') as HTMLButtonElement;
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 const canvasMarkers = document.getElementById(
 	'canvas-markers',
@@ -44,6 +46,7 @@ let isDrawingMarkers = true;
 let isDebugMode = false;
 let isTracking = false;
 let isFoodMode = false;
+let isPanMode = false;
 
 let lastUpdateTime = 0;
 const SPEED = 10;
@@ -140,26 +143,24 @@ window.addEventListener('mousemove', (e) => {
 
 canvasContainer.addEventListener('click', (e) => {
 	console.log(e);
-	console.log(isPanning);
 
-	if (isPanning) return;
-
-	if (!isFoodMode) {
-		selectedAnt = selectAnt();
-		if (isDebugMode) {
-			toggleAntDebug();
-		}
-	} else {
-		let target = createVector(
-			// (mouseX - cameraOffset.x * canvasScale) / canvasScale,
-			// (mouseY - cameraOffset.y * canvasScale) / canvasScale,
-			Math.floor((mouseX / canvasScale - cameraOffset.x) / MarkerOptions.SIZE),
-			Math.floor((mouseY / canvasScale - cameraOffset.y) / MarkerOptions.SIZE),
-		);
-		console.log(target);
-
-		worldGrid.addFood(target.x, target.y, 10);
+	selectedAnt = selectAnt();
+	if (isDebugMode) {
+		toggleAntDebug();
 	}
+});
+
+canvasContainer.addEventListener('contextmenu', (e) => {
+	e.preventDefault();
+	console.log(e);
+	let target = createVector(
+		// (mouseX - cameraOffset.x * canvasScale) / canvasScale,
+		// (mouseY - cameraOffset.y * canvasScale) / canvasScale,
+		Math.floor((mouseX / canvasScale - cameraOffset.x) / MarkerOptions.SIZE),
+		Math.floor((mouseY / canvasScale - cameraOffset.y) / MarkerOptions.SIZE),
+	);
+
+	worldGrid.addFood(target.x, target.y, 10);
 });
 
 window.addEventListener('wheel', (e) => {
@@ -172,6 +173,12 @@ btnFullscreen.addEventListener('click', () => {
 
 btnTrack.addEventListener('click', () => {
 	toggleTrack();
+});
+
+btnPan.addEventListener('click', () => {
+	console.log('click');
+
+	togglePanMode();
 });
 
 setup();
@@ -357,7 +364,7 @@ function toggleTrack() {
 	isTracking = !isTracking;
 
 	if (isTracking) {
-		canvasScale = 5;
+		canvasScale = 3;
 	}
 	btnTrack.classList.toggle('border-green-500');
 	btnTrack.classList.toggle('border-red-500');
@@ -365,6 +372,12 @@ function toggleTrack() {
 
 function toggleFoodMode() {
 	isFoodMode = !isFoodMode;
+}
+
+function togglePanMode() {
+	isPanMode = !isPanMode;
+
+	btnPan.classList.toggle('bg-neutral-600');
 }
 
 function selectAnt() {
@@ -405,20 +418,27 @@ function updateAntInfo() {
 
 function setupCamera() {
 	window.addEventListener('mousedown', (e) => {
+		if (e.buttons != MIDDLE_BUTTON) return;
 		isPanning = true;
+		togglePanMode();
+		document.body.classList.add('cursor-grabbing');
 
 		panStart.x = e.clientX / canvasScale - cameraOffset.x;
 		panStart.y = e.clientY / canvasScale - cameraOffset.y;
 	});
 
 	window.addEventListener('mousemove', (e) => {
-		if (!isPanning) return;
+		if (!isPanning || e.buttons != MIDDLE_BUTTON) return;
 
 		panCanvas(e);
 	});
 
 	window.addEventListener('mouseup', () => {
-		isPanning = false;
+		if (isPanning) {
+			isPanning = false;
+			togglePanMode();
+			document.body.classList.remove('cursor-grabbing');
+		}
 	});
 }
 
@@ -431,7 +451,7 @@ function zoomCanvas(event: WheelEvent) {
 	zoomOffset.x = event.clientX / canvasScale - cameraOffset.x;
 	zoomOffset.y = event.clientY / canvasScale - cameraOffset.y;
 
-	canvasScale += event.deltaY * -0.0025;
+	canvasScale *= 0.999 ** event.deltaY;
 	canvasScale = Math.min(Math.max(0.5, canvasScale), 16);
 
 	cameraOffset.x = event.clientX / canvasScale - zoomOffset.x;
@@ -464,7 +484,7 @@ function alignCamera() {
 	setCamera();
 }
 
-function followAntCamera(x: number, y: number) {
+function trackAntCamera(x: number, y: number) {
 	let antCenter = {
 		x: window.innerWidth / 2 / canvasScale - x,
 		y: window.innerHeight / 2 / canvasScale - y,
@@ -560,7 +580,7 @@ function main(currentTime: number) {
 		if (ant.id === selectedAnt?.id) {
 			updateAntInfo();
 			if (isTracking) {
-				followAntCamera(ant.pos.x, ant.pos.y);
+				trackAntCamera(ant.pos.x, ant.pos.y);
 			}
 		}
 	}
