@@ -1,21 +1,20 @@
+import Ant from './classes/Ant';
+import Food from './classes/Food';
+import Marker from './classes/Marker';
+import { circle } from './classes/Shapes';
+import { createVector } from './classes/Vector';
+import WorldCanvas, { calcWorldSize } from './classes/WorldCanvas';
+import WorldGrid from './classes/WorldGrid';
 import {
 	AntOptions,
 	CanvasOptions,
 	FoodOptions,
-	MarkerColors,
 	MarkerOptions,
 	MarkerTypes,
 	MIDDLE_BUTTON,
+	RIGHT_BUTTON,
 } from './constants';
-import Marker from './classes/Marker';
 import './style.css';
-import Ant from './classes/Ant';
-import { createVector } from './classes/Vector';
-import { circle } from './classes/Shapes';
-import WorldCanvas, { calcWorldSize } from './classes/WorldCanvas';
-import Food from './classes/Food';
-import WorldGrid from './classes/WorldGrid';
-import { randomInt } from './classes/Utils';
 
 const canvasContainer = document.getElementById(
 	'canvas-container',
@@ -62,6 +61,8 @@ let mouseX = 0;
 let mouseY = 0;
 let canvasScale = 1;
 let isPanning = false;
+let wasPanning = true;
+let panningTimeout = 0;
 let panStart = {
 	x: 0,
 	y: 0,
@@ -142,6 +143,12 @@ window.addEventListener('mousemove', (e) => {
 });
 
 canvasContainer.addEventListener('click', (e) => {
+	// Abort click after panning
+	if (wasPanning) {
+		wasPanning = false;
+		return;
+	}
+	console.log('click');
 	console.log(e);
 
 	selectedAnt = selectAnt();
@@ -418,24 +425,46 @@ function updateAntInfo() {
 
 function setupCamera() {
 	window.addEventListener('mousedown', (e) => {
-		if (e.buttons != MIDDLE_BUTTON) return;
-		isPanning = true;
-		togglePanMode();
-		document.body.classList.add('cursor-grabbing');
+		clearTimeout(panningTimeout);
+		if (e.buttons == RIGHT_BUTTON) return;
 
-		panStart.x = e.clientX / canvasScale - cameraOffset.x;
-		panStart.y = e.clientY / canvasScale - cameraOffset.y;
+		// Start panning with middle mouse button immediately
+		if (e.buttons == MIDDLE_BUTTON) {
+			isPanning = true;
+			wasPanning = false;
+			togglePanMode();
+			document.body.classList.add('cursor-grabbing');
+
+			panStart.x = e.clientX / canvasScale - cameraOffset.x;
+			panStart.y = e.clientY / canvasScale - cameraOffset.y;
+		} else {
+			// Start panning with every other button except right one after set timeout
+			isPanning = false;
+			panningTimeout = setTimeout(() => {
+				isPanning = true;
+				wasPanning = false;
+				togglePanMode();
+				document.body.classList.add('cursor-grabbing');
+
+				panStart.x = e.clientX / canvasScale - cameraOffset.x;
+				panStart.y = e.clientY / canvasScale - cameraOffset.y;
+			}, 100);
+		}
 	});
 
 	window.addEventListener('mousemove', (e) => {
-		if (!isPanning || e.buttons != MIDDLE_BUTTON) return;
+		if (!isPanning || e.buttons == RIGHT_BUTTON) return;
 
 		panCanvas(e);
 	});
 
 	window.addEventListener('mouseup', () => {
+		console.log('mouse up');
+
+		clearTimeout(panningTimeout);
 		if (isPanning) {
 			isPanning = false;
+			wasPanning = true;
 			togglePanMode();
 			document.body.classList.remove('cursor-grabbing');
 		}

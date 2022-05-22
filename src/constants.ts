@@ -51,4 +51,5 @@ export const FoodOptions = {
 } as const;
 
 // BUTTONS
+export const RIGHT_BUTTON = 2;
 export const MIDDLE_BUTTON = 4;

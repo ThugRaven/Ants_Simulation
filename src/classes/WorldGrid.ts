@@ -40,7 +40,10 @@ export default class WorldGrid {
 	}
 
 	addFood(x: number, y: number, quantity: number) {
-		let cell = this.cells[this.getIndexFromCoords(x, y)];
+		let index = this.getIndexFromCoords(x, y);
+		if (index > this.cells.length || index < 0) return;
+
+		let cell = this.cells[index];
 		cell.food.quantity = Math.min(cell.food.quantity + quantity, 100);
 	}
 
