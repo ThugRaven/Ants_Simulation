@@ -1,5 +1,4 @@
-import { MarkerColors, MarkerTypes } from '../constants';
-import { Vector } from './Vector';
+import { MarkerOptions, MarkerTypes } from '../constants';
 import WorldCell from './WorldCell';
 
 interface WorldGridOptions {
@@ -81,7 +80,37 @@ export default class WorldGrid {
 		}
 	}
 
+	isOnFood(x: number, y: number) {
+		return this.cells[this.getIndexFromCoords(x, y)].food.quantity > 0;
+	}
+
 	getIndexFromCoords(x: number, y: number) {
 		return x + y * this.width;
+	}
+
+	getCellCoords(x: number, y: number) {
+		let xCell = Math.floor(x / MarkerOptions.SIZE);
+		let yCell = Math.floor(y / MarkerOptions.SIZE);
+		return [xCell, yCell];
+	}
+
+	getCellFromCoords(x: number, y: number, safe = false) {
+		if (!safe) {
+			[x, y] = this.getCellCoords(x, y);
+		}
+		return this.cells[this.getIndexFromCoords(x, y)];
+	}
+
+	getCellFromCoordsSafe(x: number, y: number) {
+		let [xCell, yCell] = this.getCellCoords(x, y);
+		if (this.checkCoords(xCell, yCell)) {
+			return this.getCellFromCoords(xCell, yCell, true);
+		} else {
+			return null;
+		}
+	}
+
+	checkCoords(x: number, y: number) {
+		return x > -1 && x < this.width && y > -1 && y < this.height;
 	}
 }

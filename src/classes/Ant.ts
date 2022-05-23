@@ -167,22 +167,34 @@ export default class Ant {
 			// Calculate perception points and draw them
 			let angleBetween =
 				(AntOptions.PERCEPTION_END_ANGLE - AntOptions.PERCEPTION_START_ANGLE) /
-				(AntOptions.PERCEPTION_POINTS - 1);
-			for (let i = 0; i < AntOptions.PERCEPTION_POINTS; i++) {
-				let theta = angleBetween * i + AntOptions.PERCEPTION_START_ANGLE;
+				(AntOptions.PERCEPTION_POINTS_HORIZONTAL - 1);
+			let distanceBetween =
+				AntOptions.PERCEPTION_RADIUS / AntOptions.PERCEPTION_POINTS_VERTICAL;
 
-				let x = AntOptions.PERCEPTION_RADIUS * Math.cos(theta);
-				let y = AntOptions.PERCEPTION_RADIUS * Math.sin(theta);
+			for (let x = 1; x <= AntOptions.PERCEPTION_POINTS_VERTICAL; x++) {
+				for (let y = 0; y < AntOptions.PERCEPTION_POINTS_HORIZONTAL; y++) {
+					let theta = angleBetween * y + AntOptions.PERCEPTION_START_ANGLE;
 
-				if (this.perceptionDraw.has(i)) {
-					this.ctx.strokeStyle = 'white';
-					this.ctx.fillStyle = 'white';
-				} else {
-					this.ctx.strokeStyle = 'red';
-					this.ctx.fillStyle = 'green';
+					let perceptionX = distanceBetween * x * Math.cos(theta);
+					let perceptionY = distanceBetween * x * Math.sin(theta);
+
+					if (
+						this.perceptionDraw.has(
+							x * AntOptions.PERCEPTION_POINTS_VERTICAL + y,
+						)
+					) {
+						this.ctx.strokeStyle = 'white';
+						this.ctx.fillStyle = 'white';
+					} else {
+						this.ctx.strokeStyle = 'red';
+						this.ctx.fillStyle = 'green';
+					}
+
+					circle(this.ctx, perceptionX, perceptionY, 4);
+					if (x === AntOptions.PERCEPTION_POINTS_VERTICAL) {
+						line(this.ctx, 0, 0, perceptionX, perceptionY);
+					}
 				}
-				line(this.ctx, 0, 0, x, y);
-				circle(this.ctx, x, y, 4);
 			}
 		}
 
@@ -191,7 +203,6 @@ export default class Ant {
 		if (this.debug) {
 			this.ctx.fillStyle = 'white';
 			circle(this.ctx, this.pos.x, this.pos.y, 3);
-			console.log(this.perceptionDraw);
 		}
 	}
 
@@ -199,33 +210,48 @@ export default class Ant {
 		if (this.debug) {
 			this.perceptionDraw = new Set();
 		}
+
+		if (
+			// worldGrid.isOnFood(
+			// 	Math.floor(this.pos.x / MarkerOptions.SIZE),
+			// 	Math.floor(this.pos.y / MarkerOptions.SIZE),
+			// )
+			true
+		) {
+		}
+
 		let foundFood = false;
 		let angleBetween =
 			(AntOptions.PERCEPTION_END_ANGLE - AntOptions.PERCEPTION_START_ANGLE) /
-			(AntOptions.PERCEPTION_POINTS - 1);
-		for (let i = 0; i < AntOptions.PERCEPTION_POINTS; i++) {
-			let theta = angleBetween * i + AntOptions.PERCEPTION_START_ANGLE;
+			(AntOptions.PERCEPTION_POINTS_HORIZONTAL - 1);
+		let distanceBetween =
+			AntOptions.PERCEPTION_RADIUS / AntOptions.PERCEPTION_POINTS_VERTICAL;
 
-			let perceptionX = AntOptions.PERCEPTION_RADIUS * Math.cos(theta);
-			let perceptionY = AntOptions.PERCEPTION_RADIUS * Math.sin(theta);
-			let perceptionPoint = this.pos.copy().add(perceptionX, perceptionY);
+		for (let x = 1; x <= AntOptions.PERCEPTION_POINTS_VERTICAL; x++) {
+			for (let y = 0; y < AntOptions.PERCEPTION_POINTS_HORIZONTAL; y++) {
+				let theta = angleBetween * y + AntOptions.PERCEPTION_START_ANGLE;
 
-			let index = worldGrid.getIndexFromCoords(
-				Math.floor(perceptionPoint.x / MarkerOptions.SIZE),
-				Math.floor(perceptionPoint.y / MarkerOptions.SIZE),
-			);
+				let perceptionX = distanceBetween * x * Math.cos(theta);
+				let perceptionY = distanceBetween * x * Math.sin(theta);
+				let perceptionPoint = this.pos.copy().add(perceptionX, perceptionY);
 
-			if (index > 0 && index < worldGrid.cells.length) {
-				let cell = worldGrid.cells[index];
-				if (cell.food.quantity > 0) {
-					if (this.debug) {
-						console.log(`Found food at index: ${index}`);
-						this.perceptionDraw.add(i);
+				let cell = worldGrid.getCellFromCoordsSafe(
+					perceptionPoint.x,
+					perceptionPoint.y,
+				);
+
+				if (cell) {
+					if (cell.food.quantity > 0) {
+						if (this.debug) {
+							this.perceptionDraw.add(
+								x * AntOptions.PERCEPTION_POINTS_VERTICAL + y,
+							);
+						}
+
+						foundFood = true;
+						this.seek(perceptionPoint);
+						break;
 					}
-
-					foundFood = true;
-					this.seek(perceptionPoint);
-					break;
 				}
 			}
 		}
