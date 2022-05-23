@@ -35,14 +35,20 @@ export enum AntStates {
 }
 
 export const AntOptions = {
+	// Image sizing
 	IMG_WIDTH: 24,
 	IMG_HEIGHT: 34,
+	// Wander options
 	WANDER_DISPLACE_RANGE: 0.3,
 	WANDER_POINT_MAGNITUDE: 100,
 	WANDER_POINT_RADIUS: 50,
+	// Perception options
 	PERCEPTION_RADIUS: 100,
 	PERCEPTION_START_ANGLE: (7 / 6) * Math.PI,
 	PERCEPTION_END_ANGLE: (11 / 6) * Math.PI,
+	PERCEPTION_POINTS: 32,
+	PERCEPTION_POINTS_HORIZONTAL: 8,
+	PERCEPTION_POINTS_VERTICAL: 4,
 } as const;
 
 export const FoodOptions = {

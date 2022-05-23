@@ -61,7 +61,7 @@ let mouseX = 0;
 let mouseY = 0;
 let canvasScale = 1;
 let isPanning = false;
-let wasPanning = true;
+let wasPanning = false;
 let panningTimeout = 0;
 let panStart = {
 	x: 0,
@@ -167,6 +167,9 @@ canvasContainer.addEventListener('contextmenu', (e) => {
 		Math.floor((mouseY / canvasScale - cameraOffset.y) / MarkerOptions.SIZE),
 	);
 
+	if (isDebugMode) {
+		console.log(`Placed food at: ${target.x}:${target.y}`);
+	}
 	worldGrid.addFood(target.x, target.y, 10);
 });
 
@@ -601,8 +604,7 @@ function main(currentTime: number) {
 			circle(ctx, target.x, target.y, 4);
 		}
 		// ant.seek(target);
-		ant.wander();
-		// ant.search();
+		ant.search(worldGrid);
 		ant.update();
 		ant.draw();
 

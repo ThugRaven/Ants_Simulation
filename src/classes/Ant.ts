@@ -1,8 +1,8 @@
-import { AntOptions, AntStates } from '../constants';
-import Food from './Food';
+import { AntOptions, AntStates, MarkerOptions } from '../constants';
 import { circle, line } from './Shapes';
 import { random } from './Utils';
 import { createVector, Vector } from './Vector';
+import WorldGrid from './WorldGrid';
 
 interface AntOptions {
 	id: number;
@@ -25,6 +25,7 @@ export default class Ant {
 	state: number;
 	debug: boolean;
 	wanderTheta: number;
+	perceptionDraw: Set<number>;
 
 	constructor(
 		ctx: CanvasRenderingContext2D,
@@ -42,6 +43,7 @@ export default class Ant {
 		this.state = AntStates.TO_FOOD;
 		this.debug = options.debug || false;
 		this.wanderTheta = random(0, Math.PI * 2);
+		this.perceptionDraw = new Set();
 	}
 
 	seek(target: Vector) {
@@ -162,6 +164,26 @@ export default class Ant {
 			this.ctx.strokeStyle = 'red';
 			line(this.ctx, 0, 0, xLeft, yLeft);
 			line(this.ctx, 0, 0, xRight, yRight);
+			// Calculate perception points and draw them
+			let angleBetween =
+				(AntOptions.PERCEPTION_END_ANGLE - AntOptions.PERCEPTION_START_ANGLE) /
+				(AntOptions.PERCEPTION_POINTS - 1);
+			for (let i = 0; i < AntOptions.PERCEPTION_POINTS; i++) {
+				let theta = angleBetween * i + AntOptions.PERCEPTION_START_ANGLE;
+
+				let x = AntOptions.PERCEPTION_RADIUS * Math.cos(theta);
+				let y = AntOptions.PERCEPTION_RADIUS * Math.sin(theta);
+
+				if (this.perceptionDraw.has(i)) {
+					this.ctx.strokeStyle = 'white';
+					this.ctx.fillStyle = 'white';
+				} else {
+					this.ctx.strokeStyle = 'red';
+					this.ctx.fillStyle = 'green';
+				}
+				line(this.ctx, 0, 0, x, y);
+				circle(this.ctx, x, y, 4);
+			}
 		}
 
 		this.ctx.restore();
@@ -169,8 +191,47 @@ export default class Ant {
 		if (this.debug) {
 			this.ctx.fillStyle = 'white';
 			circle(this.ctx, this.pos.x, this.pos.y, 3);
+			console.log(this.perceptionDraw);
 		}
 	}
 
-	search(foods: Food[]) {}
+	search(worldGrid: WorldGrid) {
+		if (this.debug) {
+			this.perceptionDraw = new Set();
+		}
+		let foundFood = false;
+		let angleBetween =
+			(AntOptions.PERCEPTION_END_ANGLE - AntOptions.PERCEPTION_START_ANGLE) /
+			(AntOptions.PERCEPTION_POINTS - 1);
+		for (let i = 0; i < AntOptions.PERCEPTION_POINTS; i++) {
+			let theta = angleBetween * i + AntOptions.PERCEPTION_START_ANGLE;
+
+			let perceptionX = AntOptions.PERCEPTION_RADIUS * Math.cos(theta);
+			let perceptionY = AntOptions.PERCEPTION_RADIUS * Math.sin(theta);
+			let perceptionPoint = this.pos.copy().add(perceptionX, perceptionY);
+
+			let index = worldGrid.getIndexFromCoords(
+				Math.floor(perceptionPoint.x / MarkerOptions.SIZE),
+				Math.floor(perceptionPoint.y / MarkerOptions.SIZE),
+			);
+
+			if (index > 0 && index < worldGrid.cells.length) {
+				let cell = worldGrid.cells[index];
+				if (cell.food.quantity > 0) {
+					if (this.debug) {
+						console.log(`Found food at index: ${index}`);
+						this.perceptionDraw.add(i);
+					}
+
+					foundFood = true;
+					this.seek(perceptionPoint);
+					break;
+				}
+			}
+		}
+
+		if (!foundFood) {
+			this.wander();
+		}
+	}
 }
