@@ -259,24 +259,24 @@ function setup() {
 	// 	}
 	// }
 
-	for (let x = 0; x < worldGrid.width; x++) {
-		for (let y = 0; y < worldGrid.height; y++) {
-			let random = Math.floor(Math.random() * 2) + 1;
-			let type = 0;
+	// for (let x = 0; x < worldGrid.width; x++) {
+	// 	for (let y = 0; y < worldGrid.height; y++) {
+	// 		let random = Math.floor(Math.random() * 2) + 1;
+	// 		let type = 0;
 
-			if (random == 1) {
-				type = MarkerTypes.TO_HOME;
-			} else if (random == 2) {
-				type = MarkerTypes.TO_FOOD;
-			}
+	// 		if (random == 1) {
+	// 			type = MarkerTypes.TO_HOME;
+	// 		} else if (random == 2) {
+	// 			type = MarkerTypes.TO_FOOD;
+	// 		}
 
-			worldGrid.addMarker(x, y, type, Math.random());
+	// 		worldGrid.addMarker(x, y, type, Math.random());
 
-			if (Math.random() < 0.05) {
-				// worldGrid.addFood(x, y, randomInt(0, 100));
-			}
-		}
-	}
+	// 		if (Math.random() < 0.05) {
+	// 			// worldGrid.addFood(x, y, randomInt(0, 100));
+	// 		}
+	// 	}
+	// }
 
 	if (markersImageData) {
 		worldGrid.drawMarkers(ctxMarkers, markersImageData);
@@ -318,7 +318,7 @@ function setup() {
 			// 		// y: canvas.height / 2,
 			// 	},
 			// });
-			for (let i = 0; i < 10; i++) {
+			for (let i = 0; i < 250; i++) {
 				ant = new Ant(ctx, ant4, {
 					id: i + 1,
 					pos: {

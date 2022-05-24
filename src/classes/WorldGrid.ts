@@ -31,10 +31,16 @@ export default class WorldGrid {
 
 	addMarker(x: number, y: number, type: MarkerTypes, intensity: number) {
 		let cell = this.cells[this.getIndexFromCoords(x, y)];
-		if (type == MarkerTypes.TO_HOME) {
-			cell.marker.intensity[0] = intensity;
-		} else if (type == MarkerTypes.TO_FOOD) {
-			cell.marker.intensity[1] = intensity;
+		if (type === MarkerTypes.TO_HOME) {
+			cell.marker.intensity[0] += Math.min(
+				1,
+				cell.marker.intensity[0] + intensity,
+			);
+		} else if (type === MarkerTypes.TO_FOOD) {
+			cell.marker.intensity[1] += Math.min(
+				1,
+				cell.marker.intensity[1] + intensity,
+			);
 		}
 	}
 

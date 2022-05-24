@@ -1,8 +1,8 @@
 // CANVAS
 
 export const CanvasOptions = {
-	WIDTH: 1600,
-	HEIGHT: 1200,
+	WIDTH: 1600 * 2,
+	HEIGHT: 1200 * 2,
 } as const;
 
 // MARKERS

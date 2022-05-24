@@ -227,10 +227,10 @@ export default class Ant {
 
 		let foundFood = false;
 
-		if (this.state === AntStates.TO_HOME) {
-			this.wander();
-			return;
-		}
+		// if (this.state === AntStates.TO_HOME) {
+		// 	this.wander();
+		// 	return;
+		// }
 
 		let cell = worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y);
 		if (cell && cell.food.quantity > 0) {
@@ -245,6 +245,9 @@ export default class Ant {
 			(AntOptions.PERCEPTION_POINTS_HORIZONTAL - 1);
 		let distanceBetween =
 			AntOptions.PERCEPTION_RADIUS / AntOptions.PERCEPTION_POINTS_VERTICAL;
+
+		let maxIntensity = 0;
+		let maxIntensityPoint: Vector | null = null;
 
 		for (let x = 1; x <= AntOptions.PERCEPTION_POINTS_VERTICAL; x++) {
 			for (let y = 0; y < AntOptions.PERCEPTION_POINTS_HORIZONTAL; y++) {
@@ -269,10 +272,27 @@ export default class Ant {
 
 						foundFood = true;
 						this.seek(perceptionPoint);
-						break;
+						return;
+					}
+
+					let intensity = 0;
+					if (this.state === AntStates.TO_HOME) {
+						intensity = cellPerception.marker.intensity[0];
+					} else if (this.state === AntStates.TO_FOOD) {
+						intensity = cellPerception.marker.intensity[1];
+					}
+
+					if (intensity > maxIntensity) {
+						maxIntensity = intensity;
+						maxIntensityPoint = perceptionPoint;
 					}
 				}
 			}
+		}
+
+		if (maxIntensityPoint) {
+			this.seek(maxIntensityPoint);
+			return;
 		}
 
 		if (!foundFood) {
