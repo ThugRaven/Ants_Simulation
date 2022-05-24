@@ -534,6 +534,7 @@ function main(currentTime: number) {
 	mainLoopAnimationFrame = window.requestAnimationFrame(main);
 
 	const deltaTime = (currentTime - lastUpdateTime) / 1000;
+	// console.log(deltaTime);
 
 	// if (deltaTime < 1 / SPEED) {
 	// 	return;
@@ -605,7 +606,8 @@ function main(currentTime: number) {
 		}
 		// ant.seek(target);
 		ant.search(worldGrid);
-		ant.update();
+		ant.update(deltaTime);
+		ant.addMarker(worldGrid, deltaTime);
 		ant.draw();
 
 		if (ant.id === selectedAnt?.id) {

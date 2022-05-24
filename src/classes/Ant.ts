@@ -1,4 +1,4 @@
-import { AntOptions, AntStates, MarkerOptions } from '../constants';
+import { AntOptions, AntStates, MarkerTypes } from '../constants';
 import { circle, line } from './Shapes';
 import { random } from './Utils';
 import { createVector, Vector } from './Vector';
@@ -26,6 +26,8 @@ export default class Ant {
 	debug: boolean;
 	wanderTheta: number;
 	perceptionDraw: Set<number>;
+	internalClock: number;
+	markerClock: number;
 
 	constructor(
 		ctx: CanvasRenderingContext2D,
@@ -44,6 +46,8 @@ export default class Ant {
 		this.debug = options.debug || false;
 		this.wanderTheta = random(0, Math.PI * 2);
 		this.perceptionDraw = new Set();
+		this.internalClock = 0;
+		this.markerClock = random(0, AntOptions.MARKER_PERIOD);
 	}
 
 	seek(target: Vector) {
@@ -99,7 +103,9 @@ export default class Ant {
 		this.acc.add(force);
 	}
 
-	update() {
+	update(dt: number) {
+		this.internalClock += dt;
+
 		this.vel.add(this.acc);
 		this.vel.limit(this.maxSpeed);
 		this.pos.add(this.vel);
@@ -114,6 +120,13 @@ export default class Ant {
 		let horizontalOffset = -AntOptions.IMG_WIDTH / 2;
 		let verticalOffset = -AntOptions.IMG_HEIGHT / 2;
 
+		// Draw food
+		if (this.state === AntStates.TO_HOME) {
+			this.ctx.fillStyle = 'green';
+			circle(this.ctx, 0, verticalOffset, 10);
+		}
+
+		// Draw ant
 		this.ctx.drawImage(
 			this.antIcon,
 			horizontalOffset,
@@ -122,6 +135,7 @@ export default class Ant {
 			AntOptions.IMG_HEIGHT,
 		);
 
+		// Draw debug shapes
 		if (this.debug) {
 			this.ctx.strokeStyle = '#FF0000';
 			this.ctx.lineWidth = 2;
@@ -211,16 +225,21 @@ export default class Ant {
 			this.perceptionDraw = new Set();
 		}
 
-		if (
-			// worldGrid.isOnFood(
-			// 	Math.floor(this.pos.x / MarkerOptions.SIZE),
-			// 	Math.floor(this.pos.y / MarkerOptions.SIZE),
-			// )
-			true
-		) {
+		let foundFood = false;
+
+		if (this.state === AntStates.TO_HOME) {
+			this.wander();
+			return;
 		}
 
-		let foundFood = false;
+		let cell = worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y);
+		if (cell && cell.food.quantity > 0) {
+			this.state = AntStates.TO_HOME;
+			worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y)?.pick();
+			this.internalClock = 0;
+			return;
+		}
+
 		let angleBetween =
 			(AntOptions.PERCEPTION_END_ANGLE - AntOptions.PERCEPTION_START_ANGLE) /
 			(AntOptions.PERCEPTION_POINTS_HORIZONTAL - 1);
@@ -235,13 +254,13 @@ export default class Ant {
 				let perceptionY = distanceBetween * x * Math.sin(theta);
 				let perceptionPoint = this.pos.copy().add(perceptionX, perceptionY);
 
-				let cell = worldGrid.getCellFromCoordsSafe(
+				let cellPerception = worldGrid.getCellFromCoordsSafe(
 					perceptionPoint.x,
 					perceptionPoint.y,
 				);
 
-				if (cell) {
-					if (cell.food.quantity > 0) {
+				if (cellPerception) {
+					if (cellPerception.food.quantity > 0) {
 						if (this.debug) {
 							this.perceptionDraw.add(
 								x * AntOptions.PERCEPTION_POINTS_VERTICAL + y,
@@ -258,6 +277,28 @@ export default class Ant {
 
 		if (!foundFood) {
 			this.wander();
+		}
+	}
+
+	addMarker(worldGrid: WorldGrid, dt: number) {
+		this.markerClock += dt;
+		if (this.markerClock >= AntOptions.MARKER_PERIOD) {
+			let [x, y] = worldGrid.getCellCoords(this.pos.x, this.pos.y);
+			if (!worldGrid.checkCoords(x, y)) return;
+
+			let intensity =
+				AntOptions.MARKER_DEFAULT_INTENSITY *
+				Math.exp(-0.05 * this.internalClock);
+
+			worldGrid.addMarker(
+				x,
+				y,
+				this.state === AntStates.TO_FOOD
+					? MarkerTypes.TO_HOME
+					: MarkerTypes.TO_FOOD,
+				intensity,
+			);
+			this.markerClock = 0;
 		}
 	}
 }

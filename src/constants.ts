@@ -51,6 +51,9 @@ export const AntOptions = {
 	PERCEPTION_POINTS_HORIZONTAL: 12,
 	PERCEPTION_POINTS_VERTICAL: 5,
 	PERCEPTION_POINTS_START: 34,
+	// Marker
+	MARKER_PERIOD: 0.1,
+	MARKER_DEFAULT_INTENSITY: 1,
 } as const;
 
 export const FoodOptions = {
