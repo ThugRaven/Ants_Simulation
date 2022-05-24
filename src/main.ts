@@ -11,7 +11,6 @@ import {
 	CanvasOptions,
 	FoodOptions,
 	MarkerOptions,
-	MarkerTypes,
 	MIDDLE_BUTTON,
 	RIGHT_BUTTON,
 } from './constants';
@@ -448,7 +447,7 @@ function setupCamera() {
 			isPanning = false;
 			panningTimeout = setTimeout(() => {
 				isPanning = true;
-				wasPanning = false;
+				wasPanning = true;
 				togglePanMode();
 				document.body.classList.add('cursor-grabbing');
 
@@ -470,7 +469,6 @@ function setupCamera() {
 		clearTimeout(panningTimeout);
 		if (isPanning) {
 			isPanning = false;
-			wasPanning = true;
 			togglePanMode();
 			document.body.classList.remove('cursor-grabbing');
 		}
