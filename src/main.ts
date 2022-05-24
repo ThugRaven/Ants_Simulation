@@ -7,6 +7,7 @@ import WorldCanvas, { calcWorldSize } from './classes/WorldCanvas';
 import WorldGrid from './classes/WorldGrid';
 import {
 	AntOptions,
+	ANT_AMOUNT,
 	CanvasOptions,
 	FoodOptions,
 	MarkerOptions,
@@ -318,7 +319,7 @@ function setup() {
 			// 		// y: canvas.height / 2,
 			// 	},
 			// });
-			for (let i = 0; i < 250; i++) {
+			for (let i = 0; i < ANT_AMOUNT; i++) {
 				ant = new Ant(ctx, ant4, {
 					id: i + 1,
 					pos: {
@@ -341,12 +342,14 @@ function toggleLoop() {
 
 	if (isRunning) {
 		console.log('Play');
-		mainLoopAnimationFrame = window.requestAnimationFrame(main);
+		// mainLoopAnimationFrame = window.requestAnimationFrame(main);
 	} else {
 		console.log('Pause');
-		cancelAnimationFrame(mainLoopAnimationFrame);
+		// cancelAnimationFrame(mainLoopAnimationFrame);
 	}
 }
+
+mainLoopAnimationFrame = window.requestAnimationFrame(main);
 
 function toggleMarkers() {
 	isDrawingMarkers = !isDrawingMarkers;
@@ -534,9 +537,8 @@ function main(currentTime: number) {
 	mainLoopAnimationFrame = window.requestAnimationFrame(main);
 
 	const deltaTime = (currentTime - lastUpdateTime) / 1000;
-	// console.log(deltaTime);
 
-	// if (deltaTime < 1 / SPEED) {
+	// if (deltaTime < 1 / 25) {
 	// 	return;
 	// }
 	console.log('update');
@@ -559,11 +561,11 @@ function main(currentTime: number) {
 
 	// worldGrid.update();
 	if (isDrawingMarkers && markersImageData) {
-		worldGrid.drawMarkers(ctxMarkers, markersImageData);
-		worldGrid.drawFood(ctxFood);
-	} else {
+		worldGrid.drawMarkers(ctxMarkers, markersImageData, isRunning);
+	} else if (isRunning) {
 		worldGrid.update();
 	}
+	worldGrid.drawFood(ctxFood);
 	// if (isDrawingMarkers) {
 	// 	let markersImageData = ctxMarkers.createImageData(
 	// 		canvasMarkers.width,
@@ -605,9 +607,11 @@ function main(currentTime: number) {
 			circle(ctx, target.x, target.y, 4);
 		}
 		// ant.seek(target);
-		ant.search(worldGrid);
-		ant.update(deltaTime);
-		ant.addMarker(worldGrid, deltaTime);
+		if (isRunning) {
+			ant.search(worldGrid, deltaTime);
+			ant.update(deltaTime);
+			ant.addMarker(worldGrid, deltaTime);
+		}
 		ant.draw();
 
 		if (ant.id === selectedAnt?.id) {

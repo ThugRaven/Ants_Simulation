@@ -52,7 +52,11 @@ export default class WorldGrid {
 		cell.food.quantity = Math.min(cell.food.quantity + quantity, 100);
 	}
 
-	drawMarkers(ctx: CanvasRenderingContext2D, markersImageData: ImageData) {
+	drawMarkers(
+		ctx: CanvasRenderingContext2D,
+		markersImageData: ImageData,
+		update = true,
+	) {
 		// for (let x = 0; x < this.width; x++) {
 		// 	for (let y = 0; y < this.height; y++) {
 		// 		let cell = this.cells[this.getIndexFromCoords(x, y)];
@@ -70,7 +74,9 @@ export default class WorldGrid {
 			markersImageData.data[i + 2] = colors[2]; // B value
 			markersImageData.data[i + 3] = 255; // A value
 
-			cell.marker.update();
+			if (update) {
+				cell.marker.update();
+			}
 		}
 		ctx.putImageData(markersImageData, 0, 0);
 	}

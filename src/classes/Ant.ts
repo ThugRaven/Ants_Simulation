@@ -40,8 +40,8 @@ export default class Ant {
 		this.pos = createVector(options.pos.x, options.pos.y);
 		this.vel = createVector(0, 0);
 		this.acc = createVector(0, 0);
-		this.maxSpeed = 4;
-		this.maxForce = 0.25;
+		this.maxSpeed = 4 * 85;
+		this.maxForce = 0.25 * 85;
 		this.state = AntStates.TO_FOOD;
 		this.debug = options.debug || false;
 		this.wanderTheta = random(0, Math.PI * 2);
@@ -50,20 +50,20 @@ export default class Ant {
 		this.markerClock = random(0, AntOptions.MARKER_PERIOD);
 	}
 
-	seek(target: Vector) {
+	seek(target: Vector, dt: number) {
 		if (this.debug) {
 			this.ctx.strokeStyle = 'white';
 			line(this.ctx, target.x, target.y, this.pos.x, this.pos.y);
 		}
 
 		let force = target.copy().sub(this.pos);
-		force.setMag(this.maxSpeed);
+		force.setMag(this.maxSpeed * dt);
 		force.sub(this.vel);
-		force.limit(this.maxForce);
+		force.limit(this.maxForce * dt);
 		this.applyForce(force);
 	}
 
-	wander() {
+	wander(dt: number) {
 		let wanderPoint = this.vel.copy();
 		wanderPoint.setMag(AntOptions.WANDER_POINT_MAGNITUDE);
 		wanderPoint.add(this.pos);
@@ -92,7 +92,7 @@ export default class Ant {
 		}
 
 		let steer = wanderPoint.sub(this.pos);
-		steer.setMag(this.maxForce);
+		steer.setMag(this.maxForce * dt);
 		this.applyForce(steer);
 
 		let displaceRange = AntOptions.WANDER_DISPLACE_RANGE;
@@ -107,7 +107,7 @@ export default class Ant {
 		this.internalClock += dt;
 
 		this.vel.add(this.acc);
-		this.vel.limit(this.maxSpeed);
+		this.vel.limit(this.maxSpeed * dt);
 		this.pos.add(this.vel);
 		this.acc.set(0, 0);
 	}
@@ -220,7 +220,7 @@ export default class Ant {
 		}
 	}
 
-	search(worldGrid: WorldGrid) {
+	search(worldGrid: WorldGrid, dt: number) {
 		if (this.debug) {
 			this.perceptionDraw = new Set();
 		}
@@ -271,7 +271,7 @@ export default class Ant {
 						}
 
 						foundFood = true;
-						this.seek(perceptionPoint);
+						this.seek(perceptionPoint, dt);
 						return;
 					}
 
@@ -291,12 +291,12 @@ export default class Ant {
 		}
 
 		if (maxIntensityPoint) {
-			this.seek(maxIntensityPoint);
+			this.seek(maxIntensityPoint, dt);
 			return;
 		}
 
 		if (!foundFood) {
-			this.wander();
+			this.wander(dt);
 		}
 	}
 

@@ -28,6 +28,7 @@ export const MarkerOptions = {
 export const EVAPORATE_AMOUNT = 0.001;
 
 // ANTS
+export const ANT_AMOUNT = 250;
 
 export enum AntStates {
 	TO_HOME = 0,
@@ -52,7 +53,7 @@ export const AntOptions = {
 	PERCEPTION_POINTS_VERTICAL: 5,
 	PERCEPTION_POINTS_START: 34,
 	// Marker
-	MARKER_PERIOD: 0.1,
+	MARKER_PERIOD: 0.15,
 	MARKER_DEFAULT_INTENSITY: 1,
 } as const;
 
