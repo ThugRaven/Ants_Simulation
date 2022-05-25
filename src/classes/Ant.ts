@@ -233,7 +233,7 @@ export default class Ant {
 		// }
 
 		let cell = worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y);
-		if (cell && cell.food.quantity > 0) {
+		if (cell && cell.food.quantity > 0 && this.state === AntStates.TO_FOOD) {
 			this.state = AntStates.TO_HOME;
 			worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y)?.pick();
 			this.internalClock = 0;
@@ -248,10 +248,15 @@ export default class Ant {
 
 		let maxIntensity = 0;
 		let maxIntensityPoint: Vector | null = null;
+		let angle = this.vel.heading();
 
 		for (let x = 1; x <= AntOptions.PERCEPTION_POINTS_VERTICAL; x++) {
 			for (let y = 0; y < AntOptions.PERCEPTION_POINTS_HORIZONTAL; y++) {
-				let theta = angleBetween * y + AntOptions.PERCEPTION_START_ANGLE;
+				let theta =
+					angleBetween * y +
+					AntOptions.PERCEPTION_START_ANGLE +
+					angle +
+					Math.PI / 2;
 
 				let perceptionX = distanceBetween * x * Math.cos(theta);
 				let perceptionY = distanceBetween * x * Math.sin(theta);
@@ -263,7 +268,10 @@ export default class Ant {
 				);
 
 				if (cellPerception) {
-					if (cellPerception.food.quantity > 0) {
+					if (
+						cellPerception.food.quantity > 0 &&
+						this.state === AntStates.TO_FOOD
+					) {
 						if (this.debug) {
 							this.perceptionDraw.add(
 								x * AntOptions.PERCEPTION_POINTS_VERTICAL + y,

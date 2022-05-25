@@ -485,7 +485,7 @@ function zoomCanvas(event: WheelEvent) {
 	zoomOffset.y = event.clientY / canvasScale - cameraOffset.y;
 
 	canvasScale *= 0.999 ** event.deltaY;
-	canvasScale = Math.min(Math.max(0.5, canvasScale), 16);
+	canvasScale = Math.min(Math.max(0.25, canvasScale), 16);
 
 	cameraOffset.x = event.clientX / canvasScale - zoomOffset.x;
 	cameraOffset.y = event.clientY / canvasScale - zoomOffset.y;
