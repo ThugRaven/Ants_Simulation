@@ -40,6 +40,17 @@ const antVel = document.querySelector<HTMLSpanElement>('[data-vel]');
 const antState = document.querySelector<HTMLSpanElement>('[data-state]');
 const btnTrack = document.getElementById('btn-track') as HTMLButtonElement;
 
+const markerIntensityHome = document.querySelector<HTMLSpanElement>(
+	'[data-intensity-home]',
+);
+const markerIntensityFood = document.querySelector<HTMLSpanElement>(
+	'[data-intensity-food]',
+);
+const cellFood = document.querySelector<HTMLSpanElement>('[data-food]');
+const cellPreview = document.querySelector<HTMLDivElement>(
+	'[data-cell-preview]',
+);
+
 let isRunning = false;
 let isDrawingMarkers = true;
 let isDebugMode = false;
@@ -428,6 +439,17 @@ function updateAntInfo() {
 	antState!.textContent = selectedAnt.state.toString();
 }
 
+function updateCellInfo(x: number, y: number) {
+	let cell = worldGrid.getCellFromCoordsSafe(x, y);
+	if (!cell) return;
+
+	markerIntensityHome!.textContent = cell.marker.intensity[0].toFixed(2);
+	markerIntensityFood!.textContent = cell.marker.intensity[1].toFixed(2);
+	cellFood!.textContent = cell.food.quantity.toString();
+	let color = cell.marker.getMixedColor();
+	cellPreview!.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+}
+
 function setupCamera() {
 	window.addEventListener('mousedown', (e) => {
 		clearTimeout(panningTimeout);
@@ -600,10 +622,6 @@ function main(currentTime: number) {
 	for (const ant of ants) {
 		// console.log(ant);
 
-		if (isDebugMode) {
-			ctx.fillStyle = 'red';
-			circle(ctx, target.x, target.y, 4);
-		}
 		// ant.seek(target);
 		if (isRunning) {
 			ant.search(worldGrid, deltaTime);
@@ -618,6 +636,12 @@ function main(currentTime: number) {
 				trackAntCamera(ant.pos.x, ant.pos.y);
 			}
 		}
+	}
+
+	if (isDebugMode) {
+		ctx.fillStyle = 'red';
+		circle(ctx, target.x, target.y, 4);
+		updateCellInfo(target.x, target.y);
 	}
 
 	// if (ant) {
