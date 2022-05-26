@@ -25,7 +25,13 @@ export const MarkerOptions = {
 	SIZE: 16,
 } as const;
 
-export const EVAPORATE_AMOUNT = 0.001;
+export const EVAPORATE_AMOUNT = 0.0005;
+
+// COLONY
+export const ColonyOptions = {
+	COLONY_RADIUS: 50,
+	COLONY_MAX_ANTS: 250,
+};
 
 // ANTS
 export const ANT_AMOUNT = 250;

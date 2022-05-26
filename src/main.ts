@@ -1,4 +1,5 @@
 import Ant from './classes/Ant';
+import Colony from './classes/Colony';
 import Food from './classes/Food';
 import Marker from './classes/Marker';
 import { circle } from './classes/Shapes';
@@ -32,6 +33,9 @@ const canvasMarkers = document.getElementById(
 	'canvas-markers',
 ) as HTMLCanvasElement;
 const canvasFood = document.getElementById('canvas-food') as HTMLCanvasElement;
+const canvasColony = document.getElementById(
+	'canvas-colony',
+) as HTMLCanvasElement;
 const ctx = canvas.getContext('2d');
 const antIcon = document.getElementById('antIcon') as SVGElement | null;
 
@@ -116,6 +120,13 @@ let antGrid = new WorldCanvas(canvas, {
 });
 let ctxAnt = antGrid.create();
 
+let colonyGrid = new WorldCanvas(canvasColony, {
+	width: width,
+	height: height,
+	cellSize: MarkerOptions.SIZE,
+});
+let ctxColony = colonyGrid.create();
+
 let worldGrid = new WorldGrid({
 	width: width / MarkerOptions.SIZE,
 	height: height / MarkerOptions.SIZE,
@@ -126,6 +137,14 @@ let markersImageData = ctxMarkers?.createImageData(
 	worldGrid.width,
 	worldGrid.height,
 );
+
+let colony = new Colony({
+	id: 1,
+	pos: {
+		x: canvas.width / 2,
+		y: canvas.height / 2,
+	},
+});
 
 window.addEventListener('keydown', (e) => {
 	switch (e.code) {
@@ -210,7 +229,8 @@ setupCamera();
 alignCamera();
 
 function setup() {
-	if (ctxMarkers == null || ctxFood == null || ctx == null) return;
+	if (ctxMarkers == null || ctxFood == null || ctx == null || ctxColony == null)
+		return;
 
 	canvas.width = CanvasOptions.WIDTH;
 	canvas.height = CanvasOptions.HEIGHT;
@@ -348,6 +368,8 @@ function setup() {
 
 	console.time('perf');
 	console.log(count);
+
+	colony.drawColony(ctxColony);
 }
 
 function toggleLoop() {
