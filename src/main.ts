@@ -7,6 +7,7 @@ import WorldCanvas, { calcWorldSize } from './classes/WorldCanvas';
 import WorldGrid from './classes/WorldGrid';
 import {
 	AntOptions,
+	AntStates,
 	ANT_AMOUNT,
 	CanvasOptions,
 	FoodOptions,
@@ -50,6 +51,8 @@ const cellFood = document.querySelector<HTMLSpanElement>('[data-food]');
 const cellPreview = document.querySelector<HTMLDivElement>(
 	'[data-cell-preview]',
 );
+
+const pauseIndicator = document.querySelector<HTMLDivElement>('[data-pause]');
 
 let isRunning = false;
 let isDrawingMarkers = true;
@@ -350,6 +353,7 @@ function setup() {
 function toggleLoop() {
 	isRunning = !isRunning;
 
+	pauseIndicator!.style.display = isRunning ? 'none' : 'block';
 	if (isRunning) {
 		console.log('Play');
 		// mainLoopAnimationFrame = window.requestAnimationFrame(main);
@@ -436,7 +440,8 @@ function updateAntInfo() {
 	antVel!.textContent = `${selectedAnt.vel.x.toFixed(
 		2,
 	)} : ${selectedAnt.vel.y.toFixed(2)}`;
-	antState!.textContent = selectedAnt.state.toString();
+	antState!.textContent =
+		selectedAnt.state === AntStates.TO_HOME ? 'To Home' : 'To Food';
 }
 
 function updateCellInfo(x: number, y: number) {
