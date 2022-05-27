@@ -1,4 +1,11 @@
-import { AntOptions, AntStates, MarkerTypes } from '../constants';
+import {
+	AntOptions,
+	AntStates,
+	ColonyOptions,
+	FoodOptions,
+	MarkerTypes,
+} from '../constants';
+import Colony from './Colony';
 import { circle, line } from './Shapes';
 import { random } from './Utils';
 import { createVector, Vector } from './Vector';
@@ -105,6 +112,12 @@ export default class Ant {
 
 	update(dt: number) {
 		this.internalClock += dt;
+		if (
+			this.internalClock >= AntOptions.AUTONOMY_REFILL &&
+			this.state === AntStates.TO_FOOD
+		) {
+			this.state = AntStates.REFILL;
+		}
 
 		this.vel.add(this.acc);
 		this.vel.limit(this.maxSpeed * dt);
@@ -220,7 +233,7 @@ export default class Ant {
 		}
 	}
 
-	search(worldGrid: WorldGrid, dt: number) {
+	search(worldGrid: WorldGrid, colony: Colony, dt: number) {
 		if (this.debug) {
 			this.perceptionDraw = new Set();
 		}
@@ -236,6 +249,7 @@ export default class Ant {
 		if (cell && cell.food.quantity > 0 && this.state === AntStates.TO_FOOD) {
 			this.state = AntStates.TO_HOME;
 			worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y)?.pick();
+			this.vel.setHeading(this.vel.heading() + Math.PI);
 			this.internalClock = 0;
 			return;
 		}
@@ -249,6 +263,7 @@ export default class Ant {
 		let maxIntensity = 0;
 		let maxIntensityPoint: Vector | null = null;
 		let angle = this.vel.heading();
+		let colonyPos = createVector(colony.x, colony.y);
 
 		for (let x = 1; x <= AntOptions.PERCEPTION_POINTS_VERTICAL; x++) {
 			for (let y = 0; y < AntOptions.PERCEPTION_POINTS_HORIZONTAL; y++) {
@@ -268,6 +283,17 @@ export default class Ant {
 				);
 
 				if (cellPerception) {
+					// Check for colony
+					if (
+						perceptionPoint.dist(colonyPos) <= ColonyOptions.COLONY_RADIUS &&
+						(this.state === AntStates.REFILL ||
+							this.state === AntStates.TO_HOME)
+					) {
+						this.seek(perceptionPoint, dt);
+						return;
+					}
+
+					// Check for food
 					if (
 						cellPerception.food.quantity > 0 &&
 						this.state === AntStates.TO_FOOD
@@ -283,8 +309,12 @@ export default class Ant {
 						return;
 					}
 
+					// Check for highest intensity marker
 					let intensity = 0;
-					if (this.state === AntStates.TO_HOME) {
+					if (
+						this.state === AntStates.TO_HOME ||
+						this.state === AntStates.REFILL
+					) {
 						intensity = cellPerception.marker.intensity[0];
 					} else if (this.state === AntStates.TO_FOOD) {
 						intensity = cellPerception.marker.intensity[1];
@@ -308,6 +338,21 @@ export default class Ant {
 		}
 	}
 
+	checkColony(colony: Colony, dt: number) {
+		let colonyPos = createVector(colony.x, colony.y);
+		if (
+			this.pos.dist(colonyPos) <= ColonyOptions.COLONY_RADIUS &&
+			(this.state === AntStates.REFILL || this.state === AntStates.TO_HOME)
+		) {
+			if (this.state === AntStates.TO_HOME) {
+				this.vel.setHeading(this.vel.heading() + Math.PI);
+			}
+			this.state = AntStates.TO_FOOD;
+			colony.addFood(FoodOptions.PICK_AMOUNT);
+			this.internalClock = 0;
+		}
+	}
+
 	addMarker(worldGrid: WorldGrid, dt: number) {
 		this.markerClock += dt;
 		if (this.markerClock >= AntOptions.MARKER_PERIOD) {
@@ -318,14 +363,22 @@ export default class Ant {
 				AntOptions.MARKER_DEFAULT_INTENSITY *
 				Math.exp(-0.05 * this.internalClock);
 
-			worldGrid.addMarker(
-				x,
-				y,
-				this.state === AntStates.TO_FOOD
-					? MarkerTypes.TO_HOME
-					: MarkerTypes.TO_FOOD,
-				intensity,
-			);
+			let state = -1;
+			switch (this.state) {
+				case AntStates.TO_HOME:
+					state = MarkerTypes.TO_FOOD;
+					break;
+				case AntStates.TO_FOOD:
+					state = MarkerTypes.TO_HOME;
+					break;
+				case AntStates.REFILL:
+					state = MarkerTypes.TO_HOME;
+					break;
+				default:
+					break;
+			}
+
+			worldGrid.addMarker(x, y, state, intensity);
 			this.markerClock = 0;
 		}
 	}

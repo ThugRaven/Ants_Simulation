@@ -462,8 +462,21 @@ function updateAntInfo() {
 	antVel!.textContent = `${selectedAnt.vel.x.toFixed(
 		2,
 	)} : ${selectedAnt.vel.y.toFixed(2)}`;
-	antState!.textContent =
-		selectedAnt.state === AntStates.TO_HOME ? 'To Home' : 'To Food';
+	let state = '';
+	switch (selectedAnt.state) {
+		case AntStates.TO_HOME:
+			state = 'To Home';
+			break;
+		case AntStates.TO_FOOD:
+			state = 'To Food';
+			break;
+		case AntStates.REFILL:
+			state = 'Refill';
+			break;
+		default:
+			break;
+	}
+	antState!.textContent = state;
 }
 
 function updateCellInfo(x: number, y: number) {
@@ -651,9 +664,10 @@ function main(currentTime: number) {
 
 		// ant.seek(target);
 		if (isRunning) {
-			ant.search(worldGrid, deltaTime);
+			ant.search(worldGrid, colony, deltaTime);
 			ant.update(deltaTime);
 			ant.addMarker(worldGrid, deltaTime);
+			ant.checkColony(colony, deltaTime);
 		}
 		ant.draw();
 

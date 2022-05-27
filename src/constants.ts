@@ -1,8 +1,8 @@
 // CANVAS
 
 export const CanvasOptions = {
-	WIDTH: 1600 * 2,
-	HEIGHT: 1200 * 2,
+	WIDTH: 1600 * 4,
+	HEIGHT: 1200 * 4,
 } as const;
 
 // MARKERS
@@ -39,6 +39,7 @@ export const ANT_AMOUNT = 250;
 export enum AntStates {
 	TO_HOME = 0,
 	TO_FOOD = 1,
+	REFILL = 3,
 }
 
 export const AntOptions = {
@@ -46,11 +47,11 @@ export const AntOptions = {
 	IMG_WIDTH: 24,
 	IMG_HEIGHT: 34,
 	// Wander options
-	WANDER_DISPLACE_RANGE: 0.3,
+	WANDER_DISPLACE_RANGE: 0.5,
 	WANDER_POINT_MAGNITUDE: 100,
 	WANDER_POINT_RADIUS: 50,
 	// Perception options
-	PERCEPTION_RADIUS: 80,
+	PERCEPTION_RADIUS: 150,
 	PERCEPTION_START_ANGLE: (7 / 6) * Math.PI,
 	PERCEPTION_END_ANGLE: (11 / 6) * Math.PI,
 	// PERCEPTION_START_ANGLE: Math.PI,
@@ -61,6 +62,9 @@ export const AntOptions = {
 	// Marker
 	MARKER_PERIOD: 0.15,
 	MARKER_DEFAULT_INTENSITY: 1,
+	// Other
+	AUTONOMY_MAX: 300,
+	AUTONOMY_REFILL: 100,
 } as const;
 
 export const FoodOptions = {
