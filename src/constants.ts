@@ -30,7 +30,10 @@ export const EVAPORATE_AMOUNT = 0.0005;
 // COLONY
 export const ColonyOptions = {
 	COLONY_RADIUS: 50,
+	COLONY_STARTING_ANTS: 25,
 	COLONY_MAX_ANTS: 250,
+	ANT_CREATION_PERIOD: 0.15,
+	ANT_COST: 5,
 };
 
 // ANTS
@@ -67,6 +70,7 @@ export const AntOptions = {
 	AUTONOMY_REFILL: 100,
 } as const;
 
+// FOOD
 export const FoodOptions = {
 	SIZE: 16,
 	PICK_AMOUNT: 1,

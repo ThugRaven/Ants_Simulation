@@ -1,7 +1,8 @@
-import { ColonyOptions } from '../constants';
+import { AntOptions, ColonyOptions } from '../constants';
 import Ant from './Ant';
 import { circle } from './Shapes';
-import { random, randomInt } from './Utils';
+import { Vector } from './Vector';
+import WorldGrid from './WorldGrid';
 
 interface ColonyOptions {
 	id: number;
@@ -16,11 +17,18 @@ export default class Colony {
 	id: number;
 	x: number;
 	y: number;
+	startingAntsCount: number;
 	maxAntsCount: number;
 	ants: Ant[];
 	antColor: number[];
 	antIcon: HTMLImageElement | null;
 	antId: number;
+	isRunning: boolean;
+	isDrawingAnts: boolean;
+	isDebugMode: boolean;
+	colonyClock: number;
+	antCtx: CanvasRenderingContext2D | null;
+	selectedAnt: Ant | null;
 
 	food: number;
 	maxFood: number;
@@ -29,32 +37,144 @@ export default class Colony {
 		this.id = colonyOptions.id;
 		this.x = colonyOptions.pos.x;
 		this.y = colonyOptions.pos.y;
+		this.startingAntsCount = ColonyOptions.COLONY_STARTING_ANTS;
 		this.maxAntsCount = ColonyOptions.COLONY_MAX_ANTS;
 		this.ants = [];
 		this.antColor = colonyOptions.antColor || [255, 255, 255];
 		this.antIcon = null;
 		this.antId = 0;
+		this.isRunning = false;
+		this.isDrawingAnts = true;
+		this.isDebugMode = false;
+		this.colonyClock = 0;
+		this.antCtx = null;
+		this.selectedAnt = null;
 
 		this.food = 0;
 		this.maxFood = 200;
 	}
 
-	initialize(
-		ctx: CanvasRenderingContext2D,
-		width: number,
-		height: number,
-		antIcon: HTMLImageElement,
-	) {
-		for (let i = 0; i < this.maxAntsCount; i++) {
-			let ant = new Ant(ctx, antIcon, {
+	initialize(antIcon: HTMLImageElement, antCtx: CanvasRenderingContext2D) {
+		this.antIcon = antIcon;
+		this.antCtx = antCtx;
+
+		for (let i = 0; i < this.startingAntsCount; i++) {
+			let ant = new Ant(this.antCtx, antIcon, {
 				id: this.antId + 1,
 				pos: {
-					x: randomInt(0, width),
-					y: random(0, height),
+					x: this.x,
+					y: this.y,
 				},
 			});
 			this.ants.push(ant);
 			this.antId++;
+		}
+	}
+
+	updateAndDrawAnts(
+		worldGrid: WorldGrid,
+		selectedId: number | undefined,
+		dt: number,
+	) {
+		let selectedAnt = null;
+		let removeAnt = false;
+		for (let i = 0; i < this.ants.length; i++) {
+			if (this.isRunning) {
+				// Update ants
+				this.ants[i].search(worldGrid, this, dt);
+				this.ants[i].update(dt);
+				this.ants[i].addMarker(worldGrid, dt);
+				this.ants[i].checkColony(this);
+
+				// Mark ant for deletion
+				if (this.ants[i].isDead) {
+					removeAnt = true;
+				}
+			}
+
+			// Draw ants
+			if (this.isDrawingAnts) {
+				this.ants[i].draw();
+			}
+
+			// Get selected ant
+			if (selectedId && this.ants[i].id === selectedId) {
+				selectedAnt = this.ants[i];
+			}
+
+			// Remove ant
+			if (removeAnt) {
+				console.log('Removed ant: ', this.ants[i]);
+				this.ants.splice(i, 1);
+				removeAnt = false;
+			}
+		}
+		return selectedAnt;
+	}
+
+	updateColony(dt: number) {
+		this.colonyClock += dt;
+		if (
+			this.colonyClock >= ColonyOptions.ANT_CREATION_PERIOD &&
+			this.useFood(ColonyOptions.ANT_COST)
+		) {
+			this.createAnt();
+			this.colonyClock = 0;
+		}
+	}
+
+	createAnt() {
+		if (this.ants.length < this.maxAntsCount && this.antIcon && this.antCtx) {
+			let ant = new Ant(this.antCtx, this.antIcon, {
+				id: this.antId + 1,
+				pos: {
+					x: this.x,
+					y: this.y,
+				},
+			});
+			this.ants.push(ant);
+			this.antId++;
+
+			if (this.isDebugMode) {
+				console.log('Created ant: ', ant);
+			}
+		} else {
+			if (this.isDebugMode) {
+				console.log("Can't create new ant - max count reached");
+			}
+		}
+	}
+
+	selectAnt(mouseVector: Vector) {
+		if (this.ants.length <= 0) return null;
+
+		let newAnt = this.selectedAnt;
+		let minDist = Infinity;
+		let radius = AntOptions.IMG_HEIGHT / 2;
+
+		// Get ant in mouse radius
+		for (const ant of this.ants) {
+			let dist = ant.pos.dist(mouseVector);
+			if (dist < minDist && dist < radius) {
+				minDist = dist;
+				newAnt = ant;
+			}
+		}
+
+		console.log(newAnt);
+		this.selectedAnt = newAnt;
+		return newAnt;
+	}
+
+	toggleAntDebug() {
+		if (this.ants.length > 0 && this.selectedAnt) {
+			for (const ant of this.ants) {
+				if (ant.id === this.selectedAnt.id) {
+					ant.debug = this.isDebugMode;
+				} else {
+					ant.debug = false;
+				}
+			}
 		}
 	}
 
@@ -70,6 +190,8 @@ export default class Colony {
 	useFood(quantity: number) {
 		if (this.food >= quantity) {
 			this.food -= quantity;
+			return true;
 		}
+		return false;
 	}
 }

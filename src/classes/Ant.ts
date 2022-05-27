@@ -35,6 +35,7 @@ export default class Ant {
 	perceptionDraw: Set<number>;
 	internalClock: number;
 	markerClock: number;
+	isDead: boolean;
 
 	constructor(
 		ctx: CanvasRenderingContext2D,
@@ -55,6 +56,7 @@ export default class Ant {
 		this.perceptionDraw = new Set();
 		this.internalClock = 0;
 		this.markerClock = random(0, AntOptions.MARKER_PERIOD);
+		this.isDead = false;
 	}
 
 	seek(target: Vector, dt: number) {
@@ -117,6 +119,10 @@ export default class Ant {
 			this.state === AntStates.TO_FOOD
 		) {
 			this.state = AntStates.REFILL;
+		}
+
+		if (this.internalClock >= AntOptions.AUTONOMY_MAX) {
+			this.isDead = true;
 		}
 
 		this.vel.add(this.acc);
@@ -338,7 +344,7 @@ export default class Ant {
 		}
 	}
 
-	checkColony(colony: Colony, dt: number) {
+	checkColony(colony: Colony) {
 		let colonyPos = createVector(colony.x, colony.y);
 		if (
 			this.pos.dist(colonyPos) <= ColonyOptions.COLONY_RADIUS &&

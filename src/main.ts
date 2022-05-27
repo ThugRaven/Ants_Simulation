@@ -184,7 +184,7 @@ canvasContainer.addEventListener('click', (e) => {
 	console.log('click');
 	console.log(e);
 
-	selectedAnt = selectAnt();
+	selectAnt();
 	if (isDebugMode) {
 		toggleAntDebug();
 	}
@@ -352,17 +352,20 @@ function setup() {
 			// 		// y: canvas.height / 2,
 			// 	},
 			// });
-			for (let i = 0; i < ANT_AMOUNT; i++) {
-				ant = new Ant(ctx, ant4, {
-					id: i + 1,
-					pos: {
-						x: Math.floor(Math.random() * canvas.width),
-						y: Math.floor(Math.random() * canvas.height),
-					},
-				});
-				ant.draw();
-				ants.push(ant);
-			}
+
+			// for (let i = 0; i < ANT_AMOUNT; i++) {
+			// 	ant = new Ant(ctx, ant4, {
+			// 		id: i + 1,
+			// 		pos: {
+			// 			x: Math.floor(Math.random() * canvas.width),
+			// 			y: Math.floor(Math.random() * canvas.height),
+			// 		},
+			// 	});
+			// 	ant.draw();
+			// 	ants.push(ant);
+			// }
+
+			colony.initialize(ant4, ctx);
 		};
 	}
 
@@ -374,6 +377,8 @@ function setup() {
 
 function toggleLoop() {
 	isRunning = !isRunning;
+
+	colony.isRunning = isRunning;
 
 	pauseIndicator!.style.display = isRunning ? 'none' : 'block';
 	if (isRunning) {
@@ -394,19 +399,22 @@ function toggleMarkers() {
 function toggleDebug() {
 	isDebugMode = !isDebugMode;
 
+	colony.isDebugMode = isDebugMode;
 	toggleAntDebug();
 }
 
 function toggleAntDebug() {
-	if (ants.length > 0 && selectedAnt) {
-		for (const ant of ants) {
-			if (ant.id === selectedAnt.id) {
-				ant.debug = isDebugMode;
-			} else {
-				ant.debug = false;
-			}
-		}
-	}
+	colony.toggleAntDebug();
+
+	// if (ants.length > 0 && selectedAnt) {
+	// 	for (const ant of ants) {
+	// 		if (ant.id === selectedAnt.id) {
+	// 			ant.debug = isDebugMode;
+	// 		} else {
+	// 			ant.debug = false;
+	// 		}
+	// 	}
+	// }
 }
 
 function toggleTrack() {
@@ -430,29 +438,32 @@ function togglePanMode() {
 }
 
 function selectAnt() {
-	if (ants.length <= 0) return null;
+	// if (ants.length <= 0) return null;
 
-	let newAnt = selectedAnt;
-	let minDist = Infinity;
+	// let newAnt = selectedAnt;
+	// let minDist = Infinity;
 	let mouseVector = createVector(
 		mouseX / canvasScale - cameraOffset.x,
 		mouseY / canvasScale - cameraOffset.y,
 	);
-	let radius = AntOptions.IMG_HEIGHT / 2;
+	// let radius = AntOptions.IMG_HEIGHT / 2;
 
-	for (const ant of ants) {
-		let dist = ant.pos.dist(mouseVector);
-		if (dist < minDist && dist < radius) {
-			minDist = dist;
-			newAnt = ant;
-		}
-	}
+	// for (const ant of ants) {
+	// 	let dist = ant.pos.dist(mouseVector);
+	// 	if (dist < minDist && dist < radius) {
+	// 		minDist = dist;
+	// 		newAnt = ant;
+	// 	}
+	// }
 
-	console.log(newAnt);
-	return newAnt;
+	// console.log(newAnt);
+	// return newAnt;
+
+	colony.selectAnt(mouseVector);
 }
 
 function updateAntInfo() {
+	let selectedAnt = colony.selectedAnt;
 	if (!selectedAnt) return;
 
 	antId!.textContent = selectedAnt.id.toString();
@@ -601,7 +612,7 @@ function main(currentTime: number) {
 	// if (deltaTime < 1 / 25) {
 	// 	return;
 	// }
-	console.log('update');
+	// console.log('update');
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	ctxMarkers.clearRect(0, 0, canvas.width, canvas.height);
 	ctxFood.clearRect(0, 0, canvas.width, canvas.height);
@@ -615,9 +626,9 @@ function main(currentTime: number) {
 	// 	}
 	// }
 
-	if (isDebugMode) {
-		console.time('Time to draw markers');
-	}
+	// if (isDebugMode) {
+	// 	console.time('Time to draw markers');
+	// }
 
 	// worldGrid.update();
 	if (isDrawingMarkers && markersImageData) {
@@ -648,9 +659,9 @@ function main(currentTime: number) {
 	// 		markers[i].update();
 	// 	}
 	// }
-	if (isDebugMode) {
-		console.timeEnd('Time to draw markers');
-	}
+	// if (isDebugMode) {
+	// 	console.timeEnd('Time to draw markers');
+	// }
 
 	let target = createVector(
 		// (mouseX - cameraOffset.x * canvasScale) / canvasScale,
@@ -659,24 +670,31 @@ function main(currentTime: number) {
 		mouseY / canvasScale - cameraOffset.y,
 	);
 
-	for (const ant of ants) {
-		// console.log(ant);
+	// for (const ant of ants) {
+	// 	// console.log(ant);
 
-		// ant.seek(target);
-		if (isRunning) {
-			ant.search(worldGrid, colony, deltaTime);
-			ant.update(deltaTime);
-			ant.addMarker(worldGrid, deltaTime);
-			ant.checkColony(colony, deltaTime);
-		}
-		ant.draw();
+	// 	// ant.seek(target);
+	// 	if (isRunning) {
+	// 		ant.search(worldGrid, colony, deltaTime);
+	// 		ant.update(deltaTime);
+	// 		ant.addMarker(worldGrid, deltaTime);
+	// 		ant.checkColony(colony, deltaTime);
+	// 	}
+	// 	ant.draw();
 
-		if (ant.id === selectedAnt?.id) {
-			updateAntInfo();
-			if (isTracking) {
-				trackAntCamera(ant.pos.x, ant.pos.y);
-			}
-		}
+	// 	if (ant.id === selectedAnt?.id) {
+	// 		updateAntInfo();
+	// 		if (isTracking) {
+	// 			trackAntCamera(ant.pos.x, ant.pos.y);
+	// 		}
+	// 	}
+	// }
+
+	colony.updateColony(deltaTime);
+	colony.updateAndDrawAnts(worldGrid, selectedAnt?.id, deltaTime);
+	updateAntInfo();
+	if (isTracking && colony.selectedAnt) {
+		trackAntCamera(colony.selectedAnt.pos.x, colony.selectedAnt.pos.y);
 	}
 
 	if (isDebugMode) {
