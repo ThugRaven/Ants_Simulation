@@ -10,7 +10,7 @@ interface ColonyOptions {
 		x: number;
 		y: number;
 	};
-	antColor?: number[];
+	colonyColor?: number[];
 }
 
 export default class Colony {
@@ -20,7 +20,8 @@ export default class Colony {
 	startingAntsCount: number;
 	maxAntsCount: number;
 	ants: Ant[];
-	antColor: number[];
+	totalAnts: number;
+	colonyColor: number[];
 	antIcon: HTMLImageElement | null;
 	antId: number;
 	isRunning: boolean;
@@ -31,6 +32,7 @@ export default class Colony {
 	selectedAnt: Ant | null;
 
 	food: number;
+	totalFood: number;
 	maxFood: number;
 
 	constructor(colonyOptions: ColonyOptions) {
@@ -40,7 +42,8 @@ export default class Colony {
 		this.startingAntsCount = ColonyOptions.COLONY_STARTING_ANTS;
 		this.maxAntsCount = ColonyOptions.COLONY_MAX_ANTS;
 		this.ants = [];
-		this.antColor = colonyOptions.antColor || [255, 255, 255];
+		this.totalAnts = 0;
+		this.colonyColor = colonyOptions.colonyColor || [255, 255, 255];
 		this.antIcon = null;
 		this.antId = 0;
 		this.isRunning = false;
@@ -51,7 +54,8 @@ export default class Colony {
 		this.selectedAnt = null;
 
 		this.food = 0;
-		this.maxFood = 200;
+		this.totalFood = 0;
+		this.maxFood = ColonyOptions.COLONY_MAX_FOOD;
 	}
 
 	initialize(antIcon: HTMLImageElement, antCtx: CanvasRenderingContext2D) {
@@ -68,6 +72,7 @@ export default class Colony {
 			});
 			this.ants.push(ant);
 			this.antId++;
+			this.totalAnts++;
 		}
 	}
 
@@ -113,9 +118,12 @@ export default class Colony {
 	}
 
 	updateColony(dt: number) {
+		if (!this.isRunning) return;
+
 		this.colonyClock += dt;
 		if (
 			this.colonyClock >= ColonyOptions.ANT_CREATION_PERIOD &&
+			this.ants.length < this.maxAntsCount &&
 			this.useFood(ColonyOptions.ANT_COST)
 		) {
 			this.createAnt();
@@ -134,6 +142,7 @@ export default class Colony {
 			});
 			this.ants.push(ant);
 			this.antId++;
+			this.totalAnts++;
 
 			if (this.isDebugMode) {
 				console.log('Created ant: ', ant);
@@ -148,7 +157,7 @@ export default class Colony {
 	selectAnt(mouseVector: Vector) {
 		if (this.ants.length <= 0) return null;
 
-		let newAnt = this.selectedAnt;
+		let newAnt = null;
 		let minDist = Infinity;
 		let radius = AntOptions.IMG_HEIGHT / 2;
 
@@ -167,9 +176,9 @@ export default class Colony {
 	}
 
 	toggleAntDebug() {
-		if (this.ants.length > 0 && this.selectedAnt) {
+		if (this.ants.length > 0) {
 			for (const ant of this.ants) {
-				if (ant.id === this.selectedAnt.id) {
+				if (this.selectedAnt && ant.id === this.selectedAnt.id) {
 					ant.debug = this.isDebugMode;
 				} else {
 					ant.debug = false;
@@ -179,12 +188,13 @@ export default class Colony {
 	}
 
 	drawColony(ctx: CanvasRenderingContext2D) {
-		ctx.fillStyle = `rgb(${this.antColor[0]}, ${this.antColor[1]}, ${this.antColor[2]})`;
+		ctx.fillStyle = `rgb(${this.colonyColor[0]}, ${this.colonyColor[1]}, ${this.colonyColor[2]})`;
 		circle(ctx, this.x, this.y, ColonyOptions.COLONY_RADIUS);
 	}
 
 	addFood(quantity: number) {
 		this.food = Math.min(this.food + quantity, this.maxFood);
+		this.totalFood++;
 	}
 
 	useFood(quantity: number) {

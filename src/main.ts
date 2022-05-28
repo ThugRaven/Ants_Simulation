@@ -7,9 +7,7 @@ import { createVector } from './classes/Vector';
 import WorldCanvas, { calcWorldSize } from './classes/WorldCanvas';
 import WorldGrid from './classes/WorldGrid';
 import {
-	AntOptions,
 	AntStates,
-	ANT_AMOUNT,
 	CanvasOptions,
 	FoodOptions,
 	MarkerOptions,
@@ -20,7 +18,7 @@ import './style.css';
 
 const canvasContainer = document.getElementById(
 	'canvas-container',
-) as HTMLElement;
+) as HTMLDivElement;
 const cameraContainer = document.getElementById(
 	'camera-container',
 ) as HTMLDivElement;
@@ -39,22 +37,32 @@ const canvasColony = document.getElementById(
 const ctx = canvas.getContext('2d');
 const antIcon = document.getElementById('antIcon') as SVGElement | null;
 
+const antPanel = document.getElementById('antPanel') as HTMLDivElement;
 const antId = document.querySelector<HTMLSpanElement>('[data-id]');
 const antPos = document.querySelector<HTMLSpanElement>('[data-pos]');
 const antVel = document.querySelector<HTMLSpanElement>('[data-vel]');
 const antState = document.querySelector<HTMLSpanElement>('[data-state]');
 const btnTrack = document.getElementById('btn-track') as HTMLButtonElement;
 
+const cellPanel = document.getElementById('cellPanel') as HTMLDivElement;
+const cellPreview = document.querySelector<HTMLDivElement>(
+	'[data-cell-preview]',
+);
 const markerIntensityHome = document.querySelector<HTMLSpanElement>(
 	'[data-intensity-home]',
 );
 const markerIntensityFood = document.querySelector<HTMLSpanElement>(
 	'[data-intensity-food]',
 );
-const cellFood = document.querySelector<HTMLSpanElement>('[data-food]');
-const cellPreview = document.querySelector<HTMLDivElement>(
-	'[data-cell-preview]',
+const cellFood = document.querySelector<HTMLSpanElement>('[data-cell-food]');
+
+const colonyPreview = document.querySelector<HTMLDivElement>(
+	'[data-colony-preview]',
 );
+const colonyPopulation =
+	document.querySelector<HTMLSpanElement>('[data-colony-pop]');
+const colonyFood =
+	document.querySelector<HTMLSpanElement>('[data-colony-food]');
 
 const pauseIndicator = document.querySelector<HTMLDivElement>('[data-pause]');
 
@@ -75,6 +83,7 @@ let mainLoopAnimationFrame = -1;
 let ant: Ant | null = null;
 let selectedAnt: Ant | null = null;
 
+let offsetY = canvasContainer.getBoundingClientRect().top;
 let mouseX = 0;
 let mouseY = 0;
 let canvasScale = 1;
@@ -165,14 +174,16 @@ window.addEventListener('keydown', (e) => {
 			break;
 		case 'KeyF':
 			toggleFoodMode();
+		case 'KeyA':
+			toggleAnts();
 		default:
 			break;
 	}
 });
 
-window.addEventListener('mousemove', (e) => {
+canvasContainer.addEventListener('mousemove', (e) => {
 	mouseX = e.pageX;
-	mouseY = e.pageY;
+	mouseY = e.pageY - offsetY;
 });
 
 canvasContainer.addEventListener('click', (e) => {
@@ -206,7 +217,9 @@ canvasContainer.addEventListener('contextmenu', (e) => {
 	worldGrid.addFood(target.x, target.y, 10);
 });
 
-window.addEventListener('wheel', (e) => {
+canvasContainer.addEventListener('wheel', (e) => {
+	console.log(e);
+
 	zoomCanvas(e);
 });
 
@@ -401,6 +414,11 @@ function toggleDebug() {
 
 	colony.isDebugMode = isDebugMode;
 	toggleAntDebug();
+	if (isDebugMode) {
+		cellPanel.style.display = 'block';
+	} else {
+		cellPanel.style.display = 'none';
+	}
 }
 
 function toggleAntDebug() {
@@ -437,6 +455,10 @@ function togglePanMode() {
 	btnPan.classList.toggle('bg-neutral-600');
 }
 
+function toggleAnts() {
+	colony.isDrawingAnts = !colony.isDrawingAnts;
+}
+
 function selectAnt() {
 	// if (ants.length <= 0) return null;
 
@@ -460,6 +482,11 @@ function selectAnt() {
 	// return newAnt;
 
 	colony.selectAnt(mouseVector);
+	if (colony.selectedAnt) {
+		antPanel.style.display = 'block';
+	} else {
+		antPanel.style.display = 'none';
+	}
 }
 
 function updateAntInfo() {
@@ -501,8 +528,17 @@ function updateCellInfo(x: number, y: number) {
 	cellPreview!.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
 }
 
+function updateColonyInfo() {
+	if (!colony) return;
+
+	colonyPopulation!.textContent = `${colony.ants.length} | ${colony.totalAnts}`;
+	colonyFood!.textContent = `${colony.food} | ${colony.totalFood}`;
+	let color = colony.colonyColor;
+	colonyPreview!.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+}
+
 function setupCamera() {
-	window.addEventListener('mousedown', (e) => {
+	canvasContainer.addEventListener('mousedown', (e) => {
 		clearTimeout(panningTimeout);
 		if (e.buttons == RIGHT_BUTTON) return;
 
@@ -514,7 +550,7 @@ function setupCamera() {
 			document.body.classList.add('cursor-grabbing');
 
 			panStart.x = e.clientX / canvasScale - cameraOffset.x;
-			panStart.y = e.clientY / canvasScale - cameraOffset.y;
+			panStart.y = (e.clientY - offsetY) / canvasScale - cameraOffset.y;
 		} else {
 			// Start panning with every other button except right one after set timeout
 			isPanning = false;
@@ -525,18 +561,18 @@ function setupCamera() {
 				document.body.classList.add('cursor-grabbing');
 
 				panStart.x = e.clientX / canvasScale - cameraOffset.x;
-				panStart.y = e.clientY / canvasScale - cameraOffset.y;
+				panStart.y = (e.clientY - offsetY) / canvasScale - cameraOffset.y;
 			}, 100);
 		}
 	});
 
-	window.addEventListener('mousemove', (e) => {
+	canvasContainer.addEventListener('mousemove', (e) => {
 		if (!isPanning || e.buttons == RIGHT_BUTTON) return;
 
 		panCanvas(e);
 	});
 
-	window.addEventListener('mouseup', () => {
+	canvasContainer.addEventListener('mouseup', () => {
 		console.log('mouse up');
 
 		clearTimeout(panningTimeout);
@@ -555,20 +591,20 @@ function zoomCanvas(event: WheelEvent) {
 	};
 
 	zoomOffset.x = event.clientX / canvasScale - cameraOffset.x;
-	zoomOffset.y = event.clientY / canvasScale - cameraOffset.y;
+	zoomOffset.y = (event.clientY - offsetY) / canvasScale - cameraOffset.y;
 
 	canvasScale *= 0.999 ** event.deltaY;
 	canvasScale = Math.min(Math.max(0.25, canvasScale), 16);
 
 	cameraOffset.x = event.clientX / canvasScale - zoomOffset.x;
-	cameraOffset.y = event.clientY / canvasScale - zoomOffset.y;
+	cameraOffset.y = (event.clientY - offsetY) / canvasScale - zoomOffset.y;
 
 	setCamera();
 }
 
 function panCanvas(event: MouseEvent) {
 	cameraOffset.x = event.clientX / canvasScale - panStart.x;
-	cameraOffset.y = event.clientY / canvasScale - panStart.y;
+	cameraOffset.y = (event.clientY - offsetY) / canvasScale - panStart.y;
 
 	setCamera();
 }
@@ -608,6 +644,8 @@ function main(currentTime: number) {
 	mainLoopAnimationFrame = window.requestAnimationFrame(main);
 
 	const deltaTime = (currentTime - lastUpdateTime) / 1000;
+
+	console.time('Frame time: ');
 
 	// if (deltaTime < 1 / 25) {
 	// 	return;
@@ -703,6 +741,8 @@ function main(currentTime: number) {
 		updateCellInfo(target.x, target.y);
 	}
 
+	updateColonyInfo();
+
 	// if (ant) {
 	// 	let target = createVector(mouseX, mouseY);
 	// 	if (isDebugMode) {
@@ -713,6 +753,8 @@ function main(currentTime: number) {
 	// 	ant.update();
 	// 	ant.draw();
 	// }
+
+	console.timeEnd('Frame time: ');
 
 	frames++;
 	if (frames == 100) {

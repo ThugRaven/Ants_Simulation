@@ -32,12 +32,10 @@ export const ColonyOptions = {
 	COLONY_RADIUS: 50,
 	COLONY_STARTING_ANTS: 25,
 	COLONY_MAX_ANTS: 250,
+	COLONY_MAX_FOOD: 1250,
 	ANT_CREATION_PERIOD: 0.15,
 	ANT_COST: 5,
 };
-
-// ANTS
-export const ANT_AMOUNT = 250;
 
 export enum AntStates {
 	TO_HOME = 0,

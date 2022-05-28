@@ -12,32 +12,55 @@
 		/>
 		<title>Ants Simulation</title>
 	</head>
-	<body class="bg-black h-screen overflow-hidden">
-		<main id="canvas-container">
-			<div id="camera-container" class="origin-top-left">
-				<!--  outline outline-white outline-1 -->
-				<canvas id="canvas-markers" class="origin-top-left"></canvas>
-				<canvas
-					id="canvas-food"
-					class="origin-top-left absolute inset-0"
-				></canvas>
-				<canvas
-					id="canvas"
-					class="outline outline-white outline-1 absolute inset-0"
-				></canvas>
-				<canvas
-					id="canvas-colony"
-					class="outline outline-white outline-1 absolute inset-0"
-				></canvas>
-			</div>
-		</main>
-		<aside
-			class="fixed top-2 right-2 text-white flex flex-col items-center justify-center gap-2"
-		>
-			<div class="bg-neutral-800 rounded-lg p-4 w-full">
-				<h2 class="text-4xl font-bold text-center">Ant preview</h2>
-				<div
-					class="bg-neutral-700 w-full flex items-center justify-center rounded-lg my-2"
+	<body class="bg-black h-screen overflow-hidden flex flex-col">
+		<header>
+			<div class="bg-neutral-800 w-full flex justify-end gap-2 p-2">
+				<button
+					id="btn-fullscreen"
+					class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 p-3 rounded-lg shadow-md"
+					title="Colony panel"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						height="24px"
+						viewBox="0 0 24 24"
+						width="24px"
+						fill="#000000"
+						class="w-8 h-8 fill-white"
+					>
+						<path d="M0 0h24v24H0z" fill="none" />
+						<path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+					</svg>
+				</button>
+				<button
+					id="btn-fullscreen"
+					class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 p-3 rounded-lg shadow-md"
+					title="Cell panel"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						enable-background="new 0 0 24 24"
+						height="24px"
+						viewBox="0 0 24 24"
+						width="24px"
+						fill="#000000"
+						class="w-8 h-8 fill-white"
+					>
+						<g><rect fill="none" height="24" width="24" /></g>
+						<g>
+							<g>
+								<rect height="8" width="8" x="3" y="3" />
+								<rect height="8" width="8" x="3" y="13" />
+								<rect height="8" width="8" x="13" y="3" />
+								<rect height="8" width="8" x="13" y="13" />
+							</g>
+						</g>
+					</svg>
+				</button>
+				<button
+					id="btn-fullscreen"
+					class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 p-3 rounded-lg shadow-md"
+					title="Ant panel"
 				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
@@ -47,7 +70,7 @@
 						width="24"
 						fill="#FFFFFF"
 						id="antIcon"
-						class="m-2 rotate-90 w-1/4 h-full"
+						class="w-8 h-8 fill-white"
 					>
 						<g transform="translate(-88.87054,-162.53213)">
 							<path
@@ -55,85 +78,171 @@
 							/>
 						</g>
 					</svg>
-				</div>
-				<input type="color" class="w-full m-0 bg-neutral-800 cursor-pointer" />
-				<h3 class="text-2xl mt-2">Selected ant</h3>
-				<ul
-					class="flex flex-col items-center justify-center w-full gap-2 list-none my-2"
-				>
-					<li
-						class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
-					>
-						<span class="text-lg font-bold">ID</span>
-						<span class="text-neutral-100" data-id>-</span>
-					</li>
-					<li
-						class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
-					>
-						<span class="text-lg font-bold">Position</span>
-						<span class="text-neutral-100" data-pos>- : -</span>
-					</li>
-					<li
-						class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
-					>
-						<span class="text-lg font-bold">Velocity</span>
-						<span class="text-neutral-100" data-vel>- : -</span>
-					</li>
-					<li
-						class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
-					>
-						<span class="text-lg font-bold">State</span>
-						<span class="text-neutral-100" data-state>-</span>
-					</li>
-				</ul>
-				<div class="flex w-full items-center justify-evenly">
-					<button
-						class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 px-4 py-2 rounded-lg shadow-md"
-					>
-						Zoom
-					</button>
-					<button
-						id="btn-track"
-						class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 px-4 py-2 rounded-lg border-2 border-red-500 shadow-md"
-					>
-						Track
-					</button>
-				</div>
+				</button>
 			</div>
-			<div class="bg-neutral-800 rounded-lg p-4 w-full">
-				<h2 class="text-4xl font-bold text-center">Cell</h2>
-				<div
-					class="bg-neutral-700 w-full flex items-center justify-center rounded-lg my-2"
-				>
+		</header>
+		<main class="h-full overflow-hidden relative">
+			<div
+				class="absolute inset-0 flex items-start justify-end gap-2 p-2 z-10 pointer-events-none text-white"
+			>
+				<div class="bg-neutral-800 rounded-lg p-4 pointer-events-auto">
+					<h2 class="text-4xl font-bold text-center">Colony</h2>
 					<div
-						class="m-2 w-1/4 h-full aspect-square bg-black"
-						data-cell-preview
-					></div>
+						class="bg-neutral-700 w-full flex items-center justify-center rounded-lg my-2"
+					>
+						<div
+							class="m-2 w-1/4 h-full aspect-square rounded-full bg-black"
+							data-colony-preview
+						></div>
+					</div>
+					<ul
+						class="flex flex-col items-center justify-center w-full gap-2 list-none my-2"
+					>
+						<li
+							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						>
+							<span class="text-lg font-bold">Population</span>
+							<span class="text-neutral-100" data-colony-pop>- | -</span>
+						</li>
+						<li
+							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						>
+							<span class="text-lg font-bold">Food</span>
+							<span class="text-neutral-100" data-colony-food>- | -</span>
+						</li>
+					</ul>
 				</div>
-				<ul
-					class="flex flex-col items-center justify-center w-full gap-2 list-none my-2"
+				<div
+					id="cellPanel"
+					class="bg-neutral-800 rounded-lg p-4 pointer-events-auto"
 				>
-					<li
-						class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+					<h2 class="text-4xl font-bold text-center">Cell</h2>
+					<div
+						class="bg-neutral-700 w-full flex items-center justify-center rounded-lg my-2"
 					>
-						<span class="text-lg font-bold">Intensity - To Home</span>
-						<span class="text-neutral-100" data-intensity-home>-</span>
-					</li>
-					<li
-						class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						<div
+							class="m-2 w-1/4 h-full aspect-square bg-black"
+							data-cell-preview
+						></div>
+					</div>
+					<ul
+						class="flex flex-col items-center justify-center w-full gap-2 list-none my-2"
 					>
-						<span class="text-lg font-bold">Intensity - To Food</span>
-						<span class="text-neutral-100" data-intensity-food>-</span>
-					</li>
-					<li
-						class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						<li
+							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						>
+							<span class="text-lg font-bold">Intensity - To Home</span>
+							<span class="text-neutral-100" data-intensity-home>-</span>
+						</li>
+						<li
+							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						>
+							<span class="text-lg font-bold">Intensity - To Food</span>
+							<span class="text-neutral-100" data-intensity-food>-</span>
+						</li>
+						<li
+							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						>
+							<span class="text-lg font-bold">Food Quantity</span>
+							<span class="text-neutral-100" data-cell-food>-</span>
+						</li>
+					</ul>
+				</div>
+				<div
+					id="antPanel"
+					class="bg-neutral-800 rounded-lg p-4 pointer-events-auto"
+				>
+					<h2 class="text-4xl font-bold text-center">Ant preview</h2>
+					<div
+						class="bg-neutral-700 w-full flex items-center justify-center rounded-lg my-2"
 					>
-						<span class="text-lg font-bold">Food Quantity</span>
-						<span class="text-neutral-100" data-food>-</span>
-					</li>
-				</ul>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							version="1.1"
+							viewBox="0 0 24 34"
+							height="34"
+							width="24"
+							fill="#FFFFFF"
+							id="antIcon"
+							class="m-2 rotate-90 w-1/4 h-full"
+						>
+							<g transform="translate(-88.87054,-162.53213)">
+								<path
+									d="m 95.622276,163.1294 v 5.26257 l 2.944768,2.07434 -0.97677,1.07966 0.0045,4.21225 2.291972,1.56002 v 0.49978 l -1.099034,0.42216 -3.162998,-2.15442 -0.01589,-2.62243 -4.904581,-3.26317 v 0.74725 l 4.264005,3.04289 v 2.52634 l 3.607365,2.39706 v 1.16695 l -1.563396,0.8346 -3.51128,-2.36551 h -4.476611 l 0.40638,0.6575 3.733553,0.002 3.913626,2.60228 1.49741,-0.97774 v 2.38976 l -1.461511,-0.97046 -4.101838,2.69278 -0.01362,2.73451 -2.294165,1.4193 v 0.60411 h 0.502454 l 2.448252,-1.66435 v -2.5227 l 3.497295,-2.33638 1.52727,1.08692 1.527258,1.08449 -3.599373,2.38974 v 5.41105 l 4.101843,2.78231 h 0.16258 0.16008 l 4.1018,-2.78231 v -5.41105 l -3.59934,-2.38974 1.52727,-1.08449 1.52727,-1.08692 3.49729,2.33638 v 2.5227 l 2.4483,1.66435 h 0.50245 v -0.60411 l -2.29416,-1.4193 -0.0136,-2.73451 -4.10179,-2.69278 -1.46151,0.97046 v -2.38976 l 1.49741,0.97774 3.91362,-2.60228 3.73354,-0.002 0.40638,-0.6575 h -4.47636 l -3.51131,2.36551 -1.56342,-0.8346 v -1.16695 l 3.60738,-2.39706 v -2.52634 l 4.26396,-3.04289 v -0.74725 l -4.90458,3.26317 -0.0159,2.62243 -3.16296,2.15442 -1.09904,-0.42216 v -0.49978 l 2.29198,-1.56002 0.005,-4.21225 -0.97677,-1.07966 2.94473,-2.07434 v -5.26257 h -0.65627 v 4.88846 l -3.01684,2.07677 -1.57337,-0.84187 -1.57554,0.84187 -3.016767,-2.07677 v -4.88846 z"
+								/>
+							</g>
+						</svg>
+					</div>
+					<input
+						type="color"
+						class="w-full m-0 bg-neutral-800 cursor-pointer"
+					/>
+					<h3 class="text-2xl mt-2">Selected ant</h3>
+					<ul
+						class="flex flex-col items-center justify-center w-full gap-2 list-none my-2"
+					>
+						<li
+							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						>
+							<span class="text-lg font-bold">ID</span>
+							<span class="text-neutral-100" data-id>-</span>
+						</li>
+						<li
+							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						>
+							<span class="text-lg font-bold">Position</span>
+							<span class="text-neutral-100" data-pos>- : -</span>
+						</li>
+						<li
+							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						>
+							<span class="text-lg font-bold">Velocity</span>
+							<span class="text-neutral-100" data-vel>- : -</span>
+						</li>
+						<li
+							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						>
+							<span class="text-lg font-bold">State</span>
+							<span class="text-neutral-100" data-state>-</span>
+						</li>
+					</ul>
+					<div class="flex w-full items-center justify-evenly">
+						<button
+							class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 px-4 py-2 rounded-lg shadow-md"
+						>
+							Zoom
+						</button>
+						<button
+							id="btn-track"
+							class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 px-4 py-2 rounded-lg border-2 border-red-500 shadow-md"
+						>
+							Track
+						</button>
+					</div>
+				</div>
 			</div>
-		</aside>
+			<div id="canvas-container" class="">
+				<div id="camera-container" class="origin-top-left">
+					<!--  outline outline-white outline-1 -->
+					<canvas id="canvas-markers" class="origin-top-left"></canvas>
+					<canvas
+						id="canvas-food"
+						class="origin-top-left absolute inset-0"
+					></canvas>
+					<canvas
+						id="canvas"
+						class="outline outline-white outline-1 absolute inset-0"
+					></canvas>
+					<canvas
+						id="canvas-colony"
+						class="outline outline-white outline-1 absolute inset-0"
+					></canvas>
+				</div>
+			</div>
+		</main>
+		<aside
+			class="fixed top-2 right-2 text-white flex flex-col items-center justify-center gap-2 w-[18rem]"
+		></aside>
 		<div class="fixed bottom-2 right-2 flex flex-col gap-2">
 			<button
 				id="btn-pan"
@@ -172,6 +281,7 @@
 				</svg>
 			</button>
 		</div>
+
 		<div
 			class="fixed inset-0 border-2 border-red-600 pointer-events-none"
 			data-pause
