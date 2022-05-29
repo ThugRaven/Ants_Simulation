@@ -1,7 +1,5 @@
 import Ant from './classes/Ant';
 import Colony from './classes/Colony';
-import Food from './classes/Food';
-import Marker from './classes/Marker';
 import { circle } from './classes/Shapes';
 import { createVector } from './classes/Vector';
 import WorldCanvas, { calcWorldSize } from './classes/WorldCanvas';
@@ -49,6 +47,7 @@ const antPos = document.querySelector<HTMLSpanElement>('[data-pos]');
 const antVel = document.querySelector<HTMLSpanElement>('[data-vel]');
 const antState = document.querySelector<HTMLSpanElement>('[data-state]');
 const btnTrack = document.getElementById('btn-track') as HTMLButtonElement;
+const btnRemove = document.getElementById('btn-remove') as HTMLButtonElement;
 
 const btnCellPanel = document.getElementById(
 	'btn-cell-panel',
@@ -199,6 +198,8 @@ window.addEventListener('keydown', (e) => {
 			toggleFoodMode();
 		case 'KeyA':
 			toggleAnts();
+		case 'Delete':
+			removeAnt();
 		default:
 			break;
 	}
@@ -250,6 +251,10 @@ btnFullscreen.addEventListener('click', () => {
 
 btnTrack.addEventListener('click', () => {
 	toggleTrack();
+});
+
+btnRemove.addEventListener('click', () => {
+	removeAnt();
 });
 
 btnPan.addEventListener('click', () => {
@@ -568,6 +573,20 @@ function selectAnt() {
 	} else {
 		isAntPanelVisible = true;
 	}
+	isAntPanelVisible = togglePanelAndButton(
+		isAntPanelVisible,
+		antPanel,
+		btnAntPanel,
+	);
+}
+
+function removeAnt() {
+	if (colony.removeAnt()) {
+		isAntPanelVisible = true;
+	} else {
+		isAntPanelVisible = false;
+	}
+
 	isAntPanelVisible = togglePanelAndButton(
 		isAntPanelVisible,
 		antPanel,

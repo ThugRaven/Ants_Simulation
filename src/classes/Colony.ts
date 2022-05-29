@@ -175,6 +175,21 @@ export default class Colony {
 		return newAnt;
 	}
 
+	removeAnt() {
+		if (this.selectedAnt == null || this.ants.length <= 0) {
+			return false;
+		}
+
+		let index = this.ants.findIndex((ant) => ant.id === this.selectedAnt!.id);
+		if (index != -1) {
+			this.ants.splice(index, 1);
+			this.selectedAnt = null;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	toggleAntDebug() {
 		if (this.ants.length > 0) {
 			for (const ant of this.ants) {
