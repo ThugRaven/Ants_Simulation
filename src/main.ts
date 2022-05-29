@@ -78,6 +78,8 @@ const colonyFood =
 	document.querySelector<HTMLSpanElement>('[data-colony-food]');
 
 const pauseIndicator = document.querySelector<HTMLDivElement>('[data-pause]');
+const btnPlay = document.getElementById('btn-play') as HTMLButtonElement;
+const btnPause = document.getElementById('btn-pause') as HTMLButtonElement;
 
 let isRunning = false;
 let isDrawingMarkers = true;
@@ -252,6 +254,14 @@ btnTrack.addEventListener('click', () => {
 
 btnPan.addEventListener('click', () => {
 	togglePanMode();
+});
+
+btnPlay.addEventListener('click', () => {
+	toggleLoop();
+});
+
+btnPause.addEventListener('click', () => {
+	toggleLoop();
 });
 
 btnColonyPanel.addEventListener('click', () => {
@@ -470,13 +480,8 @@ function toggleLoop() {
 	colony.isRunning = isRunning;
 
 	pauseIndicator!.style.display = isRunning ? 'none' : 'block';
-	if (isRunning) {
-		console.log('Play');
-		// mainLoopAnimationFrame = window.requestAnimationFrame(main);
-	} else {
-		console.log('Pause');
-		// cancelAnimationFrame(mainLoopAnimationFrame);
-	}
+	btnPlay.style.display = isRunning ? 'none' : 'flex';
+	btnPause.style.display = isRunning ? 'flex' : 'none';
 }
 
 mainLoopAnimationFrame = window.requestAnimationFrame(main);
