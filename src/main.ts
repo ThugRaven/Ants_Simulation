@@ -34,6 +34,9 @@ const canvasFood = document.getElementById('canvas-food') as HTMLCanvasElement;
 const canvasColony = document.getElementById(
 	'canvas-colony',
 ) as HTMLCanvasElement;
+const canvasWalls = document.getElementById(
+	'canvas-walls',
+) as HTMLCanvasElement;
 const ctx = canvas.getContext('2d');
 const antIcon = document.getElementById('antIcon') as SVGElement | null;
 
@@ -76,11 +79,7 @@ let isPanMode = false;
 let lastUpdateTime = 0;
 const SPEED = 10;
 let frames = 0;
-let markers: Marker[] = [];
-let foods: Food[] = [];
-let ants: Ant[] = [];
 let mainLoopAnimationFrame = -1;
-let ant: Ant | null = null;
 let selectedAnt: Ant | null = null;
 
 let offsetY = canvasContainer.getBoundingClientRect().top;
@@ -135,6 +134,14 @@ let colonyGrid = new WorldCanvas(canvasColony, {
 	cellSize: MarkerOptions.SIZE,
 });
 let ctxColony = colonyGrid.create();
+
+let wallsGrid = new WorldCanvas(canvasWalls, {
+	width: width / MarkerOptions.SIZE,
+	height: height / MarkerOptions.SIZE,
+	cellSize: 1,
+});
+canvasWalls.style.transform = `scale(${MarkerOptions.SIZE})`;
+let ctxWalls = wallsGrid.create();
 
 let worldGrid = new WorldGrid({
 	width: width / MarkerOptions.SIZE,
@@ -218,8 +225,6 @@ canvasContainer.addEventListener('contextmenu', (e) => {
 });
 
 canvasContainer.addEventListener('wheel', (e) => {
-	console.log(e);
-
 	zoomCanvas(e);
 });
 
@@ -242,7 +247,13 @@ setupCamera();
 alignCamera();
 
 function setup() {
-	if (ctxMarkers == null || ctxFood == null || ctx == null || ctxColony == null)
+	if (
+		ctxMarkers == null ||
+		ctxFood == null ||
+		ctx == null ||
+		ctxColony == null ||
+		ctxWalls == null
+	)
 		return;
 
 	canvas.width = CanvasOptions.WIDTH;
@@ -386,6 +397,9 @@ function setup() {
 	console.log(count);
 
 	colony.drawColony(ctxColony);
+
+	worldGrid.initializeBorderWalls();
+	worldGrid.drawBorderWalls(ctxWalls);
 }
 
 function toggleLoop() {
@@ -639,13 +653,20 @@ function trackAntCamera(x: number, y: number) {
 }
 
 function main(currentTime: number) {
-	if (ctxMarkers == null || ctxFood == null || ctx == null) return;
+	if (
+		ctxMarkers == null ||
+		ctxFood == null ||
+		ctx == null ||
+		ctxColony == null ||
+		ctxWalls == null
+	)
+		return;
 
 	mainLoopAnimationFrame = window.requestAnimationFrame(main);
 
 	const deltaTime = (currentTime - lastUpdateTime) / 1000;
 
-	console.time('Frame time: ');
+	// console.time('Frame time: ');
 
 	// if (deltaTime < 1 / 25) {
 	// 	return;
@@ -754,7 +775,7 @@ function main(currentTime: number) {
 	// 	ant.draw();
 	// }
 
-	console.timeEnd('Frame time: ');
+	// console.timeEnd('Frame time: ');
 
 	frames++;
 	if (frames == 100) {

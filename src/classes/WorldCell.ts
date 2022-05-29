@@ -19,4 +19,8 @@ export default class WorldCell {
 	pick() {
 		this.food.pick();
 	}
+
+	drawWall(ctx: CanvasRenderingContext2D, x: number, y: number) {
+		ctx.fillRect(x, y, 1, 1);
+	}
 }

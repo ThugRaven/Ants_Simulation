@@ -23,6 +23,22 @@ export default class WorldGrid {
 		}
 	}
 
+	initializeBorderWalls() {
+		for (let x = 0; x < this.width; x++) {
+			let cellTop = this.cells[this.getIndexFromCoords(x, 0)];
+			let cellBottom = this.cells[this.getIndexFromCoords(x, this.height - 1)];
+			cellTop.wall = 1;
+			cellBottom.wall = 1;
+		}
+
+		for (let y = 1; y < this.height - 1; y++) {
+			let cellLeft = this.cells[this.getIndexFromCoords(0, y)];
+			let cellRight = this.cells[this.getIndexFromCoords(this.width - 1, y)];
+			cellLeft.wall = 1;
+			cellRight.wall = 1;
+		}
+	}
+
 	update() {
 		for (const cell of this.cells) {
 			cell.marker.update();
@@ -87,6 +103,18 @@ export default class WorldGrid {
 				let cell = this.cells[this.getIndexFromCoords(x, y)];
 				if (cell.food.quantity > 0) {
 					cell.food.draw(ctx, x, y);
+				}
+			}
+		}
+	}
+
+	drawBorderWalls(ctx: CanvasRenderingContext2D) {
+		ctx.fillStyle = 'rgb(114, 107, 107)';
+		for (let x = 0; x < this.width; x++) {
+			for (let y = 0; y < this.height; y++) {
+				let cell = this.cells[this.getIndexFromCoords(x, y)];
+				if (cell.wall === 1) {
+					cell.drawWall(ctx, x, y);
 				}
 			}
 		}

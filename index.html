@@ -16,7 +16,7 @@
 		<header>
 			<div class="bg-neutral-800 w-full flex justify-end gap-2 p-2">
 				<button
-					id="btn-fullscreen"
+					id="btn-colony-panel"
 					class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 p-3 rounded-lg shadow-md"
 					title="Colony panel"
 				>
@@ -33,7 +33,7 @@
 					</svg>
 				</button>
 				<button
-					id="btn-fullscreen"
+					id="btn-cell-panel"
 					class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 p-3 rounded-lg shadow-md"
 					title="Cell panel"
 				>
@@ -58,7 +58,7 @@
 					</svg>
 				</button>
 				<button
-					id="btn-fullscreen"
+					id="btn-ant-panel"
 					class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 p-3 rounded-lg shadow-md"
 					title="Ant panel"
 				>
@@ -229,13 +229,11 @@
 						id="canvas-food"
 						class="origin-top-left absolute inset-0"
 					></canvas>
+					<canvas id="canvas" class="absolute inset-0"></canvas>
+					<canvas id="canvas-colony" class="absolute inset-0"></canvas>
 					<canvas
-						id="canvas"
-						class="outline outline-white outline-1 absolute inset-0"
-					></canvas>
-					<canvas
-						id="canvas-colony"
-						class="outline outline-white outline-1 absolute inset-0"
+						id="canvas-walls"
+						class="outline outline-white outline-1 absolute inset-0 origin-top-left"
 					></canvas>
 				</div>
 			</div>
