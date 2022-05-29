@@ -40,6 +40,9 @@ const canvasWalls = document.getElementById(
 const ctx = canvas.getContext('2d');
 const antIcon = document.getElementById('antIcon') as SVGElement | null;
 
+const btnAntPanel = document.getElementById(
+	'btn-ant-panel',
+) as HTMLButtonElement;
 const antPanel = document.getElementById('antPanel') as HTMLDivElement;
 const antId = document.querySelector<HTMLSpanElement>('[data-id]');
 const antPos = document.querySelector<HTMLSpanElement>('[data-pos]');
@@ -47,6 +50,9 @@ const antVel = document.querySelector<HTMLSpanElement>('[data-vel]');
 const antState = document.querySelector<HTMLSpanElement>('[data-state]');
 const btnTrack = document.getElementById('btn-track') as HTMLButtonElement;
 
+const btnCellPanel = document.getElementById(
+	'btn-cell-panel',
+) as HTMLButtonElement;
 const cellPanel = document.getElementById('cellPanel') as HTMLDivElement;
 const cellPreview = document.querySelector<HTMLDivElement>(
 	'[data-cell-preview]',
@@ -59,6 +65,10 @@ const markerIntensityFood = document.querySelector<HTMLSpanElement>(
 );
 const cellFood = document.querySelector<HTMLSpanElement>('[data-cell-food]');
 
+const btnColonyPanel = document.getElementById(
+	'btn-colony-panel',
+) as HTMLButtonElement;
+const colonyPanel = document.getElementById('colonyPanel') as HTMLDivElement;
 const colonyPreview = document.querySelector<HTMLDivElement>(
 	'[data-colony-preview]',
 );
@@ -75,6 +85,10 @@ let isDebugMode = false;
 let isTracking = false;
 let isFoodMode = false;
 let isPanMode = false;
+
+let isColonyPanelVisible = false;
+let isCellPanelVisible = false;
+let isAntPanelVisible = false;
 
 let lastUpdateTime = 0;
 const SPEED = 10;
@@ -237,10 +251,58 @@ btnTrack.addEventListener('click', () => {
 });
 
 btnPan.addEventListener('click', () => {
-	console.log('click');
-
 	togglePanMode();
 });
+
+btnColonyPanel.addEventListener('click', () => {
+	isColonyPanelVisible = togglePanelAndButton(
+		isColonyPanelVisible,
+		colonyPanel,
+		btnColonyPanel,
+	);
+});
+
+isColonyPanelVisible = togglePanelAndButton(
+	isColonyPanelVisible,
+	colonyPanel,
+	btnColonyPanel,
+);
+
+btnCellPanel.addEventListener('click', () => {
+	isCellPanelVisible = togglePanelAndButton(
+		isCellPanelVisible,
+		cellPanel,
+		btnCellPanel,
+	);
+});
+
+btnAntPanel.addEventListener('click', () => {
+	isAntPanelVisible = togglePanelAndButton(
+		isAntPanelVisible,
+		antPanel,
+		btnAntPanel,
+	);
+});
+
+function togglePanelAndButton(
+	isVisible: boolean,
+	panel: HTMLDivElement,
+	button: HTMLButtonElement,
+) {
+	isVisible = !isVisible;
+
+	if (!isVisible) {
+		panel.style.display = 'none';
+		button.classList.add('border-red-500');
+		button.classList.remove('border-green-500');
+	} else {
+		panel.style.display = 'block';
+		button.classList.add('border-green-500');
+		button.classList.remove('border-red-500');
+	}
+
+	return isVisible;
+}
 
 setup();
 setupCamera();
@@ -428,11 +490,11 @@ function toggleDebug() {
 
 	colony.isDebugMode = isDebugMode;
 	toggleAntDebug();
-	if (isDebugMode) {
-		cellPanel.style.display = 'block';
-	} else {
-		cellPanel.style.display = 'none';
-	}
+	isCellPanelVisible = togglePanelAndButton(
+		isCellPanelVisible,
+		cellPanel,
+		btnCellPanel,
+	);
 }
 
 function toggleAntDebug() {
@@ -497,10 +559,15 @@ function selectAnt() {
 
 	colony.selectAnt(mouseVector);
 	if (colony.selectedAnt) {
-		antPanel.style.display = 'block';
+		isAntPanelVisible = false;
 	} else {
-		antPanel.style.display = 'none';
+		isAntPanelVisible = true;
 	}
+	isAntPanelVisible = togglePanelAndButton(
+		isAntPanelVisible,
+		antPanel,
+		btnAntPanel,
+	);
 }
 
 function updateAntInfo() {
