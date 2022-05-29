@@ -330,6 +330,21 @@ export default class Ant {
 						maxIntensity = intensity;
 						maxIntensityPoint = perceptionPoint;
 					}
+
+					// Check for walls
+					if (cellPerception.wall === 1) {
+						let dist = perceptionPoint.dist(this.pos);
+
+						if (dist <= distanceBetween + 10) {
+							let force = perceptionPoint.sub(this.pos);
+
+							force.setMag(this.maxSpeed * dt);
+							force.sub(this.vel);
+							// force.limit(this.maxForce * dt);
+							force.mult(-1);
+							this.applyForce(force);
+						}
+					}
 				}
 			}
 		}
