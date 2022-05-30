@@ -108,8 +108,8 @@ export default class WorldGrid {
 		}
 	}
 
-	drawBorderWalls(ctx: CanvasRenderingContext2D) {
-		ctx.fillStyle = 'rgb(114, 107, 107)';
+	drawWalls(ctx: CanvasRenderingContext2D) {
+		ctx.fillStyle = 'rgb(163, 163, 163)';
 		for (let x = 0; x < this.width; x++) {
 			for (let y = 0; y < this.height; y++) {
 				let cell = this.cells[this.getIndexFromCoords(x, y)];

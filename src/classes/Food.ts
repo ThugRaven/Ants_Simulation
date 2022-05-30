@@ -12,7 +12,7 @@ export default class Food {
 		let centerX = x * FoodOptions.SIZE + FoodOptions.SIZE / 2;
 		let centerY = y * FoodOptions.SIZE + FoodOptions.SIZE / 2;
 
-		ctx.fillStyle = `hsl(54, 100%, 50%, ${this.quantity / 100})`;
+		ctx.fillStyle = `hsl(120, 40%, 43%, ${this.quantity / 100})`;
 		circle(ctx, centerX, centerY, FoodOptions.SIZE / 2, true);
 	}
 
