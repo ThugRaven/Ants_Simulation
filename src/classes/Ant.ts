@@ -252,7 +252,11 @@ export default class Ant {
 		// }
 
 		let cell = worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y);
-		if (cell && cell.food.quantity > 0 && this.state === AntStates.TO_FOOD) {
+		if (
+			cell &&
+			cell.food.quantity > 0 &&
+			(this.state === AntStates.TO_FOOD || this.state === AntStates.REFILL)
+		) {
 			this.state = AntStates.TO_HOME;
 			worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y)?.pick();
 			this.vel.setHeading(this.vel.heading() + Math.PI);
@@ -302,7 +306,8 @@ export default class Ant {
 					// Check for food
 					if (
 						cellPerception.food.quantity > 0 &&
-						this.state === AntStates.TO_FOOD
+						(this.state === AntStates.TO_FOOD ||
+							this.state === AntStates.REFILL)
 					) {
 						if (this.debug) {
 							this.perceptionDraw.add(
@@ -322,7 +327,10 @@ export default class Ant {
 						this.state === AntStates.REFILL
 					) {
 						intensity = cellPerception.marker.intensity[0];
-					} else if (this.state === AntStates.TO_FOOD) {
+					} else if (
+						this.state === AntStates.TO_FOOD ||
+						this.state === AntStates.REFILL
+					) {
 						intensity = cellPerception.marker.intensity[1];
 					}
 
