@@ -397,8 +397,8 @@ btnSave.addEventListener('click', () => {
 
 			if (g <= 160 && g > 0 && g > r && g > b) {
 				// Food
-				cell.food.quantity = 100;
-			} else if (r >= 42 && g >= 42 && b >= 42) {
+				cell.food.quantity = Math.round(100 * (a / 255));
+			} else if (r > 0 && g > 0 && b > 0 && r === g && g === b) {
 				// Wall
 				ctxWalls;
 				cell.wall = 1;
@@ -407,7 +407,12 @@ btnSave.addEventListener('click', () => {
 				cell.wall = 0;
 			}
 		}
+		worldGrid.initializeBorderWalls();
 		worldGrid.drawWalls(ctxWalls);
+
+		isEditMode = togglePanelAndButton(isEditMode, editPanel, btnEditMode);
+		canvasEdit.style.display = 'none';
+		canvasEditPreview.style.display = 'none';
 	}
 });
 
@@ -849,7 +854,7 @@ function zoomCanvas(event: WheelEvent) {
 	zoomOffset.y = (event.clientY - offsetY) / canvasScale - cameraOffset.y;
 
 	canvasScale *= 0.999 ** event.deltaY;
-	canvasScale = Math.min(Math.max(0.25, canvasScale), 16);
+	canvasScale = Math.min(Math.max(0.15, canvasScale), 16);
 
 	cameraOffset.x = event.clientX / canvasScale - zoomOffset.x;
 	cameraOffset.y = (event.clientY - offsetY) / canvasScale - zoomOffset.y;
@@ -909,14 +914,14 @@ function main(currentTime: number) {
 
 	const deltaTime = (currentTime - lastUpdateTime) / 1000;
 
-	// console.time('Frame time: ');
+	console.time('Frame time: ');
 
 	// if (deltaTime < 1 / 25) {
 	// 	return;
 	// }
 	// console.log('update');
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	ctxMarkers.clearRect(0, 0, canvas.width, canvas.height);
+	ctxMarkers.clearRect(0, 0, worldGrid.width, worldGrid.height);
 	ctxFood.clearRect(0, 0, canvas.width, canvas.height);
 
 	// for (let i = 0; i < markers.length; i++) {
@@ -1007,7 +1012,7 @@ function main(currentTime: number) {
 			if (isWallMode) {
 				ctxEdit.fillStyle = 'rgb(163, 163, 163)';
 			} else if (isFoodMode) {
-				ctxEdit.fillStyle = 'rgb(66, 153, 66)';
+				ctxEdit.fillStyle = 'rgb(66, 153, 66, 0.25)';
 			}
 			circle(ctxEdit, pos[0], pos[1], brushSize);
 		}
@@ -1039,7 +1044,7 @@ function main(currentTime: number) {
 	// 	ant.draw();
 	// }
 
-	// console.timeEnd('Frame time: ');
+	console.timeEnd('Frame time: ');
 
 	frames++;
 	if (frames == 100) {
