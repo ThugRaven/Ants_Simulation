@@ -76,12 +76,7 @@ export default class Colony {
 		}
 	}
 
-	updateAndDrawAnts(
-		worldGrid: WorldGrid,
-		selectedId: number | undefined,
-		dt: number,
-	) {
-		let selectedAnt = null;
+	updateAndDrawAnts(worldGrid: WorldGrid, dt: number) {
 		let removeAnt = false;
 		for (let i = 0; i < this.ants.length; i++) {
 			if (this.isRunning) {
@@ -102,11 +97,6 @@ export default class Colony {
 				this.ants[i].draw();
 			}
 
-			// Get selected ant
-			if (selectedId && this.ants[i].id === selectedId) {
-				selectedAnt = this.ants[i];
-			}
-
 			// Remove ant
 			if (removeAnt) {
 				console.log('Removed ant: ', this.ants[i]);
@@ -114,7 +104,6 @@ export default class Colony {
 				removeAnt = false;
 			}
 		}
-		return selectedAnt;
 	}
 
 	updateColony(dt: number) {
