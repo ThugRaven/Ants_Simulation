@@ -42,7 +42,7 @@
 				<button
 					id="btn-play"
 					class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 p-3 rounded-lg shadow-md aspect-square flex justify-center items-center"
-					title="Play the simulation"
+					title="Play the simulation (Space)"
 				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
@@ -59,7 +59,7 @@
 				<button
 					id="btn-pause"
 					class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 p-3 rounded-lg shadow-md aspect-square flex justify-center items-center hidden"
-					title="Pause the simulation"
+					title="Pause the simulation (Space)"
 				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
@@ -75,6 +75,25 @@
 				</button>
 			</div>
 			<div class="flex gap-2 p-2 w-full justify-end">
+				<button
+					id="btn-edit-mode"
+					class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 p-3 rounded-lg shadow-md border-2 border-red-500 aspect-square flex justify-center items-center"
+					title="Toggle edit mode"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						height="24px"
+						viewBox="0 0 24 24"
+						width="24px"
+						fill="#000000"
+						class="w-8 h-8 fill-white"
+					>
+						<path d="M0 0h24v24H0V0z" fill="none" />
+						<path
+							d="M14.06 9.02l.92.92L5.92 19H5v-.92l9.06-9.06M17.66 3c-.25 0-.51.1-.7.29l-1.83 1.83 3.75 3.75 1.83-1.83c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29zm-3.6 3.19L3 17.25V21h3.75L17.81 9.94l-3.75-3.75z"
+						/>
+					</svg>
+				</button>
 				<button
 					id="btn-colony-panel"
 					class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 p-3 rounded-lg shadow-md border-2 border-red-500 aspect-square flex justify-center items-center"
@@ -145,6 +164,58 @@
 			<div
 				class="absolute inset-0 flex items-start justify-end gap-2 p-2 z-10 pointer-events-none text-white"
 			>
+				<div
+					id="editPanel"
+					class="bg-neutral-800 rounded-lg p-4 pointer-events-auto hidden"
+				>
+					<h2 class="text-4xl font-bold text-center">Brush</h2>
+					<div
+						class="bg-neutral-700 w-full flex items-center justify-center rounded-lg my-2 h-20"
+					>
+						<div
+							class="m-2 aspect-square rounded-full bg-black"
+							data-brush-preview
+						></div>
+					</div>
+					<div class="flex flex-col items-center justify-center gap-2">
+						<span
+							class="text-neutral-100 text-2xl font-bold"
+							data-brush-size
+						></span>
+						<input
+							type="range"
+							id="brushSizeInput"
+							min="1"
+							max="21"
+							step="2"
+							class="accent-red-500"
+						/>
+					</div>
+					<h2 class="text-4xl font-bold text-center">Brushes</h2>
+					<div class="grid grid-cols-2 items-center justify-center gap-2 my-2">
+						<button
+							id="btn-wall-brush"
+							class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 px-4 py-2 rounded-lg border-2 border-red-500 shadow-md"
+							title="Wall brush"
+						>
+							Wall
+						</button>
+						<button
+							id="btn-food-brush"
+							class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 px-4 py-2 rounded-lg border-2 border-red-500 shadow-md"
+							title="Food brush"
+						>
+							Food
+						</button>
+					</div>
+					<button
+						id="btn-save"
+						class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 text-xl font-bold px-4 py-2 w-full rounded-lg shadow-md"
+						title="Save edit"
+					>
+						Save
+					</button>
+				</div>
 				<div
 					id="colonyPanel"
 					class="bg-neutral-800 rounded-lg p-4 pointer-events-auto"
@@ -273,12 +344,14 @@
 						<button
 							id="btn-track"
 							class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 px-4 py-2 rounded-lg border-2 border-red-500 shadow-md"
+							title="Track ant (T)"
 						>
 							Track
 						</button>
 						<button
 							id="btn-remove"
 							class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 px-4 py-2 rounded-lg shadow-md"
+							title="Remove ant (Delete)"
 						>
 							Remove
 						</button>
@@ -299,6 +372,14 @@
 						id="canvas-walls"
 						class="outline outline-white outline-1 absolute inset-0 origin-top-left"
 					></canvas>
+					<canvas
+						id="canvas-edit"
+						class="outline outline-white outline-1 absolute inset-0 origin-top-left hidden opacity-50"
+					></canvas>
+					<canvas
+						id="canvas-edit-preview"
+						class="outline outline-white outline-1 absolute inset-0 origin-top-left hidden opacity-50"
+					></canvas>
 				</div>
 			</div>
 		</main>
@@ -309,7 +390,7 @@
 			<button
 				id="btn-pan"
 				class="bg-neutral-800 hover:bg-neutral-700 focus-visible:bg-neutral-700 p-3 rounded-lg shadow-md"
-				title="Pan mode"
+				title="Pan mode (LMB|MMB)"
 			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -327,7 +408,7 @@
 			<button
 				id="btn-fullscreen"
 				class="bg-neutral-800 hover:bg-neutral-700 focus-visible:bg-neutral-700 p-3 rounded-lg shadow-md"
-				title="Center screen"
+				title="Center screen (C)"
 			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"

@@ -35,6 +35,10 @@ const canvasColony = document.getElementById(
 const canvasWalls = document.getElementById(
 	'canvas-walls',
 ) as HTMLCanvasElement;
+const canvasEdit = document.getElementById('canvas-edit') as HTMLCanvasElement;
+const canvasEditPreview = document.getElementById(
+	'canvas-edit-preview',
+) as HTMLCanvasElement;
 const ctx = canvas.getContext('2d');
 const antIcon = document.getElementById('antIcon') as SVGElement | null;
 
@@ -80,10 +84,35 @@ const pauseIndicator = document.querySelector<HTMLDivElement>('[data-pause]');
 const btnPlay = document.getElementById('btn-play') as HTMLButtonElement;
 const btnPause = document.getElementById('btn-pause') as HTMLButtonElement;
 
+const btnEditMode = document.getElementById(
+	'btn-edit-mode',
+) as HTMLButtonElement;
+const editPanel = document.getElementById('editPanel') as HTMLDivElement;
+const brushSizePreview = document.querySelector(
+	'[data-brush-preview]',
+) as HTMLDivElement;
+const brushSizeText = document.querySelector(
+	'[data-brush-size]',
+) as HTMLSpanElement;
+const brushSizeInput = document.getElementById(
+	'brushSizeInput',
+) as HTMLInputElement;
+const btnWallBrush = document.getElementById(
+	'btn-wall-brush',
+) as HTMLButtonElement;
+const btnFoodBrush = document.getElementById(
+	'btn-food-brush',
+) as HTMLButtonElement;
+const btnSave = document.getElementById('btn-save') as HTMLButtonElement;
+
 let isRunning = false;
 let isDrawingMarkers = true;
 let isDebugMode = false;
 let isTracking = false;
+let isEditMode = false;
+let isHolding = false;
+let isErasing = false;
+let isWallMode = false;
 let isFoodMode = false;
 let isPanMode = false;
 
@@ -112,6 +141,8 @@ let cameraOffset = {
 	x: 0,
 	y: 0,
 };
+
+let brushSize = 7;
 
 // Grids
 let [width, height] = calcWorldSize({
@@ -158,6 +189,22 @@ let wallsGrid = new WorldCanvas(canvasWalls, {
 canvasWalls.style.transform = `scale(${MarkerOptions.SIZE})`;
 let ctxWalls = wallsGrid.create();
 
+let editGrid = new WorldCanvas(canvasEdit, {
+	width: width / MarkerOptions.SIZE,
+	height: height / MarkerOptions.SIZE,
+	cellSize: 1,
+});
+canvasEdit.style.transform = `scale(${MarkerOptions.SIZE})`;
+let ctxEdit = editGrid.create();
+
+let editPreviewGrid = new WorldCanvas(canvasEditPreview, {
+	width: width / MarkerOptions.SIZE,
+	height: height / MarkerOptions.SIZE,
+	cellSize: 1,
+});
+canvasEditPreview.style.transform = `scale(${MarkerOptions.SIZE})`;
+let ctxEditPreview = editPreviewGrid.create();
+
 let worldGrid = new WorldGrid({
 	width: width / MarkerOptions.SIZE,
 	height: height / MarkerOptions.SIZE,
@@ -196,10 +243,13 @@ window.addEventListener('keydown', (e) => {
 			break;
 		case 'KeyF':
 			toggleFoodMode();
+			break;
 		case 'KeyA':
 			toggleAnts();
+			break;
 		case 'Delete':
 			removeAnt();
+			break;
 		default:
 			break;
 	}
@@ -216,8 +266,6 @@ canvasContainer.addEventListener('click', (e) => {
 		wasPanning = false;
 		return;
 	}
-	console.log('click');
-	console.log(e);
 
 	selectAnt();
 	if (isDebugMode) {
@@ -299,6 +347,85 @@ btnAntPanel.addEventListener('click', () => {
 	);
 });
 
+btnEditMode.addEventListener('click', () => {
+	isEditMode = togglePanelAndButton(isEditMode, editPanel, btnEditMode);
+	if (isEditMode) {
+		canvasEdit.style.display = 'block';
+		canvasEditPreview.style.display = 'block';
+	} else {
+		canvasEdit.style.display = 'none';
+		canvasEditPreview.style.display = 'none';
+	}
+});
+
+btnWallBrush.addEventListener('click', () => {
+	isWallMode = toggleButton(isWallMode, btnWallBrush);
+	if (isWallMode) {
+		isFoodMode = true;
+		isFoodMode = toggleButton(isWallMode, btnFoodBrush);
+	}
+});
+
+btnFoodBrush.addEventListener('click', () => {
+	isFoodMode = toggleButton(isFoodMode, btnFoodBrush);
+	if (isFoodMode) {
+		isWallMode = true;
+		isWallMode = toggleButton(isFoodMode, btnWallBrush);
+	}
+});
+
+btnSave.addEventListener('click', () => {
+	if (ctxEdit && ctxWalls) {
+		let imageData = ctxEdit.getImageData(
+			0,
+			0,
+			worldGrid.width,
+			worldGrid.height,
+		);
+
+		console.log(imageData);
+		ctxWalls.clearRect(0, 0, canvas.width, canvas.height);
+
+		for (let i = 0; i < imageData.data.length; i += 4) {
+			let cell = worldGrid.cells[i / 4];
+
+			// Modify pixel data
+			let r = imageData.data[i + 0]; // R value
+			let g = imageData.data[i + 1]; // G value
+			let b = imageData.data[i + 2]; // B value
+			let a = imageData.data[i + 3]; // A value
+
+			if (g <= 160 && g > 0 && g > r && g > b) {
+				// Food
+				cell.food.quantity = 100;
+			} else if (r >= 42 && g >= 42 && b >= 42) {
+				// Wall
+				ctxWalls;
+				cell.wall = 1;
+			} else {
+				cell.food.quantity = 0;
+				cell.wall = 0;
+			}
+		}
+		worldGrid.drawWalls(ctxWalls);
+	}
+});
+
+brushSizeInput.value = brushSize.toString();
+brushSizeText.textContent = `${brushSize} px`;
+isWallMode = toggleButton(isWallMode, btnWallBrush);
+
+brushSizeInput.addEventListener('input', () => {
+	brushSize = parseInt(brushSizeInput.value);
+	brushInfo();
+});
+
+function brushInfo() {
+	brushSizePreview.style.width = `${brushSize}px`;
+	brushSizePreview.style.height = `${brushSize}px`;
+	brushSizeText.textContent = `${brushSize} px`;
+}
+
 function togglePanelAndButton(
 	isVisible: boolean,
 	panel: HTMLDivElement,
@@ -317,6 +444,20 @@ function togglePanelAndButton(
 	}
 
 	return isVisible;
+}
+
+function toggleButton(isEnabled: boolean, button: HTMLButtonElement) {
+	isEnabled = !isEnabled;
+
+	if (!isEnabled) {
+		button.classList.add('border-red-500');
+		button.classList.remove('border-green-500');
+	} else {
+		button.classList.add('border-green-500');
+		button.classList.remove('border-red-500');
+	}
+
+	return isEnabled;
 }
 
 setup();
@@ -476,7 +617,7 @@ function setup() {
 	colony.drawColony(ctxColony);
 
 	worldGrid.initializeBorderWalls();
-	worldGrid.drawBorderWalls(ctxWalls);
+	worldGrid.drawWalls(ctxWalls);
 }
 
 function toggleLoop() {
@@ -568,6 +709,7 @@ function selectAnt() {
 	// return newAnt;
 
 	colony.selectAnt(mouseVector);
+
 	if (colony.selectedAnt) {
 		isAntPanelVisible = false;
 	} else {
@@ -645,7 +787,9 @@ function updateColonyInfo() {
 function setupCamera() {
 	canvasContainer.addEventListener('mousedown', (e) => {
 		clearTimeout(panningTimeout);
-		if (e.buttons == RIGHT_BUTTON) return;
+		if (e.buttons == RIGHT_BUTTON && isEditMode) {
+			isErasing = true;
+		} else if (e.buttons == RIGHT_BUTTON) return;
 
 		// Start panning with middle mouse button immediately
 		if (e.buttons == MIDDLE_BUTTON) {
@@ -657,6 +801,10 @@ function setupCamera() {
 			panStart.x = e.clientX / canvasScale - cameraOffset.x;
 			panStart.y = (e.clientY - offsetY) / canvasScale - cameraOffset.y;
 		} else {
+			if (isEditMode) {
+				isHolding = true;
+				return;
+			}
 			// Start panning with every other button except right one after set timeout
 			isPanning = false;
 			panningTimeout = setTimeout(() => {
@@ -681,6 +829,8 @@ function setupCamera() {
 		console.log('mouse up');
 
 		clearTimeout(panningTimeout);
+		isHolding = false;
+		isErasing = false;
 		if (isPanning) {
 			isPanning = false;
 			togglePanMode();
@@ -749,7 +899,9 @@ function main(currentTime: number) {
 		ctxFood == null ||
 		ctx == null ||
 		ctxColony == null ||
-		ctxWalls == null
+		ctxWalls == null ||
+		ctxEdit == null ||
+		ctxEditPreview == null
 	)
 		return;
 
@@ -839,6 +991,27 @@ function main(currentTime: number) {
 	// 		}
 	// 	}
 	// }
+	if (isEditMode) {
+		// Draw brush preview
+		ctxEditPreview.clearRect(0, 0, canvas.width, canvas.height);
+		ctxEditPreview.fillStyle = 'grey';
+		let pos = worldGrid.getCellCoords(target.x, target.y);
+		circle(ctxEditPreview, pos[0], pos[1], brushSize);
+
+		if (isErasing) {
+			// Erase
+			ctxEdit.fillStyle = 'black';
+			circle(ctxEdit, pos[0], pos[1], brushSize);
+		} else if (isHolding) {
+			// Draw walls/food
+			if (isWallMode) {
+				ctxEdit.fillStyle = 'rgb(163, 163, 163)';
+			} else if (isFoodMode) {
+				ctxEdit.fillStyle = 'rgb(66, 153, 66)';
+			}
+			circle(ctxEdit, pos[0], pos[1], brushSize);
+		}
+	}
 
 	colony.updateColony(deltaTime);
 	colony.updateAndDrawAnts(worldGrid, selectedAnt?.id, deltaTime);

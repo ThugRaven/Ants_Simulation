@@ -40,7 +40,7 @@ export const ColonyOptions = {
 export enum AntStates {
 	TO_HOME = 0,
 	TO_FOOD = 1,
-	REFILL = 3,
+	REFILL = 2,
 }
 
 export const AntOptions = {
@@ -69,7 +69,7 @@ export const AntOptions = {
 
 // FOOD
 export const FoodOptions = {
-	SIZE: 16,
+	SIZE: 15,
 	PICK_AMOUNT: 1,
 } as const;
 
