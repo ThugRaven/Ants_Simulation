@@ -79,13 +79,6 @@ export default class WorldGrid {
 		markersImageData: ImageData,
 		update = true,
 	) {
-		// for (let x = 0; x < this.width; x++) {
-		// 	for (let y = 0; y < this.height; y++) {
-		// 		let cell = this.cells[this.getIndexFromCoords(x, y)];
-		// 		cell.marker.draw(ctx, x, y);
-		// 	}
-		// }
-
 		for (let i = 0; i < markersImageData.data.length; i += 4) {
 			let cell = this.cells[i / 4];
 			let colors = cell.marker.getMixedColor();

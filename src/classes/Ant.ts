@@ -68,10 +68,6 @@ export default class Ant {
 			line(this.ctx, target.x, target.y, this.pos.x, this.pos.y);
 		}
 
-		if (Math.random() < this.freedomCoef) {
-			return;
-		}
-
 		let force = target.copy().sub(this.pos);
 		force.setMag(this.maxSpeed);
 		force.sub(this.vel);
@@ -252,13 +248,6 @@ export default class Ant {
 			this.perceptionDraw = new Set();
 		}
 
-		let foundFood = false;
-
-		// if (this.state === AntStates.TO_HOME) {
-		// 	this.wander();
-		// 	return;
-		// }
-
 		let cell = worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y);
 		if (
 			cell &&
@@ -269,6 +258,10 @@ export default class Ant {
 			this.foodAmount = cell.pick();
 			this.vel.setHeading(this.vel.heading() + Math.PI);
 			this.internalClock = 0;
+			return;
+		}
+
+		if (Math.random() < this.freedomCoef) {
 			return;
 		}
 
@@ -323,7 +316,6 @@ export default class Ant {
 							);
 						}
 
-						foundFood = true;
 						this.seek(perceptionPoint);
 						return;
 					}
@@ -370,9 +362,7 @@ export default class Ant {
 			return;
 		}
 
-		if (!foundFood) {
-			this.wander();
-		}
+		this.wander();
 	}
 
 	checkColony(colony: Colony) {

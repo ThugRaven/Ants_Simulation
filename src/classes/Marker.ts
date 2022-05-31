@@ -9,24 +9,6 @@ export default class Marker {
 	}
 
 	draw(ctx: CanvasRenderingContext2D, x: number, y: number) {
-		// let width = 10;
-		// let height = 10;
-		// let i = this.x - width * 0.5;
-		// let j = this.y - height * 0.5;
-		// let gradient = this.ctx.createRadialGradient(
-		// 	this.x,
-		// 	this.y,
-		// 	0,
-		// 	this.x,
-		// 	this.y,
-		// 	15,
-		// );
-		// gradient.addColorStop(0, `hsl(${hue}, 100%, 50%, ${this.intensity})`);
-		// gradient.addColorStop(1, 'black');
-		// // this.ctx.fillStyle = `hsl(${hue}, 100%, 50%, ${this.intensity})`;
-		// this.ctx.fillStyle = gradient;
-		// this.ctx.fillRect(i, j, width, height);
-
 		// Get default marker colors
 		let toHomeColor = new Vector().set(MarkerColors.TO_HOME.slice());
 		let toFoodColor = new Vector().set(MarkerColors.TO_FOOD.slice());
@@ -79,7 +61,6 @@ export default class Marker {
 	}
 
 	update() {
-		// this.intensity = Math.max(0, this.intensity - EVAPORATE_AMOUNT);
 		if (this.intensity[0] > 0) {
 			this.intensity[0] -= EVAPORATE_AMOUNT;
 		} else this.intensity[0] = 0;
@@ -87,10 +68,5 @@ export default class Marker {
 		if (this.intensity[1] > 0) {
 			this.intensity[1] -= EVAPORATE_AMOUNT;
 		} else this.intensity[1] = 0;
-		// this.intensity[0] =
-		// 	this.intensity[0] < 0 ? 0 : this.intensity[0] - EVAPORATE_AMOUNT;
-		// this.intensity[1] =
-		// 	this.intensity[1] < 0 ? 0 : this.intensity[1] - EVAPORATE_AMOUNT;
-		// this.intensity -= EVAPORATE_AMOUNT;
 	}
 }

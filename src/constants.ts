@@ -1,7 +1,7 @@
 // CANVAS
 export const CanvasOptions = {
-	WIDTH: 1600 * 4,
-	HEIGHT: 1200 * 4,
+	WIDTH: 1600 * 3,
+	HEIGHT: 1200 * 3,
 } as const;
 
 // MARKERS
@@ -30,7 +30,7 @@ export const ColonyOptions = {
 	COLONY_MAX_ANTS: 250,
 	COLONY_MAX_FOOD: 1250,
 	ANT_CREATION_PERIOD: 0.15,
-	ANT_COST: 25,
+	ANT_COST: 30,
 };
 
 export enum AntStates {
@@ -66,7 +66,7 @@ export const AntOptions = {
 // FOOD
 export const FoodOptions = {
 	SIZE: 15,
-	PICK_AMOUNT: 10,
+	PICK_AMOUNT: 2,
 } as const;
 
 // BUTTONS
