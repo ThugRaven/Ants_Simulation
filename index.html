@@ -15,7 +15,7 @@
 	<body class="bg-black h-screen overflow-hidden flex flex-col">
 		<header class="bg-neutral-800 flex">
 			<div class="flex gap-2 p-2 w-full justify-start">
-				<!-- <button
+				<button
 					id="btn-controls"
 					class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 p-3 rounded-lg shadow-md aspect-square flex justify-center items-center"
 					title="Controls"
@@ -36,7 +36,7 @@
 							/>
 						</g>
 					</svg>
-				</button> -->
+				</button>
 			</div>
 			<div class="flex gap-2 p-2 justify-center">
 				<button
@@ -360,7 +360,6 @@
 			</div>
 			<div id="canvas-container" class="">
 				<div id="camera-container" class="origin-top-left">
-					<!--  outline outline-white outline-1 -->
 					<canvas id="canvas-markers" class="origin-top-left"></canvas>
 					<canvas
 						id="canvas-food"
@@ -425,6 +424,183 @@
 			</button>
 		</div>
 
+		<div
+			id="controlsPanel"
+			class="text-white bg-neutral-800 rounded-lg p-4 fixed inset-0 m-auto w-max h-max hidden"
+		>
+			<h2 class="text-4xl font-bold text-center">Controls</h2>
+			<button
+				id="btn-close-controls"
+				class="bg-neutral-800 hover:bg-neutral-700 focus-visible:bg-neutral-700 m-2 p-3 rounded-full absolute top-0 right-0"
+				title="Close"
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					height="24px"
+					viewBox="0 0 24 24"
+					width="24px"
+					fill="#000000"
+					class="w-8 h-8 fill-white"
+				>
+					<path d="M0 0h24v24H0V0z" fill="none" />
+					<path
+						d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+					/>
+				</svg>
+			</button>
+			<table class="table-auto">
+				<thead class="text-xl text-left">
+					<tr>
+						<th class="py-2">Key</th>
+						<th class="p-2">Description</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td class="py-2 pr-2">
+							<kbd
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								>Space</kbd
+							>
+						</td>
+						<td class="p-2">
+							<span class="text-neutral-100 text-lg"
+								>Play/pause the simulation</span
+							>
+						</td>
+					</tr>
+					<tr>
+						<td class="py-2 pr-2">
+							<kbd
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								>M</kbd
+							>
+						</td>
+						<td class="p-2">
+							<span class="text-neutral-100 text-lg"
+								>Toggle markers drawing</span
+							>
+						</td>
+					</tr>
+					<tr>
+						<td class="py-2 pr-2">
+							<kbd
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								>A</kbd
+							>
+						</td>
+						<td class="p-2">
+							<span class="text-neutral-100 text-lg">Toggle ants drawing</span>
+						</td>
+					</tr>
+					<tr>
+						<td class="py-2 pr-2">
+							<kbd
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								>D</kbd
+							>
+						</td>
+						<td class="p-2">
+							<span class="text-neutral-100 text-lg">Toggle debug mode</span>
+						</td>
+					</tr>
+					<tr>
+						<td class="py-2 pr-2">
+							<kbd
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								>T</kbd
+							>
+						</td>
+						<td class="p-2">
+							<span class="text-neutral-100 text-lg"
+								>Toggle ant tracking mode</span
+							>
+						</td>
+					</tr>
+					<tr>
+						<td class="py-2 pr-2">
+							<kbd
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								>C</kbd
+							>
+						</td>
+						<td class="p-2">
+							<span class="text-neutral-100 text-lg"
+								>Align camera to center</span
+							>
+						</td>
+					</tr>
+					<tr>
+						<td class="py-2 pr-2">
+							<kbd
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								>Delete</kbd
+							>
+						</td>
+						<td class="p-2">
+							<span class="text-neutral-100 text-lg">Remove selected ant</span>
+						</td>
+					</tr>
+					<tr>
+						<td class="py-2 pr-2">
+							<kbd
+								title="Left Mouse Button"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								>LMB</kbd
+							>
+						</td>
+						<td class="p-2">
+							<span class="text-neutral-100 text-lg"
+								>Select ant. When in edit mode draws walls/food</span
+							>
+						</td>
+					</tr>
+					<tr>
+						<td class="py-2 pr-2">
+							<kbd
+								title="Left Mouse Button"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								>Hold LMB</kbd
+							>
+						</td>
+						<td class="p-2">
+							<span class="text-neutral-100 text-lg"
+								>Pan camera (only in normal mode, to pan in edit mode use
+								<kbd
+									title="Middle Mouse Button"
+									class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+									>MMB</kbd
+								>)</span
+							>
+						</td>
+					</tr>
+					<tr>
+						<td class="py-2 pr-2">
+							<kbd
+								title="Right Mouse Button"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								>RMB</kbd
+							>
+						</td>
+						<td class="p-2">
+							<span class="text-neutral-100 text-lg">Place food</span>
+						</td>
+					</tr>
+					<tr>
+						<td class="py-2 pr-2">
+							<kbd
+								title="Middle Mouse Button"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								>MMB</kbd
+							>
+						</td>
+						<td class="p-2">
+							<span class="text-neutral-100 text-lg">Pan camera</span>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
 		<div
 			class="fixed inset-0 border-2 border-red-600 pointer-events-none"
 			data-pause

@@ -11,18 +11,18 @@ export function randomInt(min: number, max: number) {
 export function togglePanelAndButton(
 	isVisible: boolean,
 	panel: HTMLDivElement,
-	button: HTMLButtonElement,
+	button?: HTMLButtonElement,
 ) {
 	isVisible = !isVisible;
 
 	if (!isVisible) {
 		panel.style.display = 'none';
-		button.classList.add('border-red-500');
-		button.classList.remove('border-green-500');
+		button?.classList.add('border-red-500');
+		button?.classList.remove('border-green-500');
 	} else {
 		panel.style.display = 'block';
-		button.classList.add('border-green-500');
-		button.classList.remove('border-red-500');
+		button?.classList.add('border-green-500');
+		button?.classList.remove('border-red-500');
 	}
 
 	return isVisible;

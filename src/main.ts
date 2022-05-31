@@ -111,6 +111,17 @@ const btnFoodBrush = document.getElementById(
 ) as HTMLButtonElement;
 const btnSave = document.getElementById('btn-save') as HTMLButtonElement;
 
+// Controls
+const btnControls = document.getElementById(
+	'btn-controls',
+) as HTMLButtonElement;
+const btnCloseControls = document.getElementById(
+	'btn-close-controls',
+) as HTMLButtonElement;
+const controlsPanel = document.getElementById(
+	'controlsPanel',
+) as HTMLDivElement;
+
 let isRunning = false;
 let isDrawingMarkers = true;
 let isDebugMode = false;
@@ -125,6 +136,7 @@ let isPanMode = false;
 let isColonyPanelVisible = false;
 let isCellPanelVisible = false;
 let isAntPanelVisible = false;
+let isControlsPanelVisible = false;
 
 let lastUpdateTime = 0;
 // let mainLoopAnimationFrame = -1;
@@ -237,6 +249,9 @@ window.addEventListener('keydown', (e) => {
 		case 'KeyM':
 			toggleMarkers();
 			break;
+		case 'KeyA':
+			toggleAnts();
+			break;
 		case 'KeyD':
 			toggleDebug();
 			break;
@@ -245,9 +260,6 @@ window.addEventListener('keydown', (e) => {
 			break;
 		case 'KeyC':
 			alignCamera();
-			break;
-		case 'KeyA':
-			toggleAnts();
 			break;
 		case 'Delete':
 			removeAnt();
@@ -341,6 +353,21 @@ btnAntPanel.addEventListener('click', () => {
 		isAntPanelVisible,
 		antPanel,
 		btnAntPanel,
+	);
+});
+
+btnControls.addEventListener('click', () => {
+	isControlsPanelVisible = togglePanelAndButton(
+		isControlsPanelVisible,
+		controlsPanel,
+	);
+});
+
+btnCloseControls.addEventListener('click', () => {
+	isControlsPanelVisible = true;
+	isControlsPanelVisible = togglePanelAndButton(
+		isControlsPanelVisible,
+		controlsPanel,
 	);
 });
 
