@@ -307,10 +307,6 @@ btnRemove.addEventListener('click', () => {
 	removeAnt();
 });
 
-btnPan.addEventListener('click', () => {
-	togglePanMode();
-});
-
 btnPlay.addEventListener('click', () => {
 	toggleLoop();
 });
@@ -497,6 +493,9 @@ function toggleDebug() {
 
 	colony.isDebugMode = isDebugMode;
 	toggleAntDebug();
+	if (isDebugMode) {
+		isCellPanelVisible = false;
+	}
 	isCellPanelVisible = togglePanelAndButton(
 		isCellPanelVisible,
 		cellPanel,
