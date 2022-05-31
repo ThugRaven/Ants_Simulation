@@ -1,22 +1,18 @@
 // CANVAS
-
 export const CanvasOptions = {
 	WIDTH: 1600 * 4,
 	HEIGHT: 1200 * 4,
 } as const;
 
 // MARKERS
-
 export enum MarkerTypes {
 	TO_HOME = 0,
 	TO_FOOD = 1,
-	// NO_FOOD = 2,
 }
 
 export const MarkerColors = {
 	TO_HOME: [255, 0, 0],
 	TO_FOOD: [43, 255, 0],
-	// 2: [0, 42, 255],
 } as const;
 
 export const MarkerOptions = {
@@ -25,7 +21,7 @@ export const MarkerOptions = {
 	SIZE: 16,
 } as const;
 
-export const EVAPORATE_AMOUNT = 0.0005;
+export const EVAPORATE_AMOUNT = 0.0002;
 
 // COLONY
 export const ColonyOptions = {
@@ -34,7 +30,7 @@ export const ColonyOptions = {
 	COLONY_MAX_ANTS: 250,
 	COLONY_MAX_FOOD: 1250,
 	ANT_CREATION_PERIOD: 0.15,
-	ANT_COST: 5,
+	ANT_COST: 25,
 };
 
 export enum AntStates {
@@ -70,7 +66,7 @@ export const AntOptions = {
 // FOOD
 export const FoodOptions = {
 	SIZE: 15,
-	PICK_AMOUNT: 1,
+	PICK_AMOUNT: 10,
 } as const;
 
 // BUTTONS
