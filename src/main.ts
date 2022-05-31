@@ -146,7 +146,7 @@ let cameraOffset = {
 	y: 0,
 };
 
-let brushSize = 7;
+let brushSize = 5;
 
 // Grids
 let [width, height] = calcWorldSize({
@@ -278,7 +278,6 @@ canvasContainer.addEventListener('click', (e) => {
 
 canvasContainer.addEventListener('contextmenu', (e) => {
 	e.preventDefault();
-	console.log(e);
 	let target = createVector(
 		// (mouseX - cameraOffset.x * canvasScale) / canvasScale,
 		// (mouseY - cameraOffset.y * canvasScale) / canvasScale,
@@ -386,7 +385,6 @@ btnSave.addEventListener('click', () => {
 			worldGrid.height,
 		);
 
-		console.log(imageData);
 		ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
 
 		for (let i = 0; i < imageData.data.length; i += 4) {
@@ -736,7 +734,7 @@ function main(currentTime: number) {
 
 	const deltaTime = (currentTime - lastUpdateTime) / 1000;
 
-	console.time('Frame time: ');
+	// console.time('Frame time: ');
 
 	// if (deltaTime < 1 / 25) {
 	// 	return;
@@ -799,6 +797,6 @@ function main(currentTime: number) {
 
 	updateColonyInfo();
 
-	console.timeEnd('Frame time: ');
+	// console.timeEnd('Frame time: ');
 	lastUpdateTime = currentTime;
 }
