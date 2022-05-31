@@ -1,3 +1,3 @@
 export default {
-	base: 'Ants_Simulation',
+	base: '/Ants_Simulation/',
 };
