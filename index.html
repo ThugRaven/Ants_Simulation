@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<link rel="icon" type="image/svg+xml" href="/Ants_Simulation/assets/favicon.17e50649.svg" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
+			rel="stylesheet"
+		/>
+		<title>Ants Simulation</title>
+		<script type="module" crossorigin src="/Ants_Simulation/assets/index.114b9a28.js"></script>
+		<link rel="stylesheet" href="/Ants_Simulation/assets/index.0cd830dd.css">
+	</head>
+	<body class="bg-black h-screen overflow-hidden flex flex-col">
+		<header class="bg-neutral-800 flex">
+			<div class="flex gap-2 p-2 w-full justify-start">
+				<!-- <button
+					id="btn-controls"
+					class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 p-3 rounded-lg shadow-md aspect-square flex justify-center items-center"
+					title="Controls"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						enable-background="new 0 0 24 24"
+						height="24px"
+						viewBox="0 0 24 24"
+						width="24px"
+						fill="#000000"
+						class="w-8 h-8 fill-white"
+					>
+						<g><rect fill="none" height="24" width="24" /></g>
+						<g>
+							<path
+								d="M11.07,12.85c0.77-1.39,2.25-2.21,3.11-3.44c0.91-1.29,0.4-3.7-2.18-3.7c-1.69,0-2.52,1.28-2.87,2.34L6.54,6.96 C7.25,4.83,9.18,3,11.99,3c2.35,0,3.96,1.07,4.78,2.41c0.7,1.15,1.11,3.3,0.03,4.9c-1.2,1.77-2.35,2.31-2.97,3.45 c-0.25,0.46-0.35,0.76-0.35,2.24h-2.89C10.58,15.22,10.46,13.95,11.07,12.85z M14,20c0,1.1-0.9,2-2,2s-2-0.9-2-2c0-1.1,0.9-2,2-2 S14,18.9,14,20z"
+							/>
+						</g>
+					</svg>
+				</button> -->
+			</div>
+			<div class="flex gap-2 p-2 justify-center">
+				<button
+					id="btn-play"
+					class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 p-3 rounded-lg shadow-md aspect-square flex justify-center items-center"
+					title="Play the simulation (Space)"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						height="24px"
+						viewBox="0 0 24 24"
+						width="24px"
+						fill="#000000"
+						class="w-8 h-8 fill-white"
+					>
+						<path d="M0 0h24v24H0z" fill="none" />
+						<path d="M8 5v14l11-7z" />
+					</svg>
+				</button>
+				<button
+					id="btn-pause"
+					class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 p-3 rounded-lg shadow-md aspect-square justify-center items-center hidden"
+					title="Pause the simulation (Space)"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						height="24px"
+						viewBox="0 0 24 24"
+						width="24px"
+						fill="#000000"
+						class="w-8 h-8 fill-white"
+					>
+						<path d="M0 0h24v24H0V0z" fill="none" />
+						<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+					</svg>
+				</button>
+			</div>
+			<div class="flex gap-2 p-2 w-full justify-end">
+				<button
+					id="btn-edit-mode"
+					class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 p-3 rounded-lg shadow-md border-2 border-red-500 aspect-square flex justify-center items-center"
+					title="Toggle edit mode"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						height="24px"
+						viewBox="0 0 24 24"
+						width="24px"
+						fill="#000000"
+						class="w-8 h-8 fill-white"
+					>
+						<path d="M0 0h24v24H0V0z" fill="none" />
+						<path
+							d="M14.06 9.02l.92.92L5.92 19H5v-.92l9.06-9.06M17.66 3c-.25 0-.51.1-.7.29l-1.83 1.83 3.75 3.75 1.83-1.83c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29zm-3.6 3.19L3 17.25V21h3.75L17.81 9.94l-3.75-3.75z"
+						/>
+					</svg>
+				</button>
+				<button
+					id="btn-colony-panel"
+					class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 p-3 rounded-lg shadow-md border-2 border-red-500 aspect-square flex justify-center items-center"
+					title="Toggle colony panel visibility"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						height="24px"
+						viewBox="0 0 24 24"
+						width="24px"
+						fill="#000000"
+						class="w-8 h-8 fill-white"
+					>
+						<path d="M0 0h24v24H0z" fill="none" />
+						<path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+					</svg>
+				</button>
+				<button
+					id="btn-cell-panel"
+					class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 p-3 rounded-lg shadow-md border-2 border-red-500 aspect-square flex justify-center items-center"
+					title="Toggle cell panel visibility"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						enable-background="new 0 0 24 24"
+						height="24px"
+						viewBox="0 0 24 24"
+						width="24px"
+						fill="#000000"
+						class="w-8 h-8 fill-white"
+					>
+						<g><rect fill="none" height="24" width="24" /></g>
+						<g>
+							<g>
+								<rect height="8" width="8" x="3" y="3" />
+								<rect height="8" width="8" x="3" y="13" />
+								<rect height="8" width="8" x="13" y="3" />
+								<rect height="8" width="8" x="13" y="13" />
+							</g>
+						</g>
+					</svg>
+				</button>
+				<button
+					id="btn-ant-panel"
+					class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 p-3 rounded-lg shadow-md border-2 border-red-500 aspect-square flex justify-center items-center"
+					title="Toggle ant panel visibility"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						version="1.1"
+						viewBox="0 0 24 34"
+						height="34"
+						width="24"
+						fill="#FFFFFF"
+						id="antIcon"
+						class="w-8 h-8 fill-white"
+					>
+						<g transform="translate(-88.87054,-162.53213)">
+							<path
+								d="m 95.622276,163.1294 v 5.26257 l 2.944768,2.07434 -0.97677,1.07966 0.0045,4.21225 2.291972,1.56002 v 0.49978 l -1.099034,0.42216 -3.162998,-2.15442 -0.01589,-2.62243 -4.904581,-3.26317 v 0.74725 l 4.264005,3.04289 v 2.52634 l 3.607365,2.39706 v 1.16695 l -1.563396,0.8346 -3.51128,-2.36551 h -4.476611 l 0.40638,0.6575 3.733553,0.002 3.913626,2.60228 1.49741,-0.97774 v 2.38976 l -1.461511,-0.97046 -4.101838,2.69278 -0.01362,2.73451 -2.294165,1.4193 v 0.60411 h 0.502454 l 2.448252,-1.66435 v -2.5227 l 3.497295,-2.33638 1.52727,1.08692 1.527258,1.08449 -3.599373,2.38974 v 5.41105 l 4.101843,2.78231 h 0.16258 0.16008 l 4.1018,-2.78231 v -5.41105 l -3.59934,-2.38974 1.52727,-1.08449 1.52727,-1.08692 3.49729,2.33638 v 2.5227 l 2.4483,1.66435 h 0.50245 v -0.60411 l -2.29416,-1.4193 -0.0136,-2.73451 -4.10179,-2.69278 -1.46151,0.97046 v -2.38976 l 1.49741,0.97774 3.91362,-2.60228 3.73354,-0.002 0.40638,-0.6575 h -4.47636 l -3.51131,2.36551 -1.56342,-0.8346 v -1.16695 l 3.60738,-2.39706 v -2.52634 l 4.26396,-3.04289 v -0.74725 l -4.90458,3.26317 -0.0159,2.62243 -3.16296,2.15442 -1.09904,-0.42216 v -0.49978 l 2.29198,-1.56002 0.005,-4.21225 -0.97677,-1.07966 2.94473,-2.07434 v -5.26257 h -0.65627 v 4.88846 l -3.01684,2.07677 -1.57337,-0.84187 -1.57554,0.84187 -3.016767,-2.07677 v -4.88846 z"
+							/>
+						</g>
+					</svg>
+				</button>
+			</div>
+		</header>
+		<main class="h-full overflow-hidden relative">
+			<div
+				class="absolute inset-0 flex items-start justify-end gap-2 p-2 z-10 pointer-events-none text-white"
+			>
+				<div
+					id="editPanel"
+					class="bg-neutral-800 rounded-lg p-4 pointer-events-auto hidden"
+				>
+					<h2 class="text-4xl font-bold text-center">Brush</h2>
+					<div
+						class="bg-neutral-700 w-full flex items-center justify-center rounded-lg my-2 h-20"
+					>
+						<div
+							class="m-2 aspect-square rounded-full bg-black"
+							data-brush-preview
+						></div>
+					</div>
+					<div class="flex flex-col items-center justify-center gap-2">
+						<span
+							class="text-neutral-100 text-2xl font-bold"
+							data-brush-size
+						></span>
+						<input
+							type="range"
+							id="brushSizeInput"
+							min="1"
+							max="75"
+							step="2"
+							class="accent-red-500"
+						/>
+					</div>
+					<h2 class="text-4xl font-bold text-center">Brushes</h2>
+					<div class="grid grid-cols-2 items-center justify-center gap-2 my-2">
+						<button
+							id="btn-wall-brush"
+							class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 px-4 py-2 rounded-lg border-2 border-red-500 shadow-md"
+							title="Wall brush"
+						>
+							Wall
+						</button>
+						<button
+							id="btn-food-brush"
+							class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 px-4 py-2 rounded-lg border-2 border-red-500 shadow-md"
+							title="Food brush"
+						>
+							Food
+						</button>
+					</div>
+					<button
+						id="btn-save"
+						class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 text-xl font-bold px-4 py-2 w-full rounded-lg shadow-md"
+						title="Save edit"
+					>
+						Save
+					</button>
+				</div>
+				<div
+					id="colonyPanel"
+					class="bg-neutral-800 rounded-lg p-4 pointer-events-auto"
+				>
+					<h2 class="text-4xl font-bold text-center">Colony</h2>
+					<div
+						class="bg-neutral-700 w-full flex items-center justify-center rounded-lg my-2"
+					>
+						<div
+							class="m-2 w-1/4 h-full aspect-square rounded-full bg-black"
+							data-colony-preview
+						></div>
+					</div>
+					<ul
+						class="flex flex-col items-center justify-center w-full gap-2 list-none my-2"
+					>
+						<li
+							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						>
+							<span class="text-lg font-bold">Population</span>
+							<span class="text-neutral-100" data-colony-pop>- | -</span>
+						</li>
+						<li
+							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						>
+							<span class="text-lg font-bold">Food</span>
+							<span class="text-neutral-100" data-colony-food>- | -</span>
+						</li>
+					</ul>
+				</div>
+				<div
+					id="cellPanel"
+					class="bg-neutral-800 rounded-lg p-4 pointer-events-auto hidden"
+				>
+					<h2 class="text-4xl font-bold text-center">Cell</h2>
+					<div
+						class="bg-neutral-700 w-full flex items-center justify-center rounded-lg my-2"
+					>
+						<div
+							class="m-2 w-1/4 h-full aspect-square bg-black"
+							data-cell-preview
+						></div>
+					</div>
+					<ul
+						class="flex flex-col items-center justify-center w-full gap-2 list-none my-2"
+					>
+						<li
+							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						>
+							<span class="text-lg font-bold">Intensity - To Home</span>
+							<span class="text-neutral-100" data-intensity-home>-</span>
+						</li>
+						<li
+							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						>
+							<span class="text-lg font-bold">Intensity - To Food</span>
+							<span class="text-neutral-100" data-intensity-food>-</span>
+						</li>
+						<li
+							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						>
+							<span class="text-lg font-bold">Food Quantity</span>
+							<span class="text-neutral-100" data-cell-food>-</span>
+						</li>
+					</ul>
+				</div>
+				<div
+					id="antPanel"
+					class="bg-neutral-800 rounded-lg p-4 pointer-events-auto hidden"
+				>
+					<h2 class="text-4xl font-bold text-center">Ant preview</h2>
+					<div
+						class="bg-neutral-700 w-full flex items-center justify-center rounded-lg my-2"
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							version="1.1"
+							viewBox="0 0 24 34"
+							height="34"
+							width="24"
+							fill="#FFFFFF"
+							id="antIcon"
+							class="m-2 rotate-90 w-1/4 h-full"
+						>
+							<g transform="translate(-88.87054,-162.53213)">
+								<path
+									d="m 95.622276,163.1294 v 5.26257 l 2.944768,2.07434 -0.97677,1.07966 0.0045,4.21225 2.291972,1.56002 v 0.49978 l -1.099034,0.42216 -3.162998,-2.15442 -0.01589,-2.62243 -4.904581,-3.26317 v 0.74725 l 4.264005,3.04289 v 2.52634 l 3.607365,2.39706 v 1.16695 l -1.563396,0.8346 -3.51128,-2.36551 h -4.476611 l 0.40638,0.6575 3.733553,0.002 3.913626,2.60228 1.49741,-0.97774 v 2.38976 l -1.461511,-0.97046 -4.101838,2.69278 -0.01362,2.73451 -2.294165,1.4193 v 0.60411 h 0.502454 l 2.448252,-1.66435 v -2.5227 l 3.497295,-2.33638 1.52727,1.08692 1.527258,1.08449 -3.599373,2.38974 v 5.41105 l 4.101843,2.78231 h 0.16258 0.16008 l 4.1018,-2.78231 v -5.41105 l -3.59934,-2.38974 1.52727,-1.08449 1.52727,-1.08692 3.49729,2.33638 v 2.5227 l 2.4483,1.66435 h 0.50245 v -0.60411 l -2.29416,-1.4193 -0.0136,-2.73451 -4.10179,-2.69278 -1.46151,0.97046 v -2.38976 l 1.49741,0.97774 3.91362,-2.60228 3.73354,-0.002 0.40638,-0.6575 h -4.47636 l -3.51131,2.36551 -1.56342,-0.8346 v -1.16695 l 3.60738,-2.39706 v -2.52634 l 4.26396,-3.04289 v -0.74725 l -4.90458,3.26317 -0.0159,2.62243 -3.16296,2.15442 -1.09904,-0.42216 v -0.49978 l 2.29198,-1.56002 0.005,-4.21225 -0.97677,-1.07966 2.94473,-2.07434 v -5.26257 h -0.65627 v 4.88846 l -3.01684,2.07677 -1.57337,-0.84187 -1.57554,0.84187 -3.016767,-2.07677 v -4.88846 z"
+								/>
+							</g>
+						</svg>
+					</div>
+					<input
+						type="color"
+						class="w-full m-0 bg-neutral-800 cursor-pointer"
+					/>
+					<h3 class="text-2xl mt-2">Selected ant</h3>
+					<ul
+						class="flex flex-col items-center justify-center w-full gap-2 list-none my-2"
+					>
+						<li
+							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						>
+							<span class="text-lg font-bold">ID</span>
+							<span class="text-neutral-100" data-id>-</span>
+						</li>
+						<li
+							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						>
+							<span class="text-lg font-bold">Position</span>
+							<span class="text-neutral-100" data-pos>- : -</span>
+						</li>
+						<li
+							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						>
+							<span class="text-lg font-bold">Velocity</span>
+							<span class="text-neutral-100" data-vel>- : -</span>
+						</li>
+						<li
+							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						>
+							<span class="text-lg font-bold">State</span>
+							<span class="text-neutral-100" data-state>-</span>
+						</li>
+					</ul>
+					<div class="flex w-full items-center justify-evenly">
+						<button
+							id="btn-track"
+							class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 px-4 py-2 rounded-lg border-2 border-red-500 shadow-md"
+							title="Track ant (T)"
+						>
+							Track
+						</button>
+						<button
+							id="btn-remove"
+							class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 px-4 py-2 rounded-lg shadow-md"
+							title="Remove ant (Delete)"
+						>
+							Remove
+						</button>
+					</div>
+				</div>
+			</div>
+			<div id="canvas-container" class="">
+				<div id="camera-container" class="origin-top-left">
+					<!--  outline outline-white outline-1 -->
+					<canvas id="canvas-markers" class="origin-top-left"></canvas>
+					<canvas
+						id="canvas-food"
+						class="origin-top-left absolute inset-0"
+					></canvas>
+					<canvas id="canvas" class="absolute inset-0"></canvas>
+					<canvas id="canvas-colony" class="absolute inset-0"></canvas>
+					<canvas
+						id="canvas-walls"
+						class="outline outline-white outline-1 absolute inset-0 origin-top-left"
+					></canvas>
+					<canvas
+						id="canvas-edit"
+						class="absolute inset-0 origin-top-left hidden opacity-50"
+					></canvas>
+					<canvas
+						id="canvas-edit-preview"
+						class="absolute inset-0 origin-top-left hidden opacity-50"
+					></canvas>
+				</div>
+			</div>
+		</main>
+		<aside
+			class="fixed top-2 right-2 text-white flex flex-col items-center justify-center gap-2 w-[18rem]"
+		></aside>
+		<div class="fixed bottom-2 right-2 flex flex-col gap-2">
+			<button
+				id="btn-pan"
+				class="bg-neutral-800 hover:bg-neutral-700 focus-visible:bg-neutral-700 p-3 rounded-lg shadow-md"
+				title="Pan mode (LMB|MMB)"
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					height="24px"
+					viewBox="0 0 24 24"
+					width="24px"
+					class="w-8 h-8 fill-white"
+				>
+					<path d="M0 0h24v24H0z" fill="none" />
+					<path
+						d="M18 24h-6.55c-1.08 0-2.14-.45-2.89-1.23l-7.3-7.61 2.07-1.83c.62-.55 1.53-.66 2.26-.27L8 14.34V4.79c0-1.38 1.12-2.5 2.5-2.5.17 0 .34.02.51.05.09-1.3 1.17-2.33 2.49-2.33.86 0 1.61.43 2.06 1.09.29-.12.61-.18.94-.18 1.38 0 2.5 1.12 2.5 2.5v.28c.16-.03.33-.05.5-.05 1.38 0 2.5 1.12 2.5 2.5V20c0 2.21-1.79 4-4 4zM4.14 15.28l5.86 6.1c.38.39.9.62 1.44.62H18c1.1 0 2-.9 2-2V6.15c0-.28-.22-.5-.5-.5s-.5.22-.5.5V12h-2V3.42c0-.28-.22-.5-.5-.5s-.5.22-.5.5V12h-2V2.51c0-.28-.22-.5-.5-.5s-.5.22-.5.5V12h-2V4.79c0-.28-.22-.5-.5-.5s-.5.23-.5.5v12.87l-5.35-2.83-.51.45z"
+					/>
+				</svg>
+			</button>
+			<button
+				id="btn-fullscreen"
+				class="bg-neutral-800 hover:bg-neutral-700 focus-visible:bg-neutral-700 p-3 rounded-lg shadow-md"
+				title="Center screen (C)"
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					height="24px"
+					viewBox="0 0 24 24"
+					width="24px"
+					class="w-8 h-8 fill-white"
+				>
+					<path d="M0 0h24v24H0V0z" fill="none" />
+					<path
+						d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"
+					/>
+				</svg>
+			</button>
+		</div>
+
+		<div
+			class="fixed inset-0 border-2 border-red-600 pointer-events-none"
+			data-pause
+		></div>
+		
+	</body>
+</html>
