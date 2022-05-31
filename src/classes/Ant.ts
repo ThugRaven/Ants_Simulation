@@ -2,7 +2,6 @@ import {
 	AntOptions,
 	AntStates,
 	ColonyOptions,
-	FoodOptions,
 	MarkerTypes,
 } from '../constants';
 import Colony from './Colony';
@@ -36,6 +35,8 @@ export default class Ant {
 	internalClock: number;
 	markerClock: number;
 	isDead: boolean;
+	freedomCoef: number;
+	foodAmount: number;
 
 	constructor(
 		ctx: CanvasRenderingContext2D,
@@ -48,8 +49,8 @@ export default class Ant {
 		this.pos = createVector(options.pos.x, options.pos.y);
 		this.vel = createVector(0, 0);
 		this.acc = createVector(0, 0);
-		this.maxSpeed = 4 * 85;
-		this.maxForce = 0.25 * 85;
+		this.maxSpeed = 4;
+		this.maxForce = 0.25;
 		this.state = AntStates.TO_FOOD;
 		this.debug = options.debug || false;
 		this.wanderTheta = random(0, Math.PI * 2);
@@ -57,22 +58,28 @@ export default class Ant {
 		this.internalClock = 0;
 		this.markerClock = random(0, AntOptions.MARKER_PERIOD);
 		this.isDead = false;
+		this.freedomCoef = random(0.01, 0.1);
+		this.foodAmount = 0;
 	}
 
-	seek(target: Vector, dt: number) {
+	seek(target: Vector) {
 		if (this.debug) {
 			this.ctx.strokeStyle = 'white';
 			line(this.ctx, target.x, target.y, this.pos.x, this.pos.y);
 		}
 
+		if (Math.random() < this.freedomCoef) {
+			return;
+		}
+
 		let force = target.copy().sub(this.pos);
-		force.setMag(this.maxSpeed * dt);
+		force.setMag(this.maxSpeed);
 		force.sub(this.vel);
-		force.limit(this.maxForce * dt);
+		force.limit(this.maxForce);
 		this.applyForce(force);
 	}
 
-	wander(dt: number) {
+	wander() {
 		let wanderPoint = this.vel.copy();
 		wanderPoint.setMag(AntOptions.WANDER_POINT_MAGNITUDE);
 		wanderPoint.add(this.pos);
@@ -101,7 +108,8 @@ export default class Ant {
 		}
 
 		let steer = wanderPoint.sub(this.pos);
-		steer.setMag(this.maxForce * dt);
+		steer.setMag(this.maxForce);
+		steer.limit(this.maxForce);
 		this.applyForce(steer);
 
 		let displaceRange = AntOptions.WANDER_DISPLACE_RANGE;
@@ -126,7 +134,7 @@ export default class Ant {
 		}
 
 		this.vel.add(this.acc);
-		this.vel.limit(this.maxSpeed * dt);
+		this.vel.limit(this.maxSpeed);
 		this.pos.add(this.vel);
 		this.acc.set(0, 0);
 	}
@@ -239,7 +247,7 @@ export default class Ant {
 		}
 	}
 
-	search(worldGrid: WorldGrid, colony: Colony, dt: number) {
+	search(worldGrid: WorldGrid, colony: Colony) {
 		if (this.debug) {
 			this.perceptionDraw = new Set();
 		}
@@ -258,7 +266,7 @@ export default class Ant {
 			(this.state === AntStates.TO_FOOD || this.state === AntStates.REFILL)
 		) {
 			this.state = AntStates.TO_HOME;
-			worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y)?.pick();
+			this.foodAmount = cell.pick();
 			this.vel.setHeading(this.vel.heading() + Math.PI);
 			this.internalClock = 0;
 			return;
@@ -299,7 +307,7 @@ export default class Ant {
 						(this.state === AntStates.REFILL ||
 							this.state === AntStates.TO_HOME)
 					) {
-						this.seek(perceptionPoint, dt);
+						this.seek(perceptionPoint);
 						return;
 					}
 
@@ -316,7 +324,7 @@ export default class Ant {
 						}
 
 						foundFood = true;
-						this.seek(perceptionPoint, dt);
+						this.seek(perceptionPoint);
 						return;
 					}
 
@@ -346,7 +354,7 @@ export default class Ant {
 						if (dist <= distanceBetween + 10) {
 							let force = perceptionPoint.sub(this.pos);
 
-							force.setMag(this.maxSpeed * dt);
+							force.setMag(this.maxSpeed);
 							force.sub(this.vel);
 							// force.limit(this.maxForce * dt);
 							force.mult(-1);
@@ -358,12 +366,12 @@ export default class Ant {
 		}
 
 		if (maxIntensityPoint) {
-			this.seek(maxIntensityPoint, dt);
+			this.seek(maxIntensityPoint);
 			return;
 		}
 
 		if (!foundFood) {
-			this.wander(dt);
+			this.wander();
 		}
 	}
 
@@ -375,9 +383,9 @@ export default class Ant {
 		) {
 			if (this.state === AntStates.TO_HOME) {
 				this.vel.setHeading(this.vel.heading() + Math.PI);
+				colony.addFood(this.foodAmount);
 			}
 			this.state = AntStates.TO_FOOD;
-			colony.addFood(FoodOptions.PICK_AMOUNT);
 			this.internalClock = 0;
 		}
 	}
@@ -390,7 +398,7 @@ export default class Ant {
 
 			let intensity =
 				AntOptions.MARKER_DEFAULT_INTENSITY *
-				Math.exp(-0.05 * this.internalClock);
+				Math.exp(-0.15 * this.internalClock);
 
 			let state = -1;
 			switch (this.state) {

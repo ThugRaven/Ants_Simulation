@@ -81,7 +81,7 @@ export default class Colony {
 		for (let i = 0; i < this.ants.length; i++) {
 			if (this.isRunning) {
 				// Update ants
-				this.ants[i].search(worldGrid, this, dt);
+				this.ants[i].search(worldGrid, this);
 				this.ants[i].update(dt);
 				this.ants[i].addMarker(worldGrid, dt);
 				this.ants[i].checkColony(this);
@@ -159,7 +159,6 @@ export default class Colony {
 			}
 		}
 
-		console.log(newAnt);
 		this.selectedAnt = newAnt;
 		return newAnt;
 	}
