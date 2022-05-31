@@ -127,8 +127,7 @@ let isCellPanelVisible = false;
 let isAntPanelVisible = false;
 
 let lastUpdateTime = 0;
-const SPEED = 10;
-let mainLoopAnimationFrame = -1;
+// let mainLoopAnimationFrame = -1;
 
 let offsetY = canvasContainer.getBoundingClientRect().top;
 let mouseX = 0;
@@ -263,7 +262,7 @@ canvasContainer.addEventListener('mousemove', (e) => {
 	mouseY = e.pageY - offsetY;
 });
 
-canvasContainer.addEventListener('click', (e) => {
+canvasContainer.addEventListener('click', () => {
 	// Abort click after panning
 	if (wasPanning) {
 		wasPanning = false;
@@ -434,7 +433,7 @@ setup();
 setupMousePanning();
 alignCamera();
 
-mainLoopAnimationFrame = window.requestAnimationFrame(main);
+window.requestAnimationFrame(main);
 
 function setup() {
 	if (
@@ -729,7 +728,7 @@ function main(currentTime: number) {
 	)
 		return;
 
-	mainLoopAnimationFrame = window.requestAnimationFrame(main);
+	window.requestAnimationFrame(main);
 
 	const deltaTime = (currentTime - lastUpdateTime) / 1000;
 
