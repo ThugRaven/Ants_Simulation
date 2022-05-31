@@ -426,7 +426,7 @@ function brushInfo() {
 
 // Set default value of brush size
 brushSizeInput.value = brushSize.toString();
-brushSizeText.textContent = `${brushSize} px`;
+brushInfo();
 isWallMode = toggleButton(isWallMode, btnWallBrush);
 
 setup();
