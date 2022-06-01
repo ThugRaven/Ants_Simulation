@@ -421,17 +421,17 @@ btnSave.addEventListener('click', () => {
 			if (g <= 160 && g > 0 && g > r && g > b) {
 				// Food
 				cell.food.quantity = Math.round(100 * (a / 255));
-			} else if (r > 0 && g > 0 && b > 0 && r === g && g === b) {
+			} else if (r > 10 && g > 10 && b > 10 && r === g && g === b) {
 				// Wall
-				ctxWalls;
 				cell.wall = 1;
-			} else {
+			} else if (a > 0) {
 				cell.food.quantity = 0;
 				cell.wall = 0;
 			}
 		}
 		worldGrid.initializeBorderWalls();
 		worldGrid.drawWalls(ctxWalls);
+		ctxEdit.clearRect(0, 0, worldGrid.width, worldGrid.height);
 
 		// Hide edit panel after save
 		isEditMode = togglePanelAndButton(isEditMode, editPanel, btnEditMode);
@@ -760,6 +760,7 @@ function main(currentTime: number) {
 	const deltaTime = (currentTime - lastUpdateTime) / 1000;
 
 	// console.time('Frame time: ');
+	// console.log(deltaTime);
 
 	// if (deltaTime < 1 / 25) {
 	// 	return;
