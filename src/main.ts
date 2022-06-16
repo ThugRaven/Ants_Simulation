@@ -420,10 +420,15 @@ btnSave.addEventListener('click', () => {
 
 			if (g <= 160 && g > 0 && g > r && g > b) {
 				// Food
-				cell.food.quantity = Math.round(100 * (a / 255));
+				if (cell.wall !== 1) {
+					cell.food.quantity = Math.round(100 * (a / 255));
+				} else {
+					cell.wall = 1;
+				}
 			} else if (r > 10 && g > 10 && b > 10 && r === g && g === b) {
 				// Wall
 				cell.wall = 1;
+				cell.food.quantity = 0;
 			} else if (a > 0) {
 				cell.food.quantity = 0;
 				cell.wall = 0;
