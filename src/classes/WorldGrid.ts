@@ -41,8 +41,13 @@ export default class WorldGrid {
 
 	update() {
 		for (const cell of this.cells) {
-			cell.marker.update();
+			this.updateCell(cell);
 		}
+	}
+
+	updateCell(cell: WorldCell) {
+		cell.marker.update();
+		cell.density *= 0.99;
 	}
 
 	addMarker(x: number, y: number, type: MarkerTypes, intensity: number) {
@@ -90,7 +95,7 @@ export default class WorldGrid {
 			markersImageData.data[i + 3] = 255; // A value
 
 			if (update) {
-				cell.marker.update();
+				this.updateCell(cell);
 			}
 		}
 		ctx.putImageData(markersImageData, 0, 0);
@@ -117,6 +122,29 @@ export default class WorldGrid {
 				}
 			}
 		}
+	}
+
+	drawDensity(
+		ctx: CanvasRenderingContext2D,
+		densityImageData: ImageData,
+		numberOfAnts: number,
+		update = true,
+	) {
+		for (let i = 0; i < densityImageData.data.length; i += 4) {
+			let cell = this.cells[i / 4];
+			let color = cell.density / numberOfAnts;
+
+			// Modify pixel data
+			densityImageData.data[i + 0] = color * 255; // R value
+			densityImageData.data[i + 1] = 0; // G value
+			densityImageData.data[i + 2] = 0; // B value
+			densityImageData.data[i + 3] = 255; // A value
+
+			if (update) {
+				this.updateCell(cell);
+			}
+		}
+		ctx.putImageData(densityImageData, 0, 0);
 	}
 
 	isOnFood(x: number, y: number) {

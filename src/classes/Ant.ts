@@ -249,6 +249,7 @@ export default class Ant {
 		}
 
 		let cell = worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y);
+		cell?.addDensity();
 		if (
 			cell &&
 			cell.food.quantity > 0 &&

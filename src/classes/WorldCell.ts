@@ -5,11 +5,13 @@ export default class WorldCell {
 	marker: Marker;
 	food: Food;
 	wall: number;
+	density: number;
 
 	constructor() {
 		this.marker = new Marker([0, 0]);
 		this.food = new Food(0);
 		this.wall = 0;
+		this.density = 0;
 	}
 
 	update() {
@@ -22,5 +24,9 @@ export default class WorldCell {
 
 	drawWall(ctx: CanvasRenderingContext2D, x: number, y: number) {
 		ctx.fillRect(x, y, 1, 1);
+	}
+
+	addDensity() {
+		this.density++;
 	}
 }

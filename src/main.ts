@@ -124,6 +124,7 @@ const controlsPanel = document.getElementById(
 
 let isRunning = false;
 let isDrawingMarkers = true;
+let isDrawingDensity = false;
 let isDebugMode = false;
 let isTracking = false;
 let isEditMode = false;
@@ -232,6 +233,12 @@ let markersImageData = ctxMarkers?.createImageData(
 	worldGrid.height,
 );
 
+// Density image data
+let densityImageData = ctxMarkers?.createImageData(
+	worldGrid.width,
+	worldGrid.height,
+);
+
 // Colony
 let colony = new Colony({
 	id: 1,
@@ -248,6 +255,9 @@ window.addEventListener('keydown', (e) => {
 			break;
 		case 'KeyM':
 			toggleMarkers();
+			break;
+		case 'KeyN':
+			toggleDensity();
 			break;
 		case 'KeyA':
 			toggleAnts();
@@ -517,6 +527,16 @@ function toggleLoop() {
 
 function toggleMarkers() {
 	isDrawingMarkers = !isDrawingMarkers;
+	if (isDrawingMarkers) {
+		isDrawingDensity = false;
+	}
+}
+
+function toggleDensity() {
+	isDrawingDensity = !isDrawingDensity;
+	if (isDrawingDensity) {
+		isDrawingMarkers = false;
+	}
 }
 
 function toggleDebug() {
@@ -781,9 +801,17 @@ function main(currentTime: number) {
 
 	if (isDrawingMarkers && markersImageData) {
 		worldGrid.drawMarkers(ctxMarkers, markersImageData, isRunning);
+	} else if (isDrawingDensity && densityImageData) {
+		worldGrid.drawDensity(
+			ctxMarkers,
+			densityImageData,
+			colony.ants.length,
+			isRunning,
+		);
 	} else if (isRunning) {
 		worldGrid.update();
 	}
+
 	worldGrid.drawFood(ctxFood);
 
 	let target = createVector(
