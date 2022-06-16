@@ -802,12 +802,7 @@ function main(currentTime: number) {
 	if (isDrawingMarkers && markersImageData) {
 		worldGrid.drawMarkers(ctxMarkers, markersImageData, isRunning);
 	} else if (isDrawingDensity && densityImageData) {
-		worldGrid.drawDensity(
-			ctxMarkers,
-			densityImageData,
-			colony.ants.length,
-			isRunning,
-		);
+		worldGrid.drawDensity(ctxMarkers, densityImageData, isRunning);
 	} else if (isRunning) {
 		worldGrid.update();
 	}

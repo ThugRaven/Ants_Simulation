@@ -127,17 +127,16 @@ export default class WorldGrid {
 	drawDensity(
 		ctx: CanvasRenderingContext2D,
 		densityImageData: ImageData,
-		numberOfAnts: number,
 		update = true,
 	) {
 		for (let i = 0; i < densityImageData.data.length; i += 4) {
 			let cell = this.cells[i / 4];
-			let color = cell.density / numberOfAnts;
+			let ratio = cell.density;
 
 			// Modify pixel data
-			densityImageData.data[i + 0] = color * 255; // R value
-			densityImageData.data[i + 1] = 0; // G value
-			densityImageData.data[i + 2] = 0; // B value
+			densityImageData.data[i + 0] = 4 * ratio; // R value
+			densityImageData.data[i + 1] = ratio; // G value
+			densityImageData.data[i + 2] = ratio; // B value
 			densityImageData.data[i + 3] = 255; // A value
 
 			if (update) {
