@@ -243,15 +243,19 @@ export default class Ant {
 			this.perceptionDraw = new Set();
 		}
 
+		let posAhead = this.vel.copy();
+		posAhead.setMag(AntOptions.IMG_HEIGHT / 2);
+		posAhead.add(this.pos);
+		let cellAhead = worldGrid.getCellFromCoordsSafe(posAhead.x, posAhead.y);
 		let cell = worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y);
 		cell?.addDensity();
 		if (
-			cell &&
-			cell.food.quantity > 0 &&
+			cellAhead &&
+			cellAhead.food.quantity > 0 &&
 			(this.state === AntStates.TO_FOOD || this.state === AntStates.REFILL)
 		) {
 			this.state = AntStates.TO_HOME;
-			this.foodAmount = cell.pick();
+			this.foodAmount = cellAhead.pick();
 			this.vel.setHeading(this.vel.heading() + Math.PI);
 			this.internalClock = 0;
 			return;
