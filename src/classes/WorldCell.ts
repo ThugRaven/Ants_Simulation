@@ -6,12 +6,14 @@ export default class WorldCell {
 	food: Food;
 	wall: number;
 	density: number;
+	colony: boolean;
 
 	constructor() {
 		this.marker = new Marker([0, 0]);
 		this.food = new Food(0);
 		this.wall = 0;
 		this.density = 0;
+		this.colony = false;
 	}
 
 	update() {

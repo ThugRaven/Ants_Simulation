@@ -58,7 +58,11 @@ export default class Colony {
 		this.maxFood = ColonyOptions.COLONY_MAX_FOOD;
 	}
 
-	initialize(antIcon: HTMLImageElement, antCtx: CanvasRenderingContext2D) {
+	initialize(
+		antIcon: HTMLImageElement,
+		antCtx: CanvasRenderingContext2D,
+		worldGrid: WorldGrid,
+	) {
 		this.antIcon = antIcon;
 		this.antCtx = antCtx;
 
@@ -74,6 +78,11 @@ export default class Colony {
 			this.antId++;
 			this.totalAnts++;
 		}
+
+		let cell = worldGrid.getCellFromCoordsSafe(this.x, this.y);
+		if (cell) {
+			cell.colony = true;
+		}
 	}
 
 	updateAndDrawAnts(worldGrid: WorldGrid, dt: number) {
@@ -84,7 +93,6 @@ export default class Colony {
 				this.ants[i].search(worldGrid, this);
 				this.ants[i].update(dt);
 				this.ants[i].addMarker(worldGrid, dt);
-				this.ants[i].checkColony(this);
 
 				// Mark ant for deletion
 				if (this.ants[i].isDead) {

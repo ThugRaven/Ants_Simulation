@@ -505,7 +505,7 @@ function setup() {
 		ant4.src = image64;
 		ant4.onload = () => {
 			ctxAnt!.drawImage(ant4, 100, 50, 24, 34);
-			colony.initialize(ant4, ctxAnt!);
+			colony.initialize(ant4, ctxAnt!, worldGrid);
 		};
 	}
 

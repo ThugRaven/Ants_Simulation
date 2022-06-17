@@ -1,9 +1,4 @@
-import {
-	AntOptions,
-	AntStates,
-	ColonyOptions,
-	MarkerTypes,
-} from '../constants';
+import { AntOptions, AntStates, MarkerTypes } from '../constants';
 import Colony from './Colony';
 import { circle, line } from './Shapes';
 import { random } from './Utils';
@@ -262,6 +257,20 @@ export default class Ant {
 			return;
 		}
 
+		if (
+			cell &&
+			cell.colony &&
+			(this.state === AntStates.REFILL || this.state === AntStates.TO_HOME)
+		) {
+			if (this.state === AntStates.TO_HOME) {
+				this.vel.setHeading(this.vel.heading() + Math.PI);
+				colony.addFood(this.foodAmount);
+			}
+			this.state = AntStates.TO_FOOD;
+			this.internalClock = 0;
+			return;
+		}
+
 		if (Math.random() < this.freedomCoef) {
 			return;
 		}
@@ -275,7 +284,6 @@ export default class Ant {
 		let maxIntensity = 0;
 		let maxIntensityPoint: Vector | null = null;
 		let angle = this.vel.heading();
-		let colonyPos = createVector(colony.x, colony.y);
 
 		for (let x = 1; x <= AntOptions.PERCEPTION_POINTS_VERTICAL; x++) {
 			for (let y = 0; y < AntOptions.PERCEPTION_POINTS_HORIZONTAL; y++) {
@@ -297,7 +305,7 @@ export default class Ant {
 				if (cellPerception) {
 					// Check for colony
 					if (
-						perceptionPoint.dist(colonyPos) <= ColonyOptions.COLONY_RADIUS &&
+						cellPerception.colony &&
 						(this.state === AntStates.REFILL ||
 							this.state === AntStates.TO_HOME)
 					) {
@@ -364,21 +372,6 @@ export default class Ant {
 		}
 
 		this.wander();
-	}
-
-	checkColony(colony: Colony) {
-		let colonyPos = createVector(colony.x, colony.y);
-		if (
-			this.pos.dist(colonyPos) <= ColonyOptions.COLONY_RADIUS &&
-			(this.state === AntStates.REFILL || this.state === AntStates.TO_HOME)
-		) {
-			if (this.state === AntStates.TO_HOME) {
-				this.vel.setHeading(this.vel.heading() + Math.PI);
-				colony.addFood(this.foodAmount);
-			}
-			this.state = AntStates.TO_FOOD;
-			this.internalClock = 0;
-		}
 	}
 
 	addMarker(worldGrid: WorldGrid, dt: number) {
