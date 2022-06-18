@@ -11,8 +11,8 @@
 			rel="stylesheet"
 		/>
 		<title>Ants Simulation</title>
-		<script type="module" crossorigin src="/Ants_Simulation/assets/index.126a0a28.js"></script>
-		<link rel="stylesheet" href="/Ants_Simulation/assets/index.f85a2e87.css">
+		<script type="module" crossorigin src="/Ants_Simulation/assets/index.47a892e4.js"></script>
+		<link rel="stylesheet" href="/Ants_Simulation/assets/index.6c12a380.css">
 	</head>
 	<body class="bg-black h-screen overflow-hidden flex flex-col">
 		<header class="bg-neutral-800 flex">
@@ -163,6 +163,12 @@
 			</div>
 		</header>
 		<main class="h-full overflow-hidden relative">
+			<div
+				class="absolute left-2 top-2 flex flex-col text-white text-xl font-bold z-10"
+			>
+				<span data-fps></span>
+				<span data-ms></span>
+			</div>
 			<div
 				class="absolute inset-0 flex items-start justify-end gap-2 p-2 z-10 pointer-events-none text-white"
 			>
@@ -475,12 +481,38 @@
 						<td class="py-2 pr-2">
 							<kbd
 								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								>F</kbd
+							>
+						</td>
+						<td class="p-2">
+							<span class="text-neutral-100 text-lg"
+								>Toggle performance stats display</span
+							>
+						</td>
+					</tr>
+					<tr>
+						<td class="py-2 pr-2">
+							<kbd
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
 								>M</kbd
 							>
 						</td>
 						<td class="p-2">
 							<span class="text-neutral-100 text-lg"
 								>Toggle markers drawing</span
+							>
+						</td>
+					</tr>
+					<tr>
+						<td class="py-2 pr-2">
+							<kbd
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								>N</kbd
+							>
+						</td>
+						<td class="p-2">
+							<span class="text-neutral-100 text-lg"
+								>Toggle density drawing</span
 							>
 						</td>
 					</tr>
