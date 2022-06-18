@@ -1,4 +1,5 @@
 import Colony from './classes/Colony';
+import PerformanceStats from './classes/PerformanceStats';
 import { circle } from './classes/Shapes';
 import { toggleButton, togglePanelAndButton } from './classes/Utils';
 import { createVector } from './classes/Vector';
@@ -122,6 +123,9 @@ const controlsPanel = document.getElementById(
 	'controlsPanel',
 ) as HTMLDivElement;
 
+const fpsDisplay = document.querySelector('[data-fps]') as HTMLSpanElement;
+const msDisplay = document.querySelector('[data-ms]') as HTMLSpanElement;
+
 let isRunning = false;
 let isDrawingMarkers = true;
 let isDrawingDensity = false;
@@ -133,6 +137,7 @@ let isErasing = false;
 let isWallMode = false;
 let isFoodMode = false;
 let isPanMode = false;
+let isShowingFps = false;
 
 let isColonyPanelVisible = false;
 let isCellPanelVisible = false;
@@ -141,6 +146,7 @@ let isControlsPanelVisible = false;
 
 let lastUpdateTime = 0;
 // let mainLoopAnimationFrame = -1;
+let performanceStats = new PerformanceStats();
 
 let offsetY = canvasContainer.getBoundingClientRect().top;
 let mouseX = 0;
@@ -273,6 +279,9 @@ window.addEventListener('keydown', (e) => {
 			break;
 		case 'Delete':
 			removeAnt();
+			break;
+		case 'KeyF':
+			isShowingFps = !isShowingFps;
 			break;
 		default:
 			break;
@@ -661,6 +670,19 @@ function updateColonyInfo() {
 	colonyPreview!.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
 }
 
+function updatePerformanceDisplay(fps: number, ms: number) {
+	let [fpsAvg, msAvg] = performanceStats.update(fps, ms);
+
+	fpsDisplay.textContent = `${Math.round(fpsAvg * 100) / 100} fps`;
+	msDisplay.textContent = `${Math.round(msAvg * 100) / 100} ms`;
+
+	if (msAvg > 16.7) {
+		msDisplay.classList.add('text-red-500');
+	} else {
+		msDisplay.classList.remove('text-red-500');
+	}
+}
+
 function setupMousePanning() {
 	canvasContainer.addEventListener('mousedown', (e) => {
 		clearTimeout(panningTimeout);
@@ -786,6 +808,9 @@ function main(currentTime: number) {
 
 	// console.time('Frame time: ');
 	// console.log(deltaTime);
+	if (isShowingFps) {
+		updatePerformanceDisplay(1 / deltaTime, currentTime - lastUpdateTime);
+	}
 
 	// if (deltaTime < 1 / 25) {
 	// 	return;
