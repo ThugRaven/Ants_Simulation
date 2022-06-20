@@ -72,3 +72,4 @@ export const FoodOptions = {
 // BUTTONS
 export const RIGHT_BUTTON = 2;
 export const MIDDLE_BUTTON = 4;
+export const CAMERA_MOVE_BY = MarkerOptions.SIZE;

@@ -7,6 +7,7 @@ import WorldCanvas, { calcWorldSize } from './classes/WorldCanvas';
 import WorldGrid from './classes/WorldGrid';
 import {
 	AntStates,
+	CAMERA_MOVE_BY,
 	CanvasOptions,
 	FoodOptions,
 	MarkerOptions,
@@ -282,6 +283,24 @@ window.addEventListener('keydown', (e) => {
 			break;
 		case 'KeyF':
 			isShowingFps = !isShowingFps;
+			break;
+		case 'ArrowUp':
+			moveCamera(0, CAMERA_MOVE_BY);
+			break;
+		case 'ArrowDown':
+			moveCamera(0, -CAMERA_MOVE_BY);
+			break;
+		case 'ArrowLeft':
+			moveCamera(CAMERA_MOVE_BY, 0);
+			break;
+		case 'ArrowRight':
+			moveCamera(-CAMERA_MOVE_BY, 0);
+			break;
+		case 'Minus':
+			zoomCamera(false);
+			break;
+		case 'Equal':
+			zoomCamera(true);
 			break;
 		default:
 			break;
@@ -761,8 +780,29 @@ function panCanvas(event: MouseEvent) {
 	setCamera();
 }
 
-function setCamera() {
-	cameraContainer.style.transform = `scale(${canvasScale}) translate(${cameraOffset.x}px, ${cameraOffset.y}px)`;
+function moveCamera(x: number, y: number) {
+	cameraOffset.x += x;
+	cameraOffset.y += y;
+
+	setCamera();
+}
+
+function zoomCamera(zoomIn: boolean) {
+	let zoomOffset = {
+		x: 0,
+		y: 0,
+	};
+
+	zoomOffset.x = window.innerWidth / 2 / canvasScale - cameraOffset.x;
+	zoomOffset.y = window.innerWidth / 2 / canvasScale - cameraOffset.y;
+
+	canvasScale *= 0.999 ** (zoomIn ? -100 : 100);
+	canvasScale = Math.min(Math.max(0.15, canvasScale), 16);
+
+	cameraOffset.x = window.innerWidth / 2 / canvasScale - zoomOffset.x;
+	cameraOffset.y = window.innerWidth / 2 / canvasScale - zoomOffset.y;
+
+	setCamera();
 }
 
 function alignCamera() {
@@ -788,6 +828,10 @@ function trackAntCamera(x: number, y: number) {
 	cameraOffset.y = antCenter.y;
 
 	setCamera();
+}
+
+function setCamera() {
+	cameraContainer.style.transform = `scale(${canvasScale}) translate(${cameraOffset.x}px, ${cameraOffset.y}px)`;
 }
 
 function main(currentTime: number) {
