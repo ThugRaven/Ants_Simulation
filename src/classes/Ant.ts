@@ -1,4 +1,9 @@
-import { AntOptions, AntStates, MarkerTypes } from '../constants';
+import {
+	AntOptions,
+	AntStates,
+	ColonyOptions,
+	MarkerTypes,
+} from '../constants';
 import Colony from './Colony';
 import { circle, line } from './Shapes';
 import { random } from './Utils';
@@ -269,6 +274,12 @@ export default class Ant {
 			if (this.state === AntStates.TO_HOME) {
 				this.vel.setHeading(this.vel.heading() + Math.PI);
 				colony.addFood(this.foodAmount);
+			}
+			if (
+				this.state === AntStates.REFILL &&
+				!colony.useFood(ColonyOptions.ANT_REFILL_FOOD_AMOUNT)
+			) {
+				return;
 			}
 			this.state = AntStates.TO_FOOD;
 			this.internalClock = 0;
