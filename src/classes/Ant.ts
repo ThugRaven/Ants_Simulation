@@ -289,6 +289,44 @@ export default class Ant {
 		let maxIntensityPoint: Vector | null = null;
 		let angle = this.vel.heading();
 
+		let horizontalOffset = -AntOptions.IMG_WIDTH / 2;
+		let thetaLeft = Math.PI / 4 + angle + Math.PI;
+		let thetaRight = -Math.PI / 4 + angle + Math.PI;
+		let perceptionXLeft = horizontalOffset * Math.cos(thetaLeft);
+		let perceptionYLeft = horizontalOffset * Math.sin(thetaLeft);
+		let perceptionXRight = horizontalOffset * Math.cos(thetaRight);
+		let perceptionYRight = horizontalOffset * Math.sin(thetaRight);
+		let perceptionPointLeft = this.pos
+			.copy()
+			.add(perceptionXLeft, perceptionYLeft);
+		let perceptionPointRight = this.pos
+			.copy()
+			.add(perceptionXRight, perceptionYRight);
+
+		let cellPerceptionLeft = worldGrid.getCellFromCoordsSafe(
+			perceptionPointLeft.x,
+			perceptionPointLeft.y,
+		);
+		let cellPerceptionRight = worldGrid.getCellFromCoordsSafe(
+			perceptionPointRight.x,
+			perceptionPointRight.y,
+		);
+		if (
+			(cellPerceptionLeft && cellPerceptionLeft.wall === 1) ||
+			(cellPerceptionRight && cellPerceptionRight.wall === 1)
+		) {
+			let perceptionPointWall = cellPerceptionLeft
+				? perceptionPointLeft
+				: perceptionPointRight;
+
+			let force = perceptionPointWall.sub(this.pos);
+
+			force.sub(this.vel);
+			force.mult(-1);
+			this.applyForce(force);
+			return;
+		}
+
 		for (let x = 0; x < AntOptions.PERCEPTION_POINTS_HORIZONTAL; x++) {
 			for (let y = 1; y <= AntOptions.PERCEPTION_POINTS_VERTICAL; y++) {
 				let theta =
@@ -315,9 +353,30 @@ export default class Ant {
 							// if (dist <= distanceBetween + 10) {
 							let force = perceptionPoint.sub(this.pos);
 
-							// force.setMag(this.maxSpeed);
+							// let maxForce = 0.002;
+							force.setMag(this.maxSpeed);
 							force.sub(this.vel);
-							// force.limit(this.maxForce * dt);
+							force.limit(this.maxForce);
+							// force.limit(
+							// 	(maxForce / AntOptions.PERCEPTION_POINTS_VERTICAL) *
+							// 		Math.pow(
+							// 			AntOptions.PERCEPTION_POINTS_VERTICAL - y,
+							// 			AntOptions.PERCEPTION_POINTS_VERTICAL - y,
+							// 		),
+							// );
+							if (this.debug) {
+								// console.log(
+								// 	(maxForce / AntOptions.PERCEPTION_POINTS_VERTICAL) *
+								// 		(AntOptions.PERCEPTION_POINTS_VERTICAL - y),
+								// );
+								// console.log(
+								// 	(maxForce / AntOptions.PERCEPTION_POINTS_VERTICAL) *
+								// 		Math.pow(
+								// 			AntOptions.PERCEPTION_POINTS_VERTICAL - y,
+								// 			AntOptions.PERCEPTION_POINTS_VERTICAL - y,
+								// 		),
+								// );
+							}
 							force.mult(-1);
 							this.applyForce(force);
 						}
