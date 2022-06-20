@@ -37,6 +37,7 @@ export default class Ant {
 	isDead: boolean;
 	freedomCoef: number;
 	foodAmount: number;
+	maxAutonomy: number;
 
 	constructor(
 		ctx: CanvasRenderingContext2D,
@@ -60,6 +61,7 @@ export default class Ant {
 		this.isDead = false;
 		this.freedomCoef = random(0.01, 0.1);
 		this.foodAmount = 0;
+		this.maxAutonomy = AntOptions.AUTONOMY_MAX - random(0, 50);
 	}
 
 	seek(target: Vector) {
@@ -125,7 +127,7 @@ export default class Ant {
 			this.state = AntStates.REFILL;
 		}
 
-		if (this.internalClock >= AntOptions.AUTONOMY_MAX) {
+		if (this.internalClock >= this.maxAutonomy) {
 			this.isDead = true;
 		}
 
