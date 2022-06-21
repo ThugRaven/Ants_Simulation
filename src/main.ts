@@ -138,7 +138,7 @@ let isErasing = false;
 let isWallMode = false;
 let isFoodMode = false;
 let isPanMode = false;
-let isShowingFps = false;
+let isShowingFps = true;
 
 let isColonyPanelVisible = false;
 let isCellPanelVisible = false;

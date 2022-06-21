@@ -276,15 +276,13 @@ export default class Ant {
 			if (this.state === AntStates.TO_HOME) {
 				this.vel.setHeading(this.vel.heading() + Math.PI);
 				colony.addFood(this.foodAmount);
-			}
-			if (
+				this.state = AntStates.TO_FOOD;
+				this.internalClock = 0;
+			} else if (
 				this.state === AntStates.REFILL &&
 				!colony.useFood(ColonyOptions.ANT_REFILL_FOOD_AMOUNT)
 			) {
-				return;
 			}
-			this.state = AntStates.TO_FOOD;
-			this.internalClock = 0;
 			return;
 		}
 
