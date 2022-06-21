@@ -1,4 +1,4 @@
-import { AntOptions, ColonyOptions } from '../constants';
+import { AntOptions, ColonyOptions, MarkerOptions } from '../constants';
 import Ant from './Ant';
 import { circle } from './Shapes';
 import { Vector } from './Vector';
@@ -79,9 +79,22 @@ export default class Colony {
 			this.totalAnts++;
 		}
 
-		let cell = worldGrid.getCellFromCoordsSafe(this.x, this.y);
-		if (cell) {
-			cell.colony = true;
+		let size = Math.floor(ColonyOptions.COLONY_RADIUS / MarkerOptions.SIZE);
+
+		for (let i = 0; i < size; i++) {
+			let cellHorizontal = worldGrid.getCellFromCoordsSafe(
+				this.x - (size / 2) * MarkerOptions.SIZE + i * MarkerOptions.SIZE,
+				this.y,
+			);
+			let cellVertical = worldGrid.getCellFromCoordsSafe(
+				this.x,
+				this.y - (size / 2) * MarkerOptions.SIZE + i * MarkerOptions.SIZE,
+			);
+
+			if (cellHorizontal && cellVertical) {
+				cellHorizontal.colony = true;
+				cellVertical.colony = true;
+			}
 		}
 	}
 
