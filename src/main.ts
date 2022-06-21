@@ -327,6 +327,7 @@ canvasContainer.addEventListener('click', () => {
 
 canvasContainer.addEventListener('contextmenu', (e) => {
 	e.preventDefault();
+	if (isEditMode) return;
 	let target = createVector(
 		// (mouseX - cameraOffset.x * canvasScale) / canvasScale,
 		// (mouseY - cameraOffset.y * canvasScale) / canvasScale,
