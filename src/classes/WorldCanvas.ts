@@ -31,10 +31,18 @@ export default class WorldCanvas {
 }
 
 export function calcWorldSize(worldCanvasOptions: WorldCanvasOptions) {
-	let rows = Math.round(worldCanvasOptions.width / worldCanvasOptions.cellSize);
-	let cols = Math.round(
+	let rows = Math.floor(worldCanvasOptions.width / worldCanvasOptions.cellSize);
+	let cols = Math.floor(
 		worldCanvasOptions.height / worldCanvasOptions.cellSize,
 	);
+
+	// Convert rows/cols to odd numbers
+	if (rows % 2 === 0) {
+		rows--;
+	}
+	if (cols % 2 === 0) {
+		cols--;
+	}
 
 	let newWidth = rows * worldCanvasOptions.cellSize;
 	let newHeight = cols * worldCanvasOptions.cellSize;
