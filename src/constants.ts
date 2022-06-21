@@ -31,7 +31,7 @@ export const ColonyOptions = {
 	COLONY_MAX_FOOD: 1250,
 	ANT_CREATION_PERIOD: 0.15,
 	ANT_COST: 30,
-	ANT_REFILL_FOOD_AMOUNT: 1,
+	ANT_REFILL_FOOD_AMOUNT: 0.25,
 };
 
 export enum AntStates {
