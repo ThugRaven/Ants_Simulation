@@ -61,11 +61,11 @@ export default class Marker {
 	}
 
 	update() {
-		if (this.intensity[0] > 0) {
+		if (this.intensity[0] > 0.01) {
 			this.intensity[0] -= EVAPORATE_AMOUNT;
 		} else this.intensity[0] = 0;
 
-		if (this.intensity[1] > 0) {
+		if (this.intensity[1] > 0.01) {
 			this.intensity[1] -= EVAPORATE_AMOUNT;
 		} else this.intensity[1] = 0;
 	}

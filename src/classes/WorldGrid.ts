@@ -47,7 +47,11 @@ export default class WorldGrid {
 
 	updateCell(cell: WorldCell) {
 		cell.marker.update();
-		cell.density *= 0.99;
+		if (cell.density > 0.01) {
+			cell.density *= 0.99;
+		} else {
+			cell.density = 0;
+		}
 	}
 
 	addMarker(x: number, y: number, type: MarkerTypes, intensity: number) {
