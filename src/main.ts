@@ -6,6 +6,7 @@ import { createVector } from './classes/Vector';
 import WorldCanvas, { calcWorldSize } from './classes/WorldCanvas';
 import WorldGrid from './classes/WorldGrid';
 import {
+	AntOptions,
 	AntStates,
 	CAMERA_MOVE_BY,
 	CanvasOptions,
@@ -54,6 +55,10 @@ const antId = document.querySelector<HTMLSpanElement>('[data-id]');
 const antPos = document.querySelector<HTMLSpanElement>('[data-pos]');
 const antVel = document.querySelector<HTMLSpanElement>('[data-vel]');
 const antState = document.querySelector<HTMLSpanElement>('[data-state]');
+const antLifespanPreview = document.querySelector<HTMLDivElement>(
+	'[data-lifespan-preview]',
+);
+const antLifespan = document.querySelector<HTMLSpanElement>('[data-lifespan]');
 const btnTrack = document.getElementById('btn-track') as HTMLButtonElement;
 const btnRemove = document.getElementById('btn-remove') as HTMLButtonElement;
 
@@ -669,6 +674,14 @@ function updateAntInfo() {
 			break;
 	}
 	antState!.textContent = state;
+
+	let refillThreshold = AntOptions.AUTONOMY_REFILL / selectedAnt.maxAutonomy;
+	let autonomy = selectedAnt.internalClock / selectedAnt.maxAutonomy;
+	antLifespanPreview!.style.setProperty('--left', `${refillThreshold * 100}%`);
+	antLifespanPreview!.style.setProperty('--width', `${autonomy * 100}%`);
+	antLifespan!.textContent = `${selectedAnt.internalClock.toFixed(
+		2,
+	)} | ${selectedAnt.maxAutonomy.toFixed(2)}`;
 }
 
 function updateCellInfo(x: number, y: number) {

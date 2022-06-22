@@ -12,3 +12,11 @@ canvas {
 	image-rendering: pixelated;
 	image-rendering: crisp-edges;
 }
+
+.lifespan-preview::before {
+	width: var(--width, 0);
+}
+
+.lifespan-preview::after {
+	left: var(--left, 0);
+}
