@@ -11,8 +11,8 @@
 			rel="stylesheet"
 		/>
 		<title>Ants Simulation</title>
-		<script type="module" crossorigin src="/Ants_Simulation/assets/index.d2f62728.js"></script>
-		<link rel="stylesheet" href="/Ants_Simulation/assets/index.6c12a380.css">
+		<script type="module" crossorigin src="/Ants_Simulation/assets/index.d64c2dae.js"></script>
+		<link rel="stylesheet" href="/Ants_Simulation/assets/index.6032ffa1.css">
 	</head>
 	<body class="bg-black h-screen overflow-hidden flex flex-col">
 		<header class="bg-neutral-800 flex">
@@ -352,6 +352,16 @@
 						>
 							<span class="text-lg font-bold">State</span>
 							<span class="text-neutral-100" data-state>-</span>
+						</li>
+						<li
+							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						>
+							<span class="text-lg font-bold">Lifespan</span>
+							<div
+								class="lifespan-preview relative m-2 w-full h-3 rounded-full overflow-hidden bg-zinc-800 before:absolute before:inset-0 before:bg-red-500 before:rounded-full before:transition-all after:absolute after:top-0 after:bottom-0 after:w-0.5 after:bg-green-500 after:transition-all"
+								data-lifespan-preview
+							></div>
+							<span class="text-neutral-100" data-lifespan>- | -</span>
 						</li>
 					</ul>
 					<div class="flex w-full items-center justify-evenly">
