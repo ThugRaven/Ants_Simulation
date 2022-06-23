@@ -57,20 +57,14 @@ export default class WorldGrid {
 	addMarker(x: number, y: number, type: MarkerTypes, intensity: number) {
 		let cell = this.cells[this.getIndexFromCoords(x, y)];
 		if (type === MarkerTypes.TO_HOME) {
-			if (cell.marker.intensity[0] > 0) {
-				intensity /= 2;
-			}
 			cell.marker.intensity[0] = Math.min(
 				1,
-				cell.marker.intensity[0] + intensity,
+				Math.max(cell.marker.intensity[0], intensity),
 			);
 		} else if (type === MarkerTypes.TO_FOOD) {
-			if (cell.marker.intensity[1] > 0) {
-				intensity /= 2;
-			}
 			cell.marker.intensity[1] = Math.min(
 				1,
-				cell.marker.intensity[1] + intensity,
+				Math.max(cell.marker.intensity[1], intensity),
 			);
 		}
 	}
