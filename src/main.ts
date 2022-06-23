@@ -8,6 +8,7 @@ import WorldGrid from './classes/WorldGrid';
 import {
 	AntOptions,
 	AntStates,
+	BrushOptions,
 	CAMERA_MOVE_BY,
 	CanvasOptions,
 	FoodOptions,
@@ -308,6 +309,12 @@ window.addEventListener('keydown', (e) => {
 		case 'Equal':
 			zoomCamera(true);
 			break;
+		case 'Comma':
+			changeBrushSize(-BrushOptions.STEP);
+			break;
+		case 'Period':
+			changeBrushSize(BrushOptions.STEP);
+			break;
 		default:
 			break;
 	}
@@ -492,18 +499,33 @@ btnSave.addEventListener('click', () => {
 
 brushSizeInput.addEventListener('input', () => {
 	brushSize = parseInt(brushSizeInput.value);
-	brushInfo();
+	updateBrushInfo();
 });
 
-function brushInfo() {
+function setupBrushInput() {
+	brushSizeInput.min = BrushOptions.MIN_SIZE.toString();
+	brushSizeInput.max = BrushOptions.MAX_SIZE.toString();
+	brushSizeInput.step = BrushOptions.STEP.toString();
+	brushSizeInput.value = brushSize.toString();
+}
+
+function updateBrushInfo() {
 	brushSizePreview.style.width = `${brushSize}px`;
 	brushSizePreview.style.height = `${brushSize}px`;
 	brushSizeText.textContent = `${brushSize} px`;
 }
 
-// Set default value of brush size
-brushSizeInput.value = brushSize.toString();
-brushInfo();
+function changeBrushSize(size: number) {
+	brushSize = Math.min(
+		BrushOptions.MAX_SIZE,
+		Math.max(BrushOptions.MIN_SIZE, brushSize + size),
+	);
+	brushSizeInput.value = brushSize.toString();
+	updateBrushInfo();
+}
+
+setupBrushInput();
+updateBrushInfo();
 isWallMode = toggleButton(isWallMode, btnWallBrush);
 
 setup();

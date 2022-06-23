@@ -75,3 +75,10 @@ export const FoodOptions = {
 export const RIGHT_BUTTON = 2;
 export const MIDDLE_BUTTON = 4;
 export const CAMERA_MOVE_BY = MarkerOptions.SIZE;
+
+// BRUSH
+export const BrushOptions = {
+	MIN_SIZE: 1,
+	MAX_SIZE: 75,
+	STEP: 1,
+};
