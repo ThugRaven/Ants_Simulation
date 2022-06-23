@@ -298,6 +298,8 @@ export default class Ant {
 		let distanceBetween =
 			AntOptions.PERCEPTION_RADIUS / AntOptions.PERCEPTION_POINTS_VERTICAL;
 
+		let closestIndex = AntOptions.PERCEPTION_POINTS_VERTICAL + 1;
+		let closestFoodPoint: Vector | null = null;
 		let maxIntensity = 0;
 		let maxIntensityPoint: Vector | null = null;
 		let angle = this.vel.heading();
@@ -362,7 +364,7 @@ export default class Ant {
 					if (cellPerception.wall === 1) {
 						// let dist = perceptionPoint.dist(this.pos);
 
-						if (y == 1) {
+						if (y === 1) {
 							// if (dist <= distanceBetween + 10) {
 							let force = perceptionPoint.sub(this.pos);
 
@@ -392,9 +394,8 @@ export default class Ant {
 							}
 							force.mult(-1);
 							this.applyForce(force);
+							break;
 						}
-
-						break;
 					}
 
 					// Check for colony
@@ -417,10 +418,15 @@ export default class Ant {
 							this.perceptionDraw.add(
 								y * AntOptions.PERCEPTION_POINTS_VERTICAL + x,
 							);
+							console.log(`food: x:${x}, y:${y}`);
 						}
 
-						this.seek(perceptionPoint);
-						return;
+						// this.seek(perceptionPoint);
+						if (y < closestIndex) {
+							closestIndex = y;
+							closestFoodPoint = perceptionPoint;
+						}
+						break;
 					}
 
 					// Check for highest intensity marker
@@ -443,6 +449,11 @@ export default class Ant {
 					}
 				}
 			}
+		}
+
+		if (closestFoodPoint) {
+			this.seek(closestFoodPoint);
+			return;
 		}
 
 		if (maxIntensityPoint) {
