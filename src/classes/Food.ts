@@ -17,10 +17,10 @@ export default class Food {
 	}
 
 	pick() {
-		let difference = Math.max(this.quantity - FoodOptions.PICK_AMOUNT, 0);
+		let difference = this.quantity - FoodOptions.PICK_AMOUNT;
 		this.quantity = Math.max(this.quantity - FoodOptions.PICK_AMOUNT, 0);
-		if (difference < FoodOptions.PICK_AMOUNT) {
-			return difference;
+		if (difference < 0) {
+			return 0;
 		} else {
 			return FoodOptions.PICK_AMOUNT;
 		}

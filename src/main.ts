@@ -700,7 +700,7 @@ function updateColonyInfo() {
 	if (!colony) return;
 
 	colonyPopulation!.textContent = `${colony.ants.length} | ${colony.totalAnts}`;
-	colonyFood!.textContent = `${colony.food} | ${colony.totalFood}`;
+	colonyFood!.textContent = `${colony.food.toFixed(2)} | ${colony.totalFood}`;
 	let color = colony.colonyColor;
 	colonyPreview!.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
 }

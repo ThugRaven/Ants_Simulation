@@ -218,7 +218,7 @@ export default class Colony {
 
 	addFood(quantity: number) {
 		this.food = Math.min(this.food + quantity, this.maxFood);
-		this.totalFood++;
+		this.totalFood += quantity;
 	}
 
 	useFood(quantity: number) {
