@@ -21,6 +21,7 @@ interface AntOptions {
 
 export default class Ant {
 	ctx: CanvasRenderingContext2D;
+	canvasAntInstance: HTMLCanvasElement;
 	antIcon: HTMLImageElement;
 	id: number;
 	pos: Vector;
@@ -41,10 +42,12 @@ export default class Ant {
 
 	constructor(
 		ctx: CanvasRenderingContext2D,
+		canvasAntInstance: HTMLCanvasElement,
 		antIcon: HTMLImageElement,
 		options: AntOptions,
 	) {
 		this.ctx = ctx;
+		this.canvasAntInstance = canvasAntInstance;
 		this.antIcon = antIcon;
 		this.id = options.id;
 		this.pos = createVector(options.pos.x, options.pos.y);
@@ -152,12 +155,17 @@ export default class Ant {
 		}
 
 		// Draw ant
+		// this.ctx.drawImage(
+		// 	this.antIcon,
+		// 	horizontalOffset,
+		// 	verticalOffset,
+		// 	AntOptions.IMG_WIDTH,
+		// 	AntOptions.IMG_HEIGHT,
+		// );
 		this.ctx.drawImage(
-			this.antIcon,
+			this.canvasAntInstance,
 			horizontalOffset,
 			verticalOffset,
-			AntOptions.IMG_WIDTH,
-			AntOptions.IMG_HEIGHT,
 		);
 
 		// Draw debug shapes

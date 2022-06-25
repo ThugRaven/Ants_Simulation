@@ -29,6 +29,9 @@ const btnFullscreen = document.getElementById(
 ) as HTMLButtonElement;
 const btnPan = document.getElementById('btn-pan') as HTMLButtonElement;
 // Canvases
+const canvasAntInstance = document.getElementById(
+	'canvas-instance-ant',
+) as HTMLCanvasElement;
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 const canvasMarkers = document.getElementById(
 	'canvas-markers',
@@ -197,12 +200,19 @@ let foodGrid = new WorldCanvas(canvasFood, {
 canvasFood.style.transform = `scale(${MarkerOptions.SIZE / FoodOptions.SIZE})`;
 let ctxFood = foodGrid.create();
 
-let antGrid = new WorldCanvas(canvas, {
+let antsGrid = new WorldCanvas(canvas, {
 	width: width,
 	height: height,
 	cellSize: MarkerOptions.SIZE,
 });
-let ctxAnt = antGrid.create();
+let ctxAnts = antsGrid.create();
+
+let antGrid = new WorldCanvas(canvasAntInstance, {
+	width: AntOptions.IMG_WIDTH,
+	height: AntOptions.IMG_HEIGHT,
+	cellSize: MarkerOptions.SIZE,
+});
+let ctxAntInstance = antGrid.create();
 
 let colonyGrid = new WorldCanvas(canvasColony, {
 	width: width,
@@ -260,6 +270,7 @@ let colony = new Colony({
 		x: width / 2,
 		y: height / 2,
 	},
+	canvasAntInstance: canvasAntInstance,
 });
 
 window.addEventListener('keydown', (e) => {
@@ -538,7 +549,8 @@ function setup() {
 	if (
 		ctxMarkers == null ||
 		ctxFood == null ||
-		ctxAnt == null ||
+		ctxAntInstance == null ||
+		ctxAnts == null ||
 		ctxColony == null ||
 		ctxWalls == null ||
 		ctxEdit == null ||
@@ -561,8 +573,8 @@ function setup() {
 		let ant4 = new Image();
 		ant4.src = image64;
 		ant4.onload = () => {
-			ctxAnt!.drawImage(ant4, 100, 50, 24, 34);
-			colony.initialize(ant4, ctxAnt!, worldGrid);
+			ctxAnts!.drawImage(ant4, 100, 50, 24, 34);
+			colony.initialize(ant4, ctxAntInstance!, ctxAnts!, worldGrid);
 		};
 	}
 
@@ -876,7 +888,8 @@ function main(currentTime: number) {
 	if (
 		ctxMarkers == null ||
 		ctxFood == null ||
-		ctxAnt == null ||
+		ctxAntInstance == null ||
+		ctxAnts == null ||
 		ctxColony == null ||
 		ctxWalls == null ||
 		ctxEdit == null ||
@@ -897,7 +910,7 @@ function main(currentTime: number) {
 	// if (deltaTime < 1 / 25) {
 	// 	return;
 	// }
-	ctxAnt.clearRect(0, 0, width, height);
+	ctxAnts.clearRect(0, 0, width, height);
 	ctxMarkers.clearRect(0, 0, worldGrid.width, worldGrid.height);
 	ctxFood.clearRect(
 		0,
@@ -951,8 +964,8 @@ function main(currentTime: number) {
 	}
 
 	if (isDebugMode) {
-		ctxAnt.fillStyle = 'red';
-		circle(ctxAnt, target.x, target.y, 4);
+		ctxAnts.fillStyle = 'red';
+		circle(ctxAnts, target.x, target.y, 4);
 		updateCellInfo(target.x, target.y);
 	}
 

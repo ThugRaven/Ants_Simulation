@@ -11,6 +11,7 @@ interface ColonyOptions {
 		y: number;
 	};
 	colonyColor?: number[];
+	canvasAntInstance: HTMLCanvasElement;
 }
 
 export default class Colony {
@@ -28,7 +29,8 @@ export default class Colony {
 	isDrawingAnts: boolean;
 	isDebugMode: boolean;
 	colonyClock: number;
-	antCtx: CanvasRenderingContext2D | null;
+	antsCtx: CanvasRenderingContext2D | null;
+	canvasAntInstance: HTMLCanvasElement;
 	selectedAnt: Ant | null;
 
 	food: number;
@@ -50,7 +52,8 @@ export default class Colony {
 		this.isDrawingAnts = true;
 		this.isDebugMode = false;
 		this.colonyClock = 0;
-		this.antCtx = null;
+		this.antsCtx = null;
+		this.canvasAntInstance = colonyOptions.canvasAntInstance;
 		this.selectedAnt = null;
 
 		this.food = 0;
@@ -61,13 +64,14 @@ export default class Colony {
 	initialize(
 		antIcon: HTMLImageElement,
 		antCtx: CanvasRenderingContext2D,
+		antsCtx: CanvasRenderingContext2D,
 		worldGrid: WorldGrid,
 	) {
 		this.antIcon = antIcon;
-		this.antCtx = antCtx;
+		this.antsCtx = antsCtx;
 
 		for (let i = 0; i < this.startingAntsCount; i++) {
-			let ant = new Ant(this.antCtx, antIcon, {
+			let ant = new Ant(this.antsCtx, this.canvasAntInstance, antIcon, {
 				id: this.antId + 1,
 				pos: {
 					x: this.x,
@@ -96,6 +100,22 @@ export default class Colony {
 				cellVertical.colony = true;
 			}
 		}
+
+		this.prepareAntInstance(antIcon, antCtx);
+	}
+
+	prepareAntInstance(
+		antIcon: HTMLImageElement,
+		antCtx: CanvasRenderingContext2D,
+	) {
+		// Draw ant
+		antCtx.drawImage(
+			antIcon,
+			0,
+			0,
+			AntOptions.IMG_WIDTH,
+			AntOptions.IMG_HEIGHT,
+		);
 	}
 
 	updateAndDrawAnts(worldGrid: WorldGrid, dt: number) {
@@ -142,8 +162,8 @@ export default class Colony {
 	}
 
 	createAnt() {
-		if (this.ants.length < this.maxAntsCount && this.antIcon && this.antCtx) {
-			let ant = new Ant(this.antCtx, this.antIcon, {
+		if (this.ants.length < this.maxAntsCount && this.antIcon && this.antsCtx) {
+			let ant = new Ant(this.antsCtx, this.canvasAntInstance, this.antIcon, {
 				id: this.antId + 1,
 				pos: {
 					x: this.x,
