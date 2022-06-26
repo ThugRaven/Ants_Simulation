@@ -1,4 +1,5 @@
 import Colony from './classes/Colony';
+import ImageInstance from './classes/ImageInstance';
 import PerformanceStats from './classes/PerformanceStats';
 import { circle } from './classes/Shapes';
 import { toggleButton, togglePanelAndButton } from './classes/Utils';
@@ -29,9 +30,6 @@ const btnFullscreen = document.getElementById(
 ) as HTMLButtonElement;
 const btnPan = document.getElementById('btn-pan') as HTMLButtonElement;
 // Canvases
-const canvasAntInstance = document.getElementById(
-	'canvas-instance-ant',
-) as HTMLCanvasElement;
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 const canvasMarkers = document.getElementById(
 	'canvas-markers',
@@ -207,12 +205,15 @@ let antsGrid = new WorldCanvas(canvas, {
 });
 let ctxAnts = antsGrid.create();
 
-let antGrid = new WorldCanvas(canvasAntInstance, {
+let canvasAntInstance = new ImageInstance({
 	width: AntOptions.IMG_WIDTH,
 	height: AntOptions.IMG_HEIGHT,
-	cellSize: MarkerOptions.SIZE,
 });
-let ctxAntInstance = antGrid.create();
+
+let canvasAntFoodInstance = new ImageInstance({
+	width: AntOptions.FOOD_SIZE,
+	height: AntOptions.FOOD_SIZE,
+});
 
 let colonyGrid = new WorldCanvas(canvasColony, {
 	width: width,
@@ -270,7 +271,6 @@ let colony = new Colony({
 		x: width / 2,
 		y: height / 2,
 	},
-	canvasAntInstance: canvasAntInstance,
 });
 
 window.addEventListener('keydown', (e) => {
@@ -549,7 +549,6 @@ function setup() {
 	if (
 		ctxMarkers == null ||
 		ctxFood == null ||
-		ctxAntInstance == null ||
 		ctxAnts == null ||
 		ctxColony == null ||
 		ctxWalls == null ||
@@ -570,11 +569,25 @@ function setup() {
 		let b64Start = 'data:image/svg+xml;base64,';
 		let image64 = b64Start + svg64;
 
-		let ant4 = new Image();
-		ant4.src = image64;
-		ant4.onload = () => {
-			ctxAnts!.drawImage(ant4, 100, 50, 24, 34);
-			colony.initialize(ant4, ctxAntInstance!, ctxAnts!, worldGrid);
+		let antImage = new Image();
+		antImage.src = image64;
+		antImage.onload = () => {
+			let antImageInstance = canvasAntInstance.createInstance((ctx) => {
+				ctx.drawImage(antImage, 0, 0);
+			});
+			let antFoodImageInstance = canvasAntFoodInstance.createInstance((ctx) => {
+				let offset = AntOptions.FOOD_SIZE / 2;
+				ctx.fillStyle = `hsl(120, 40%, 43%)`;
+				circle(ctx, offset, offset, AntOptions.FOOD_SIZE / 2);
+			});
+
+			colony.initialize(
+				antImage,
+				antImageInstance,
+				antFoodImageInstance,
+				ctxAnts!,
+				worldGrid,
+			);
 		};
 	}
 
@@ -888,7 +901,6 @@ function main(currentTime: number) {
 	if (
 		ctxMarkers == null ||
 		ctxFood == null ||
-		ctxAntInstance == null ||
 		ctxAnts == null ||
 		ctxColony == null ||
 		ctxWalls == null ||

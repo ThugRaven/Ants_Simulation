@@ -63,6 +63,7 @@ export const AntOptions = {
 	// Other
 	AUTONOMY_MAX: 300,
 	AUTONOMY_REFILL: 150,
+	FOOD_SIZE: 16,
 } as const;
 
 // FOOD

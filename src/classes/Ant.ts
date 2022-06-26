@@ -21,7 +21,8 @@ interface AntOptions {
 
 export default class Ant {
 	ctx: CanvasRenderingContext2D;
-	canvasAntInstance: HTMLCanvasElement;
+	antImageInstance: HTMLCanvasElement;
+	antFoodImageInstance: HTMLCanvasElement;
 	antIcon: HTMLImageElement;
 	id: number;
 	pos: Vector;
@@ -42,12 +43,14 @@ export default class Ant {
 
 	constructor(
 		ctx: CanvasRenderingContext2D,
-		canvasAntInstance: HTMLCanvasElement,
+		antImageInstance: HTMLCanvasElement,
+		antFoodImageInstance: HTMLCanvasElement,
 		antIcon: HTMLImageElement,
 		options: AntOptions,
 	) {
 		this.ctx = ctx;
-		this.canvasAntInstance = canvasAntInstance;
+		this.antImageInstance = antImageInstance;
+		this.antFoodImageInstance = antFoodImageInstance;
 		this.antIcon = antIcon;
 		this.id = options.id;
 		this.pos = createVector(options.pos.x, options.pos.y);
@@ -150,8 +153,11 @@ export default class Ant {
 
 		// Draw food
 		if (this.state === AntStates.TO_HOME) {
-			this.ctx.fillStyle = 'green';
-			circle(this.ctx, 0, verticalOffset, 10);
+			this.ctx.drawImage(
+				this.antFoodImageInstance,
+				-AntOptions.FOOD_SIZE / 2,
+				verticalOffset - AntOptions.FOOD_SIZE / 2,
+			);
 		}
 
 		// Draw ant
@@ -162,11 +168,7 @@ export default class Ant {
 		// 	AntOptions.IMG_WIDTH,
 		// 	AntOptions.IMG_HEIGHT,
 		// );
-		this.ctx.drawImage(
-			this.canvasAntInstance,
-			horizontalOffset,
-			verticalOffset,
-		);
+		this.ctx.drawImage(this.antImageInstance, horizontalOffset, verticalOffset);
 
 		// Draw debug shapes
 		if (this.debug) {

@@ -11,7 +11,6 @@ interface ColonyOptions {
 		y: number;
 	};
 	colonyColor?: number[];
-	canvasAntInstance: HTMLCanvasElement;
 }
 
 export default class Colony {
@@ -24,13 +23,14 @@ export default class Colony {
 	totalAnts: number;
 	colonyColor: number[];
 	antIcon: HTMLImageElement | null;
+	antImageInstance: HTMLCanvasElement | null;
+	antFoodImageInstance: HTMLCanvasElement | null;
 	antId: number;
 	isRunning: boolean;
 	isDrawingAnts: boolean;
 	isDebugMode: boolean;
 	colonyClock: number;
 	antsCtx: CanvasRenderingContext2D | null;
-	canvasAntInstance: HTMLCanvasElement;
 	selectedAnt: Ant | null;
 
 	food: number;
@@ -47,13 +47,14 @@ export default class Colony {
 		this.totalAnts = 0;
 		this.colonyColor = colonyOptions.colonyColor || [255, 255, 255];
 		this.antIcon = null;
+		this.antImageInstance = null;
+		this.antFoodImageInstance = null;
 		this.antId = 0;
 		this.isRunning = false;
 		this.isDrawingAnts = true;
 		this.isDebugMode = false;
 		this.colonyClock = 0;
 		this.antsCtx = null;
-		this.canvasAntInstance = colonyOptions.canvasAntInstance;
 		this.selectedAnt = null;
 
 		this.food = 0;
@@ -63,21 +64,30 @@ export default class Colony {
 
 	initialize(
 		antIcon: HTMLImageElement,
-		antCtx: CanvasRenderingContext2D,
+		antImageInstance: HTMLCanvasElement,
+		antFoodImageInstance: HTMLCanvasElement,
 		antsCtx: CanvasRenderingContext2D,
 		worldGrid: WorldGrid,
 	) {
 		this.antIcon = antIcon;
+		this.antImageInstance = antImageInstance;
+		this.antFoodImageInstance = antFoodImageInstance;
 		this.antsCtx = antsCtx;
 
 		for (let i = 0; i < this.startingAntsCount; i++) {
-			let ant = new Ant(this.antsCtx, this.canvasAntInstance, antIcon, {
-				id: this.antId + 1,
-				pos: {
-					x: this.x,
-					y: this.y,
+			let ant = new Ant(
+				antsCtx,
+				antImageInstance,
+				antFoodImageInstance,
+				antIcon,
+				{
+					id: this.antId + 1,
+					pos: {
+						x: this.x,
+						y: this.y,
+					},
 				},
-			});
+			);
 			this.ants.push(ant);
 			this.antId++;
 			this.totalAnts++;
@@ -100,22 +110,6 @@ export default class Colony {
 				cellVertical.colony = true;
 			}
 		}
-
-		this.prepareAntInstance(antIcon, antCtx);
-	}
-
-	prepareAntInstance(
-		antIcon: HTMLImageElement,
-		antCtx: CanvasRenderingContext2D,
-	) {
-		// Draw ant
-		antCtx.drawImage(
-			antIcon,
-			0,
-			0,
-			AntOptions.IMG_WIDTH,
-			AntOptions.IMG_HEIGHT,
-		);
 	}
 
 	updateAndDrawAnts(worldGrid: WorldGrid, dt: number) {
@@ -162,14 +156,26 @@ export default class Colony {
 	}
 
 	createAnt() {
-		if (this.ants.length < this.maxAntsCount && this.antIcon && this.antsCtx) {
-			let ant = new Ant(this.antsCtx, this.canvasAntInstance, this.antIcon, {
-				id: this.antId + 1,
-				pos: {
-					x: this.x,
-					y: this.y,
+		if (
+			this.ants.length < this.maxAntsCount &&
+			this.antIcon &&
+			this.antImageInstance &&
+			this.antFoodImageInstance &&
+			this.antsCtx
+		) {
+			let ant = new Ant(
+				this.antsCtx,
+				this.antImageInstance,
+				this.antFoodImageInstance,
+				this.antIcon,
+				{
+					id: this.antId + 1,
+					pos: {
+						x: this.x,
+						y: this.y,
+					},
 				},
-			});
+			);
 			this.ants.push(ant);
 			this.antId++;
 			this.totalAnts++;
