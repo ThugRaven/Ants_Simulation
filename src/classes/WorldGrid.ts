@@ -100,12 +100,10 @@ export default class WorldGrid {
 	}
 
 	drawFood(ctx: CanvasRenderingContext2D) {
-		for (let x = 0; x < this.width; x++) {
-			for (let y = 0; y < this.height; y++) {
-				let cell = this.cells[this.getIndexFromCoords(x, y)];
-				if (cell.food.quantity > 0) {
-					cell.food.draw(ctx, x, y);
-				}
+		for (let i = 0; i < this.cells.length; i++) {
+			if (this.cells[i].food.quantity > 0) {
+				let [x, y] = this.getCoordsFromIndex(i);
+				this.cells[i].food.draw(ctx, x, y);
 			}
 		}
 	}
@@ -150,6 +148,12 @@ export default class WorldGrid {
 
 	getIndexFromCoords(x: number, y: number) {
 		return x + y * this.width;
+	}
+
+	getCoordsFromIndex(index: number) {
+		let x = index % this.width;
+		let y = Math.floor(index / this.width);
+		return [x, y];
 	}
 
 	getCellCoords(x: number, y: number) {
