@@ -132,8 +132,9 @@ const controlsPanel = document.getElementById(
 	'controlsPanel',
 ) as HTMLDivElement;
 
-const fpsDisplay = document.querySelector('[data-fps]') as HTMLSpanElement;
-const msDisplay = document.querySelector('[data-ms]') as HTMLSpanElement;
+const performanceDisplay = document.querySelector(
+	'[data-performance-display]',
+) as HTMLDivElement;
 
 let isRunning = false;
 let isDrawingMarkers = true;
@@ -155,7 +156,26 @@ let isControlsPanelVisible = false;
 
 let lastUpdateTime = 0;
 // let mainLoopAnimationFrame = -1;
-let performanceStats = new PerformanceStats();
+// let performanceStats = new PerformanceStats();
+let performanceStats = new PerformanceStats([
+	{ name: 'fps', title: 'Frames per second' },
+	{ name: 'ms', title: 'Milliseconds to render a frame' },
+	{ name: 'clear', title: 'Milliseconds to clear the screen' },
+	{
+		name: 'grid',
+		title: 'Milliseconds to draw markers/density and update cells',
+	},
+	{ name: 'food', title: 'Milliseconds to draw food' },
+	{ name: 'ants', title: 'Milliseconds to draw and update ants' },
+]);
+let [
+	fpsDisplay,
+	msDisplay,
+	clearDisplay,
+	gridDisplay,
+	foodDisplay,
+	antsDisplay,
+] = performanceStats.createPerformanceDisplay(performanceDisplay);
 
 let offsetY = canvasContainer.getBoundingClientRect().top;
 let mouseX = 0;
@@ -301,6 +321,7 @@ window.addEventListener('keydown', (e) => {
 			break;
 		case 'KeyF':
 			isShowingFps = !isShowingFps;
+			performanceStats.toggleMeasuring();
 			break;
 		case 'ArrowUp':
 			moveCamera(0, CAMERA_MOVE_BY);
@@ -752,13 +773,19 @@ function updateColonyInfo() {
 	colonyPreview!.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
 }
 
-function updatePerformanceDisplay(fps: number, ms: number) {
-	let [fpsAvg, msAvg] = performanceStats.update(fps, ms);
+function updatePerformanceDisplay() {
+	let avgMap = performanceStats.update();
 
-	fpsDisplay.textContent = `${Math.round(fpsAvg * 100) / 100} fps`;
-	msDisplay.textContent = `${Math.round(msAvg * 100) / 100} ms`;
+	fpsDisplay.textContent = `${Math.round(avgMap.get('fps') * 100) / 100} fps`;
+	msDisplay.textContent = `${Math.round(avgMap.get('ms') * 100) / 100} ms`;
+	clearDisplay.textContent = `${
+		Math.round(avgMap.get('clear') * 100) / 100
+	} ms`;
+	gridDisplay.textContent = `${Math.round(avgMap.get('grid') * 100) / 100} ms`;
+	foodDisplay.textContent = `${Math.round(avgMap.get('food') * 100) / 100} ms`;
+	antsDisplay.textContent = `${Math.round(avgMap.get('ants') * 100) / 100} ms`;
 
-	if (msAvg > 16.7) {
+	if (avgMap.get('ms') > 16.7) {
 		msDisplay.classList.add('text-red-500');
 	} else {
 		msDisplay.classList.remove('text-red-500');
@@ -916,12 +943,14 @@ function main(currentTime: number) {
 	// console.time('Frame time: ');
 	// console.log(deltaTime);
 	if (isShowingFps) {
-		updatePerformanceDisplay(1 / deltaTime, currentTime - lastUpdateTime);
+		performanceStats.setPerformance('fps', 1 / deltaTime);
+		performanceStats.setPerformance('ms', currentTime - lastUpdateTime);
 	}
 
 	// if (deltaTime < 1 / 25) {
 	// 	return;
 	// }
+	performanceStats.startMeasurement('clear');
 	ctxAnts.clearRect(0, 0, width, height);
 	ctxMarkers.clearRect(0, 0, worldGrid.width, worldGrid.height);
 	ctxFood.clearRect(
@@ -930,7 +959,9 @@ function main(currentTime: number) {
 		width / (MarkerOptions.SIZE / FoodOptions.SIZE),
 		height / (MarkerOptions.SIZE / FoodOptions.SIZE),
 	);
+	performanceStats.endMeasurement('clear');
 
+	performanceStats.startMeasurement('grid');
 	if (isDrawingMarkers && markersImageData) {
 		worldGrid.drawMarkers(ctxMarkers, markersImageData, isRunning);
 	} else if (isDrawingDensity && densityImageData) {
@@ -938,8 +969,11 @@ function main(currentTime: number) {
 	} else if (isRunning) {
 		worldGrid.update();
 	}
+	performanceStats.endMeasurement('grid');
 
+	performanceStats.startMeasurement('food');
 	worldGrid.drawFood(ctxFood);
+	performanceStats.endMeasurement('food');
 
 	let target = createVector(
 		mouseX / canvasScale - cameraOffset.x,
@@ -969,7 +1003,9 @@ function main(currentTime: number) {
 	}
 
 	colony.updateColony(deltaTime);
+	performanceStats.startMeasurement('ants');
 	colony.updateAndDrawAnts(worldGrid, deltaTime);
+	performanceStats.endMeasurement('ants');
 	updateAntInfo();
 	if (isTracking && colony.selectedAnt) {
 		trackAntCamera(colony.selectedAnt.pos.x, colony.selectedAnt.pos.y);
@@ -982,6 +1018,10 @@ function main(currentTime: number) {
 	}
 
 	updateColonyInfo();
+
+	if (isShowingFps) {
+		updatePerformanceDisplay();
+	}
 
 	// console.timeEnd('Frame time: ');
 	lastUpdateTime = currentTime;
