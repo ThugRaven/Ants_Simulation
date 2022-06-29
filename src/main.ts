@@ -147,7 +147,6 @@ let isErasing = false;
 let isWallMode = false;
 let isFoodMode = false;
 let isPanMode = false;
-let isShowingFps = true;
 
 let isColonyPanelVisible = false;
 let isCellPanelVisible = false;
@@ -158,15 +157,27 @@ let lastUpdateTime = 0;
 // let mainLoopAnimationFrame = -1;
 // let performanceStats = new PerformanceStats();
 let performanceStats = new PerformanceStats([
-	{ name: 'fps', title: 'Frames per second' },
-	{ name: 'ms', title: 'Milliseconds to render a frame' },
-	{ name: 'clear', title: 'Milliseconds to clear the screen' },
 	{
-		name: 'grid',
-		title: 'Milliseconds to draw markers/density and update cells',
+		mode: 0,
+		stats: [
+			{ name: 'fps', title: 'Frames per second' },
+			{ name: 'ms', title: 'Milliseconds to render a frame' },
+		],
 	},
-	{ name: 'food', title: 'Milliseconds to draw food' },
-	{ name: 'ants', title: 'Milliseconds to draw and update ants' },
+	{
+		mode: 1,
+		stats: [
+			{ name: 'clear', title: 'Milliseconds to clear the screen' },
+			{
+				name: 'grid',
+				title: 'Milliseconds to draw markers/density and update cells',
+			},
+			{ name: 'food', title: 'Milliseconds to draw food' },
+			{ name: 'ants', title: 'Milliseconds to draw and update ants' },
+			{ name: 'panels', title: 'Milliseconds to update info panels' },
+			{ name: 'all', title: 'Milliseconds needed for main loop' },
+		],
+	},
 ]);
 let [
 	fpsDisplay,
@@ -175,6 +186,8 @@ let [
 	gridDisplay,
 	foodDisplay,
 	antsDisplay,
+	panelsDisplay,
+	allDisplay,
 ] = performanceStats.createPerformanceDisplay(performanceDisplay);
 
 let offsetY = canvasContainer.getBoundingClientRect().top;
@@ -320,8 +333,7 @@ window.addEventListener('keydown', (e) => {
 			removeAnt();
 			break;
 		case 'KeyF':
-			isShowingFps = !isShowingFps;
-			performanceStats.toggleMeasuring();
+			performanceStats.changeMode();
 			break;
 		case 'ArrowUp':
 			moveCamera(0, CAMERA_MOVE_BY);
@@ -775,6 +787,7 @@ function updateColonyInfo() {
 
 function updatePerformanceDisplay() {
 	let avgMap = performanceStats.update();
+	// console.log(...avgMap);
 
 	fpsDisplay.textContent = `${Math.round(avgMap.get('fps') * 100) / 100} fps`;
 	msDisplay.textContent = `${Math.round(avgMap.get('ms') * 100) / 100} ms`;
@@ -784,6 +797,10 @@ function updatePerformanceDisplay() {
 	gridDisplay.textContent = `${Math.round(avgMap.get('grid') * 100) / 100} ms`;
 	foodDisplay.textContent = `${Math.round(avgMap.get('food') * 100) / 100} ms`;
 	antsDisplay.textContent = `${Math.round(avgMap.get('ants') * 100) / 100} ms`;
+	panelsDisplay.textContent = `${
+		Math.round(avgMap.get('panels') * 100) / 100
+	} ms`;
+	allDisplay.textContent = `${Math.round(avgMap.get('all') * 100) / 100} ms`;
 
 	if (avgMap.get('ms') > 16.7) {
 		msDisplay.classList.add('text-red-500');
@@ -937,12 +954,13 @@ function main(currentTime: number) {
 		return;
 
 	window.requestAnimationFrame(main);
+	performanceStats.startMeasurement('all');
 
 	const deltaTime = (currentTime - lastUpdateTime) / 1000;
 
 	// console.time('Frame time: ');
 	// console.log(deltaTime);
-	if (isShowingFps) {
+	if (performanceStats.isMeasuring) {
 		performanceStats.setPerformance('fps', 1 / deltaTime);
 		performanceStats.setPerformance('ms', currentTime - lastUpdateTime);
 	}
@@ -1006,6 +1024,8 @@ function main(currentTime: number) {
 	performanceStats.startMeasurement('ants');
 	colony.updateAndDrawAnts(worldGrid, deltaTime);
 	performanceStats.endMeasurement('ants');
+
+	performanceStats.startMeasurement('panels');
 	updateAntInfo();
 	if (isTracking && colony.selectedAnt) {
 		trackAntCamera(colony.selectedAnt.pos.x, colony.selectedAnt.pos.y);
@@ -1018,11 +1038,12 @@ function main(currentTime: number) {
 	}
 
 	updateColonyInfo();
+	performanceStats.endMeasurement('panels');
 
-	if (isShowingFps) {
+	if (performanceStats.isMeasuring) {
+		performanceStats.endMeasurement('all');
 		updatePerformanceDisplay();
 	}
 
-	// console.timeEnd('Frame time: ');
 	lastUpdateTime = currentTime;
 }

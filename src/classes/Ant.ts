@@ -104,9 +104,9 @@ export default class Ant {
 		let x = wanderRadius * Math.cos(theta);
 		let y = wanderRadius * Math.sin(theta);
 		wanderPoint.add(x, y);
-		this.ctx.fillStyle = 'green';
 
 		if (this.debug) {
+			this.ctx.fillStyle = 'green';
 			circle(this.ctx, wanderPoint.x, wanderPoint.y, 8);
 			line(this.ctx, this.pos.x, this.pos.y, wanderPoint.x, wanderPoint.y);
 		}

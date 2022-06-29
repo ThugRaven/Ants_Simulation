@@ -1,4 +1,9 @@
 interface PerformanceOptions {
+	mode: number;
+	stats: PerformanceStatistics[];
+}
+
+interface PerformanceStatistics {
 	name: string;
 	title: string;
 }
@@ -8,32 +13,69 @@ interface Measurement {
 	startTime?: number;
 	element?: HTMLSpanElement;
 	title: string;
+	mode: number;
+	index: number;
 }
 
 export default class PerformanceStats {
 	measurementArray: Map<string, Measurement>;
-	index: number;
 	sampleSize: number;
 	isMeasuring: boolean;
+	modes: number[];
+	mode: number;
 
 	constructor(performanceOptions: PerformanceOptions[]) {
 		this.measurementArray = new Map();
-		this.index = 0;
 		this.sampleSize = 60;
 		this.isMeasuring = true;
+		this.modes = [];
+		this.mode = 0;
+		this.getModes(performanceOptions);
 		this.createMeasurementArray(performanceOptions);
 	}
 
-	toggleMeasuring() {
-		return this.isMeasuring != this.isMeasuring;
+	getModes(performanceOptions: PerformanceOptions[]) {
+		for (const options of performanceOptions) {
+			this.modes.push(options.mode);
+		}
+	}
+
+	changeMode() {
+		if (this.mode == this.modes.length - 1) {
+			this.isMeasuring = false;
+			this.mode = -1;
+		} else {
+			this.isMeasuring = true;
+			this.mode++;
+		}
+
+		this.toggleDisplayVisibility();
+	}
+
+	toggleDisplayVisibility() {
+		for (const value of this.measurementArray.values()) {
+			if (!value.element) {
+				return;
+			}
+
+			if (this.isMeasuring && value.mode <= this.mode) {
+				value.element.style.display = 'block';
+			} else {
+				value.element.style.display = 'none';
+			}
+		}
 	}
 
 	createMeasurementArray(performanceOptions: PerformanceOptions[]) {
 		for (const options of performanceOptions) {
-			this.measurementArray.set(options.name, {
-				performanceArray: [],
-				title: options.title,
-			});
+			for (const stats of options.stats) {
+				this.measurementArray.set(stats.name, {
+					performanceArray: [],
+					title: stats.title,
+					mode: options.mode,
+					index: 0,
+				});
+			}
 		}
 	}
 
@@ -44,6 +86,13 @@ export default class PerformanceStats {
 			let span = document.createElement('span');
 			span.dataset[key.toString()] = '';
 			span.title = value.title;
+
+			if (this.isMeasuring && value.mode <= this.mode) {
+				span.style.display = 'block';
+			} else {
+				span.style.display = 'none';
+			}
+
 			value.element = container.appendChild(span);
 			elements.push(value.element);
 		}
@@ -53,23 +102,23 @@ export default class PerformanceStats {
 
 	startMeasurement(name: string) {
 		let measurement = this.measurementArray.get(name);
-		if (measurement) {
+		if (measurement && measurement.mode <= this.mode) {
 			measurement.startTime = performance.now();
 		}
 	}
 
 	endMeasurement(name: string) {
 		let measurement = this.measurementArray.get(name);
-		if (measurement && measurement.startTime) {
-			measurement.performanceArray[this.index] =
+		if (measurement && measurement.startTime && measurement.mode <= this.mode) {
+			measurement.performanceArray[measurement.index] =
 				performance.now() - measurement.startTime;
 		}
 	}
 
 	setPerformance(name: string, value: number) {
 		let measurement = this.measurementArray.get(name);
-		if (measurement) {
-			measurement.performanceArray[this.index] = value;
+		if (measurement && measurement.mode <= this.mode) {
+			measurement.performanceArray[measurement.index] = value;
 		}
 	}
 
@@ -87,12 +136,18 @@ export default class PerformanceStats {
 		}
 
 		for (const [key, value] of this.measurementArray) {
-			avgMap.set(key, avgMap.get(key) / value.performanceArray.length);
-		}
+			if (value.performanceArray.length === 0) {
+				break;
+			}
 
-		this.index++;
-		if (this.index === this.sampleSize) {
-			this.index = 0;
+			avgMap.set(key, avgMap.get(key) / value.performanceArray.length);
+
+			if (value.mode <= this.mode) {
+				value.index++;
+				if (value.index === this.sampleSize) {
+					value.index = 0;
+				}
+			}
 		}
 
 		return avgMap;

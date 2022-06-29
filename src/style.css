@@ -20,3 +20,7 @@ canvas {
 .lifespan-preview::after {
 	left: var(--left, 0);
 }
+
+.font-variant-numeric {
+	font-variant-numeric: tabular-nums;
+}
