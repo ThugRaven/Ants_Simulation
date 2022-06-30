@@ -428,7 +428,6 @@ export default class Ant {
 							this.perceptionDraw.add(
 								y * AntOptions.PERCEPTION_POINTS_VERTICAL + x,
 							);
-							console.log(`food: x:${x}, y:${y}`);
 						}
 
 						// this.seek(perceptionPoint);
