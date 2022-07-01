@@ -518,6 +518,7 @@ btnSave.addEventListener('click', () => {
 				// Food
 				if (cell.wall !== 1) {
 					cell.food.quantity = Math.round(100 * (a / 255));
+					cell.food.changed = true;
 				} else {
 					cell.wall = 1;
 				}
@@ -525,8 +526,10 @@ btnSave.addEventListener('click', () => {
 				// Wall
 				cell.wall = 1;
 				cell.food.quantity = 0;
+				cell.food.changed = true;
 			} else if (a > 0) {
 				cell.food.quantity = 0;
+				cell.food.changed = true;
 				cell.wall = 0;
 			}
 		}
@@ -958,25 +961,14 @@ function main(currentTime: number) {
 
 	const deltaTime = (currentTime - lastUpdateTime) / 1000;
 
-	// console.time('Frame time: ');
-	// console.log(deltaTime);
 	if (performanceStats.isMeasuring) {
 		performanceStats.setPerformance('fps', 1 / deltaTime);
 		performanceStats.setPerformance('ms', currentTime - lastUpdateTime);
 	}
 
-	// if (deltaTime < 1 / 25) {
-	// 	return;
-	// }
 	performanceStats.startMeasurement('clear');
 	ctxAnts.clearRect(0, 0, width, height);
 	ctxMarkers.clearRect(0, 0, worldGrid.width, worldGrid.height);
-	ctxFood.clearRect(
-		0,
-		0,
-		width / (MarkerOptions.SIZE / FoodOptions.SIZE),
-		height / (MarkerOptions.SIZE / FoodOptions.SIZE),
-	);
 	performanceStats.endMeasurement('clear');
 
 	performanceStats.startMeasurement('grid');

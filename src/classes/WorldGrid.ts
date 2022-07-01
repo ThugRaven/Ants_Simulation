@@ -75,6 +75,7 @@ export default class WorldGrid {
 
 		let cell = this.cells[index];
 		cell.food.quantity = Math.min(cell.food.quantity + quantity, 100);
+		cell.food.changed = true;
 	}
 
 	drawMarkers(
@@ -101,7 +102,7 @@ export default class WorldGrid {
 
 	drawFood(ctx: CanvasRenderingContext2D) {
 		for (let i = 0; i < this.cells.length; i++) {
-			if (this.cells[i].food.quantity > 0) {
+			if (this.cells[i].food.changed) {
 				let [x, y] = this.getCoordsFromIndex(i);
 				this.cells[i].food.draw(ctx, x, y);
 			}
