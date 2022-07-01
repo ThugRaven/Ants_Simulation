@@ -36,6 +36,7 @@ export default class Ant {
 	perceptionDraw: Set<number>;
 	internalClock: number;
 	markerClock: number;
+	directionClock: number;
 	isDead: boolean;
 	freedomCoef: number;
 	foodAmount: number;
@@ -64,6 +65,7 @@ export default class Ant {
 		this.perceptionDraw = new Set();
 		this.internalClock = 0;
 		this.markerClock = random(0, AntOptions.MARKER_PERIOD);
+		this.directionClock = 0;
 		this.isDead = false;
 		this.freedomCoef = random(0.01, 0.1);
 		this.foodAmount = 0;
@@ -126,6 +128,7 @@ export default class Ant {
 
 	update(dt: number) {
 		this.internalClock += dt;
+		this.directionClock += dt;
 		if (
 			this.internalClock >= AntOptions.AUTONOMY_REFILL &&
 			this.state === AntStates.TO_FOOD
@@ -352,124 +355,101 @@ export default class Ant {
 			return;
 		}
 
-		for (let x = 0; x < AntOptions.PERCEPTION_POINTS_HORIZONTAL; x++) {
-			for (let y = 1; y <= AntOptions.PERCEPTION_POINTS_VERTICAL; y++) {
-				let theta =
-					angleBetween * x +
-					AntOptions.PERCEPTION_START_ANGLE +
-					angle +
-					Math.PI / 2;
+		if (this.directionClock >= AntOptions.DIRECTION_PERIOD) {
+			for (let x = 0; x < AntOptions.PERCEPTION_POINTS_HORIZONTAL; x++) {
+				for (let y = 1; y <= AntOptions.PERCEPTION_POINTS_VERTICAL; y++) {
+					let theta =
+						angleBetween * x +
+						AntOptions.PERCEPTION_START_ANGLE +
+						angle +
+						Math.PI / 2;
 
-				let perceptionX = distanceBetween * y * Math.cos(theta);
-				let perceptionY = distanceBetween * y * Math.sin(theta);
-				let perceptionPoint = this.pos.copy().add(perceptionX, perceptionY);
+					let perceptionX = distanceBetween * y * Math.cos(theta);
+					let perceptionY = distanceBetween * y * Math.sin(theta);
+					let perceptionPoint = this.pos.copy().add(perceptionX, perceptionY);
 
-				let cellPerception = worldGrid.getCellFromCoordsSafe(
-					perceptionPoint.x,
-					perceptionPoint.y,
-				);
+					let cellPerception = worldGrid.getCellFromCoordsSafe(
+						perceptionPoint.x,
+						perceptionPoint.y,
+					);
 
-				if (cellPerception) {
-					// Check for walls
-					if (cellPerception.wall === 1) {
-						// let dist = perceptionPoint.dist(this.pos);
-
-						if (y === 1) {
-							// if (dist <= distanceBetween + 10) {
+					if (cellPerception) {
+						// Check for walls
+						if (cellPerception.wall === 1 && y === 1) {
 							let force = perceptionPoint.sub(this.pos);
 
-							// let maxForce = 0.002;
 							force.setMag(this.maxSpeed);
 							force.sub(this.vel);
 							force.limit(this.maxForce);
-							// force.limit(
-							// 	(maxForce / AntOptions.PERCEPTION_POINTS_VERTICAL) *
-							// 		Math.pow(
-							// 			AntOptions.PERCEPTION_POINTS_VERTICAL - y,
-							// 			AntOptions.PERCEPTION_POINTS_VERTICAL - y,
-							// 		),
-							// );
-							if (this.debug) {
-								// console.log(
-								// 	(maxForce / AntOptions.PERCEPTION_POINTS_VERTICAL) *
-								// 		(AntOptions.PERCEPTION_POINTS_VERTICAL - y),
-								// );
-								// console.log(
-								// 	(maxForce / AntOptions.PERCEPTION_POINTS_VERTICAL) *
-								// 		Math.pow(
-								// 			AntOptions.PERCEPTION_POINTS_VERTICAL - y,
-								// 			AntOptions.PERCEPTION_POINTS_VERTICAL - y,
-								// 		),
-								// );
-							}
 							force.mult(-1);
 							this.applyForce(force);
 							break;
 						}
-					}
 
-					// Check for colony
-					if (
-						cellPerception.colony &&
-						(this.state === AntStates.REFILL ||
-							this.state === AntStates.TO_HOME)
-					) {
-						this.seek(perceptionPoint);
-						return;
-					}
-
-					// Check for food
-					if (
-						cellPerception.food.quantity > 0 &&
-						(this.state === AntStates.TO_FOOD ||
-							this.state === AntStates.REFILL)
-					) {
-						if (this.debug) {
-							this.perceptionDraw.add(
-								y * AntOptions.PERCEPTION_POINTS_VERTICAL + x,
-							);
+						// Check for colony
+						if (
+							cellPerception.colony &&
+							(this.state === AntStates.REFILL ||
+								this.state === AntStates.TO_HOME)
+						) {
+							this.seek(perceptionPoint);
+							return;
 						}
 
-						// this.seek(perceptionPoint);
-						if (y < closestIndex) {
-							closestIndex = y;
-							closestFoodPoint = perceptionPoint;
+						// Check for food
+						if (
+							cellPerception.food.quantity > 0 &&
+							(this.state === AntStates.TO_FOOD ||
+								this.state === AntStates.REFILL)
+						) {
+							if (this.debug) {
+								this.perceptionDraw.add(
+									y * AntOptions.PERCEPTION_POINTS_VERTICAL + x,
+								);
+							}
+
+							// this.seek(perceptionPoint);
+							if (y < closestIndex) {
+								closestIndex = y;
+								closestFoodPoint = perceptionPoint;
+							}
+							break;
 						}
-						break;
-					}
 
-					// Check for highest intensity marker
-					let intensity = 0;
-					if (
-						this.state === AntStates.TO_HOME ||
-						this.state === AntStates.REFILL
-					) {
-						intensity = cellPerception.marker.intensity[0];
-					} else if (
-						this.state === AntStates.TO_FOOD ||
-						this.state === AntStates.REFILL
-					) {
-						intensity = cellPerception.marker.intensity[1];
-					}
+						// Check for highest intensity marker
+						let intensity = 0;
+						if (
+							this.state === AntStates.TO_HOME ||
+							this.state === AntStates.REFILL
+						) {
+							intensity = cellPerception.marker.intensity[0];
+						} else if (
+							this.state === AntStates.TO_FOOD ||
+							this.state === AntStates.REFILL
+						) {
+							intensity = cellPerception.marker.intensity[1];
+						}
 
-					if (intensity > maxIntensity) {
-						maxIntensity = intensity;
-						maxIntensityPoint = perceptionPoint;
+						if (intensity > maxIntensity) {
+							maxIntensity = intensity;
+							maxIntensityPoint = perceptionPoint;
+						}
 					}
 				}
 			}
-		}
 
-		if (closestFoodPoint) {
-			this.seek(closestFoodPoint);
-			return;
-		}
+			if (closestFoodPoint) {
+				this.seek(closestFoodPoint);
+				return;
+			}
 
-		if (maxIntensityPoint) {
-			this.seek(maxIntensityPoint);
-			return;
-		}
+			if (maxIntensityPoint) {
+				this.seek(maxIntensityPoint);
+				return;
+			}
 
+			this.directionClock = 0;
+		}
 		this.wander();
 	}
 
