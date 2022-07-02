@@ -1,5 +1,6 @@
 import Colony from './classes/Colony';
 import ImageInstance from './classes/ImageInstance';
+import MapGenerator from './classes/MapGenerator';
 import PerformanceStats from './classes/PerformanceStats';
 import { circle } from './classes/Shapes';
 import { toggleButton, togglePanelAndButton } from './classes/Utils';
@@ -13,6 +14,7 @@ import {
 	CAMERA_MOVE_BY,
 	CanvasOptions,
 	FoodOptions,
+	MapGeneratorOptions,
 	MarkerOptions,
 	MIDDLE_BUTTON,
 	RIGHT_BUTTON,
@@ -284,6 +286,14 @@ let worldGrid = new WorldGrid({
 	height: height / MarkerOptions.SIZE,
 	cellSize: 1,
 });
+
+let mapGenerator = new MapGenerator({
+	width: worldGrid.width,
+	height: worldGrid.height,
+	fillRatio: MapGeneratorOptions.FILL_RATIO,
+});
+
+mapGenerator.generateMap(worldGrid);
 
 // Markers image data
 let markersImageData = ctxMarkers?.createImageData(

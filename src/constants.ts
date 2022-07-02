@@ -4,6 +4,11 @@ export const CanvasOptions = {
 	HEIGHT: 1200 * 3,
 } as const;
 
+// MAP GENERATION
+export const MapGeneratorOptions = {
+	FILL_RATIO: 0.47,
+};
+
 // MARKERS
 export enum MarkerTypes {
 	TO_HOME = 0,
@@ -34,6 +39,7 @@ export const ColonyOptions = {
 	ANT_REFILL_FOOD_AMOUNT: 0.25,
 };
 
+// ANTS
 export enum AntStates {
 	TO_HOME = 0,
 	TO_FOOD = 1,
