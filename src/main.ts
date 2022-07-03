@@ -138,6 +138,10 @@ const performanceDisplay = document.querySelector(
 	'[data-performance-display]',
 ) as HTMLDivElement;
 
+const btnGenerateMap = document.getElementById(
+	'btn-generate-map',
+) as HTMLButtonElement;
+
 let isRunning = false;
 let isDrawingMarkers = true;
 let isDrawingDensity = false;
@@ -292,8 +296,6 @@ let mapGenerator = new MapGenerator({
 	height: worldGrid.height,
 	fillRatio: MapGeneratorOptions.FILL_RATIO,
 });
-
-mapGenerator.generateMap(worldGrid);
 
 // Markers image data
 let markersImageData = ctxMarkers?.createImageData(
@@ -477,6 +479,16 @@ btnCloseControls.addEventListener('click', () => {
 	);
 });
 
+btnGenerateMap.addEventListener('click', () => {
+	if (confirm('Are you sure you want to generate a new map?')) {
+		if (ctxWalls) {
+			ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
+			mapGenerator.generateMap(worldGrid);
+			worldGrid.drawWalls(ctxWalls);
+		}
+	}
+});
+
 btnEditMode.addEventListener('click', () => {
 	isEditMode = togglePanelAndButton(isEditMode, editPanel, btnEditMode);
 	if (isEditMode) {
@@ -543,7 +555,7 @@ btnSave.addEventListener('click', () => {
 				cell.wall = 0;
 			}
 		}
-		worldGrid.initializeBorderWalls();
+		worldGrid.addBorderWalls();
 		worldGrid.drawWalls(ctxWalls);
 		ctxEdit.clearRect(0, 0, worldGrid.width, worldGrid.height);
 
@@ -639,7 +651,7 @@ function setup() {
 
 	colony.drawColony(ctxColony);
 
-	worldGrid.initializeBorderWalls();
+	worldGrid.addBorderWalls();
 	worldGrid.drawWalls(ctxWalls);
 }
 

@@ -1,3 +1,4 @@
+import { MapGeneratorOptions } from '../constants';
 import { random } from './Utils';
 import WorldGrid from './WorldGrid';
 
@@ -34,7 +35,7 @@ export default class MapGenerator {
 			this.smoothMap();
 		}
 
-		this.addBorders();
+		this.addBorderWalls();
 		this.processMap();
 
 		for (let x = 0; x < worldGrid.width; x++) {
@@ -93,8 +94,8 @@ export default class MapGenerator {
 		return wallCount;
 	}
 
-	addBorders() {
-		let borderSize = 2;
+	addBorderWalls() {
+		let borderSize = MapGeneratorOptions.BORDER_SIZE;
 		for (let x = 0; x < this.width; x++) {
 			for (let y = 0; y < borderSize; y++) {
 				this.map[x][y] = 1;
