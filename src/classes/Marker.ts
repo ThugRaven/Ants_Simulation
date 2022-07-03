@@ -1,5 +1,4 @@
 import { EVAPORATE_AMOUNT, MarkerColors } from '../constants';
-import { Vector } from './Vector';
 
 export default class Marker {
 	intensity: number[];
@@ -8,42 +7,41 @@ export default class Marker {
 		this.intensity = intensity;
 	}
 
-	draw(ctx: CanvasRenderingContext2D, x: number, y: number) {
-		// Get default marker colors
-		let toHomeColor = new Vector().set(MarkerColors.TO_HOME.slice());
-		let toFoodColor = new Vector().set(MarkerColors.TO_FOOD.slice());
-		// Multiply colors by intensity
-		let toHomeIntensity = toHomeColor.mult(this.intensity[0]);
-		let toFoodIntensity = toFoodColor.mult(this.intensity[1]);
-
-		// Mix different marker types colors, red + green = yellow
-		let mixedColor = toHomeIntensity.add(toFoodIntensity);
-		mixedColor = new Vector().set(
-			Math.round(Math.min(mixedColor.x, 255)),
-			Math.round(Math.min(mixedColor.y, 255)),
-			Math.round(Math.min(mixedColor.z, 255)),
-		);
-
-		// this.ctx.fillStyle = `hsl(${hue}, 100%, 50%, ${this.intensity})`;
-		ctx.fillStyle = `rgb(${mixedColor.x}, ${mixedColor.y}, ${mixedColor.z})`;
-		ctx.fillRect(x, y, 1, 1);
-	}
-
 	getMixedColor() {
+		if (this.intensity[0] === 0 && this.intensity[1] === 0) {
+			return [0, 0, 0];
+		}
+
 		// Get default marker colors
 		let [rH, gH, bH] = MarkerColors.TO_HOME;
 		let [rF, gF, bF] = MarkerColors.TO_FOOD;
+
 		// Multiply colors by intensity
 		let toHomeIntensity = [
 			this.intensity[0] * rH,
 			this.intensity[0] * gH,
 			this.intensity[0] * bH,
 		];
+		if (this.intensity[1] === 0) {
+			return [
+				Math.round(toHomeIntensity[0]),
+				Math.round(toHomeIntensity[1]),
+				Math.round(toHomeIntensity[2]),
+			];
+		}
+
 		let toFoodIntensity = [
 			this.intensity[1] * rF,
 			this.intensity[1] * gF,
 			this.intensity[1] * bF,
 		];
+		if (this.intensity[0] === 0) {
+			return [
+				Math.round(toFoodIntensity[0]),
+				Math.round(toFoodIntensity[1]),
+				Math.round(toFoodIntensity[2]),
+			];
+		}
 
 		// Mix different marker types colors, red + green = yellow
 		let mixedColor = [
