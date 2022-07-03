@@ -1,4 +1,4 @@
-import { MarkerOptions, MarkerTypes } from '../constants';
+import { MapGeneratorOptions, MarkerOptions, MarkerTypes } from '../constants';
 import WorldCell from './WorldCell';
 
 interface WorldGridOptions {
@@ -23,19 +23,26 @@ export default class WorldGrid {
 		}
 	}
 
-	initializeBorderWalls() {
+	addBorderWalls() {
+		let borderSize = MapGeneratorOptions.BORDER_SIZE;
 		for (let x = 0; x < this.width; x++) {
-			let cellTop = this.cells[this.getIndexFromCoords(x, 0)];
-			let cellBottom = this.cells[this.getIndexFromCoords(x, this.height - 1)];
-			cellTop.wall = 1;
-			cellBottom.wall = 1;
+			for (let y = 0; y < borderSize; y++) {
+				let cellTop = this.cells[this.getIndexFromCoords(x, y)];
+				let cellBottom =
+					this.cells[this.getIndexFromCoords(x, this.height - y - 1)];
+				cellTop.wall = 1;
+				cellBottom.wall = 1;
+			}
 		}
 
-		for (let y = 1; y < this.height - 1; y++) {
-			let cellLeft = this.cells[this.getIndexFromCoords(0, y)];
-			let cellRight = this.cells[this.getIndexFromCoords(this.width - 1, y)];
-			cellLeft.wall = 1;
-			cellRight.wall = 1;
+		for (let x = 0; x < borderSize; x++) {
+			for (let y = 0; y < this.height; y++) {
+				let cellLeft = this.cells[this.getIndexFromCoords(x, y)];
+				let cellRight =
+					this.cells[this.getIndexFromCoords(this.width - x - 1, y)];
+				cellLeft.wall = 1;
+				cellRight.wall = 1;
+			}
 		}
 	}
 
