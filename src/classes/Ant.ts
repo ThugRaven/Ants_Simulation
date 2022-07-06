@@ -57,7 +57,7 @@ export default class Ant {
 		this.pos = createVector(options.pos.x, options.pos.y);
 		this.vel = createVector(0, 0);
 		this.acc = createVector(0, 0);
-		this.maxSpeed = 4;
+		this.maxSpeed = 3;
 		this.maxForce = 0.25;
 		this.state = AntStates.TO_FOOD;
 		this.debug = options.debug || false;
