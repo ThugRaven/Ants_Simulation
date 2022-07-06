@@ -375,12 +375,23 @@ export default class Ant {
 
 					if (cellPerception) {
 						// Check for walls
-						if (cellPerception.wall === 1 && y === 1) {
+						if (cellPerception.wall === 1 && (y === 1 || y === 2)) {
 							let force = perceptionPoint.sub(this.pos);
+
+							let forceMultiplier =
+								x + 1 > AntOptions.PERCEPTION_POINTS_HORIZONTAL / 2
+									? AntOptions.PERCEPTION_POINTS_HORIZONTAL - x
+									: x + 1;
 
 							force.setMag(this.maxSpeed);
 							force.sub(this.vel);
-							force.limit(this.maxForce);
+
+							if (y === 1) {
+								force.limit(this.maxForce * forceMultiplier);
+							} else if (y === 2) {
+								force.limit(this.maxForce * 0.5 * forceMultiplier);
+							}
+
 							force.mult(-1);
 							this.applyForce(force);
 							break;
@@ -450,6 +461,7 @@ export default class Ant {
 
 			this.directionClock = 0;
 		}
+
 		this.wander();
 	}
 
