@@ -321,6 +321,7 @@ let colony = new Colony({
 window.addEventListener('keydown', (e) => {
 	switch (e.code) {
 		case 'Space':
+			e.preventDefault();
 			toggleLoop();
 			break;
 		case 'KeyM':
