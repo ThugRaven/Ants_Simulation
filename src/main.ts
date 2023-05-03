@@ -540,7 +540,10 @@ btnSave.addEventListener('click', () => {
 			if (g <= 160 && g > 0 && g > r && g > b) {
 				// Food
 				if (cell.wall !== 1) {
-					cell.food.quantity = Math.round(100 * (a / 255));
+					cell.food.quantity = Math.min(
+						100,
+						Math.round(100 * (a / 255)) + cell.food.quantity,
+					);
 					cell.food.changed = true;
 				} else {
 					cell.wall = 1;
@@ -1008,7 +1011,7 @@ function main(currentTime: number) {
 	worldGrid.drawFood(ctxFood);
 	performanceStats.endMeasurement('food');
 
-	let target = createVector(
+	const target = createVector(
 		mouseX / canvasScale - cameraOffset.x,
 		mouseY / canvasScale - cameraOffset.y,
 	);
@@ -1017,7 +1020,7 @@ function main(currentTime: number) {
 		// Draw brush preview
 		ctxEditPreview.clearRect(0, 0, worldGrid.width, worldGrid.height);
 		ctxEditPreview.fillStyle = 'grey';
-		let pos = worldGrid.getCellCoords(target.x, target.y);
+		const pos = worldGrid.getCellCoords(target.x, target.y);
 		circle(ctxEditPreview, pos[0], pos[1], brushSize);
 
 		if (isErasing) {
