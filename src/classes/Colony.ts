@@ -155,9 +155,9 @@ export default class Colony {
 		}
 	}
 
-	createAnt() {
+	createAnt(override = false) {
 		if (
-			this.ants.length < this.maxAntsCount &&
+			(this.ants.length < this.maxAntsCount || override) &&
 			this.antIcon &&
 			this.antImageInstance &&
 			this.antFoodImageInstance &&

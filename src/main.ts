@@ -345,6 +345,9 @@ window.addEventListener('keydown', (e) => {
 		case 'Delete':
 			removeAnt();
 			break;
+		case 'Insert':
+			addAnt();
+			break;
 		case 'KeyF':
 			performanceStats.changeMode();
 			break;
@@ -755,6 +758,10 @@ function removeAnt() {
 		antPanel,
 		btnAntPanel,
 	);
+}
+
+function addAnt() {
+	colony.createAnt(true);
 }
 
 function updateAntInfo() {
