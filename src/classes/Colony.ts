@@ -117,7 +117,7 @@ export default class Colony {
 		for (let i = 0; i < this.ants.length; i++) {
 			if (this.isRunning) {
 				// Update ants
-				this.ants[i].search(worldGrid, this);
+				this.ants[i].searchSimple(worldGrid, this);
 				this.ants[i].update(dt);
 				this.ants[i].addMarker(worldGrid, dt);
 

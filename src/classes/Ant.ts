@@ -465,6 +465,192 @@ export default class Ant {
 		this.wander();
 	}
 
+	searchSimple(worldGrid: WorldGrid, colony: Colony) {
+		if (this.debug) {
+			this.perceptionDraw = new Set();
+		}
+
+		const cell = worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y);
+		cell?.addDensity();
+		if (
+			cell &&
+			cell.food.quantity > 0 &&
+			(this.state === AntStates.TO_FOOD || this.state === AntStates.REFILL)
+		) {
+			this.state = AntStates.TO_HOME;
+			this.foodAmount = cell.pick();
+			this.vel.setHeading(this.vel.heading() + Math.PI);
+			this.internalClock = 0;
+			return;
+		}
+
+		if (
+			cell &&
+			cell.colony &&
+			(this.state === AntStates.REFILL || this.state === AntStates.TO_HOME)
+		) {
+			if (this.state === AntStates.TO_HOME) {
+				this.vel.setHeading(this.vel.heading() + Math.PI);
+				colony.addFood(this.foodAmount);
+			}
+			if (
+				this.state === AntStates.REFILL &&
+				!colony.useFood(ColonyOptions.ANT_REFILL_FOOD_AMOUNT)
+			) {
+				return;
+			}
+			this.state = AntStates.TO_FOOD;
+			this.internalClock = 0;
+			return;
+		}
+
+		if (Math.random() < this.freedomCoef) {
+			return;
+		}
+
+		let angleBetween =
+			(AntOptions.PERCEPTION_END_ANGLE - AntOptions.PERCEPTION_START_ANGLE) /
+			(AntOptions.PERCEPTION_POINTS_HORIZONTAL - 1);
+		let distanceBetween =
+			AntOptions.PERCEPTION_RADIUS / AntOptions.PERCEPTION_POINTS_VERTICAL;
+
+		let closestIndex = AntOptions.PERCEPTION_POINTS_VERTICAL + 1;
+		let closestFoodPoint: Vector | null = null;
+		let maxIntensity = 0;
+		let maxIntensityPoint: Vector | null = null;
+		let angle = this.vel.heading();
+
+		const wallForce = this.vel.copy().add(this.acc).limit(this.maxSpeed);
+		const perceptionAheadPosition = this.pos.copy().add(wallForce);
+		const cellPerceptionAhead = worldGrid.getCellFromCoordsSafe(
+			perceptionAheadPosition.x,
+			perceptionAheadPosition.y,
+		);
+
+		if (cellPerceptionAhead?.wall === 1) {
+			const force = perceptionAheadPosition.sub(this.pos);
+			if (this.debug) {
+				console.log(force);
+			}
+
+			force.x *= force.x != 0 ? -1 : 1;
+			force.y *= force.y != 0 ? -1 : 1;
+
+			force.sub(this.vel);
+			this.applyForce(force);
+			return;
+		}
+
+		if (this.directionClock >= AntOptions.DIRECTION_PERIOD) {
+			for (let x = 0; x < AntOptions.PERCEPTION_POINTS_HORIZONTAL; x++) {
+				for (let y = 1; y <= AntOptions.PERCEPTION_POINTS_VERTICAL; y++) {
+					let theta =
+						angleBetween * x +
+						AntOptions.PERCEPTION_START_ANGLE +
+						angle +
+						Math.PI / 2;
+
+					let perceptionX = distanceBetween * y * Math.cos(theta);
+					let perceptionY = distanceBetween * y * Math.sin(theta);
+					let perceptionPoint = this.pos.copy().add(perceptionX, perceptionY);
+
+					let cellPerception = worldGrid.getCellFromCoordsSafe(
+						perceptionPoint.x,
+						perceptionPoint.y,
+					);
+
+					if (cellPerception) {
+						// Check for walls
+						if (cellPerception.wall === 1 && (y === 1 || y === 2)) {
+							let force = perceptionPoint.sub(this.pos);
+
+							let forceMultiplier =
+								x + 1 > AntOptions.PERCEPTION_POINTS_HORIZONTAL / 2
+									? AntOptions.PERCEPTION_POINTS_HORIZONTAL - x
+									: x + 1;
+
+							force.setMag(this.maxSpeed);
+							force.sub(this.vel);
+
+							if (y === 1) {
+								force.limit(this.maxForce * forceMultiplier);
+							} else if (y === 2) {
+								force.limit(this.maxForce * 0.5 * forceMultiplier);
+							}
+
+							force.mult(-1);
+							this.applyForce(force);
+							break;
+						}
+
+						// Check for colony
+						if (
+							cellPerception.colony &&
+							(this.state === AntStates.REFILL ||
+								this.state === AntStates.TO_HOME)
+						) {
+							this.seek(perceptionPoint);
+							return;
+						}
+
+						// Check for food
+						if (
+							cellPerception.food.quantity > 0 &&
+							(this.state === AntStates.TO_FOOD ||
+								this.state === AntStates.REFILL)
+						) {
+							if (this.debug) {
+								this.perceptionDraw.add(
+									y * AntOptions.PERCEPTION_POINTS_VERTICAL + x,
+								);
+							}
+
+							// this.seek(perceptionPoint);
+							if (y < closestIndex) {
+								closestIndex = y;
+								closestFoodPoint = perceptionPoint;
+							}
+							break;
+						}
+
+						// Check for highest intensity marker
+						let intensity = 0;
+						if (
+							this.state === AntStates.TO_HOME ||
+							this.state === AntStates.REFILL
+						) {
+							intensity = cellPerception.marker.intensity[0];
+						} else if (
+							this.state === AntStates.TO_FOOD ||
+							this.state === AntStates.REFILL
+						) {
+							intensity = cellPerception.marker.intensity[1];
+						}
+
+						if (intensity > maxIntensity) {
+							maxIntensity = intensity;
+							maxIntensityPoint = perceptionPoint;
+						}
+					}
+				}
+			}
+
+			if (closestFoodPoint) {
+				this.seek(closestFoodPoint);
+				return;
+			}
+
+			if (maxIntensityPoint) {
+				this.seek(maxIntensityPoint);
+				return;
+			}
+
+			this.directionClock = 0;
+		}
+
+		this.wander();
+	}
+
 	addMarker(worldGrid: WorldGrid, dt: number) {
 		this.markerClock += dt;
 		if (this.markerClock >= AntOptions.MARKER_PERIOD) {
