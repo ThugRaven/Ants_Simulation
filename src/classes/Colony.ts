@@ -75,7 +75,7 @@ export default class Colony {
 		this.antsCtx = antsCtx;
 
 		for (let i = 0; i < this.startingAntsCount; i++) {
-			let ant = new Ant(
+			const ant = new Ant(
 				antsCtx,
 				antImageInstance,
 				antFoodImageInstance,
@@ -93,14 +93,14 @@ export default class Colony {
 			this.totalAnts++;
 		}
 
-		let size = Math.floor(ColonyOptions.COLONY_RADIUS / MarkerOptions.SIZE);
+		const size = Math.floor(ColonyOptions.COLONY_RADIUS / MarkerOptions.SIZE);
 
 		for (let i = 0; i < size; i++) {
-			let cellHorizontal = worldGrid.getCellFromCoordsSafe(
+			const cellHorizontal = worldGrid.getCellFromCoordsSafe(
 				this.x - (size / 2) * MarkerOptions.SIZE + i * MarkerOptions.SIZE,
 				this.y,
 			);
-			let cellVertical = worldGrid.getCellFromCoordsSafe(
+			const cellVertical = worldGrid.getCellFromCoordsSafe(
 				this.x,
 				this.y - (size / 2) * MarkerOptions.SIZE + i * MarkerOptions.SIZE,
 			);
@@ -163,7 +163,7 @@ export default class Colony {
 			this.antFoodImageInstance &&
 			this.antsCtx
 		) {
-			let ant = new Ant(
+			const ant = new Ant(
 				this.antsCtx,
 				this.antImageInstance,
 				this.antFoodImageInstance,
@@ -195,11 +195,11 @@ export default class Colony {
 
 		let newAnt = null;
 		let minDist = Infinity;
-		let radius = AntOptions.IMG_HEIGHT / 2;
+		const radius = AntOptions.IMG_HEIGHT / 2;
 
 		// Get ant in mouse radius
 		for (const ant of this.ants) {
-			let dist = ant.pos.dist(mouseVector);
+			const dist = ant.pos.dist(mouseVector);
 			if (dist < minDist && dist < radius) {
 				minDist = dist;
 				newAnt = ant;
@@ -215,7 +215,7 @@ export default class Colony {
 			return false;
 		}
 
-		let index = this.ants.findIndex((ant) => ant.id === this.selectedAnt!.id);
+		const index = this.ants.findIndex((ant) => ant.id === this.selectedAnt!.id);
 		if (index != -1) {
 			this.ants.splice(index, 1);
 			this.selectedAnt = null;

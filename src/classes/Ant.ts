@@ -78,7 +78,7 @@ export default class Ant {
 			line(this.ctx, target.x, target.y, this.pos.x, this.pos.y);
 		}
 
-		let force = target.copy().sub(this.pos);
+		const force = target.copy().sub(this.pos);
 		force.setMag(this.maxSpeed);
 		force.sub(this.vel);
 		force.limit(this.maxForce);
@@ -86,11 +86,11 @@ export default class Ant {
 	}
 
 	wander() {
-		let wanderPoint = this.vel.copy();
+		const wanderPoint = this.vel.copy();
 		wanderPoint.setMag(AntOptions.WANDER_POINT_MAGNITUDE);
 		wanderPoint.add(this.pos);
 
-		let wanderRadius = AntOptions.WANDER_POINT_RADIUS;
+		const wanderRadius = AntOptions.WANDER_POINT_RADIUS;
 
 		if (this.debug) {
 			this.ctx.fillStyle = 'red';
@@ -102,9 +102,9 @@ export default class Ant {
 			line(this.ctx, this.pos.x, this.pos.y, wanderPoint.x, wanderPoint.y);
 		}
 
-		let theta = this.wanderTheta + this.vel.heading();
-		let x = wanderRadius * Math.cos(theta);
-		let y = wanderRadius * Math.sin(theta);
+		const theta = this.wanderTheta + this.vel.heading();
+		const x = wanderRadius * Math.cos(theta);
+		const y = wanderRadius * Math.sin(theta);
 		wanderPoint.add(x, y);
 
 		if (this.debug) {
@@ -113,12 +113,12 @@ export default class Ant {
 			line(this.ctx, this.pos.x, this.pos.y, wanderPoint.x, wanderPoint.y);
 		}
 
-		let steer = wanderPoint.sub(this.pos);
+		const steer = wanderPoint.sub(this.pos);
 		steer.setMag(this.maxForce);
 		steer.limit(this.maxForce);
 		this.applyForce(steer);
 
-		let displaceRange = AntOptions.WANDER_DISPLACE_RANGE;
+		const displaceRange = AntOptions.WANDER_DISPLACE_RANGE;
 		this.wanderTheta += random(-displaceRange, displaceRange);
 	}
 
@@ -151,8 +151,8 @@ export default class Ant {
 		this.ctx.translate(this.pos.x, this.pos.y);
 		this.ctx.rotate(this.vel.heading() + Math.PI / 2);
 
-		let horizontalOffset = -AntOptions.IMG_WIDTH / 2;
-		let verticalOffset = -AntOptions.IMG_HEIGHT / 2;
+		const horizontalOffset = -AntOptions.IMG_WIDTH / 2;
+		const verticalOffset = -AntOptions.IMG_HEIGHT / 2;
 
 		// Draw food
 		if (this.state === AntStates.TO_HOME) {
@@ -207,28 +207,28 @@ export default class Ant {
 				AntOptions.PERCEPTION_START_ANGLE,
 			);
 			this.ctx.stroke();
-			let thetaLeft = AntOptions.PERCEPTION_START_ANGLE;
-			let thetaRight = AntOptions.PERCEPTION_END_ANGLE;
-			let xLeft = AntOptions.PERCEPTION_RADIUS * Math.cos(thetaLeft);
-			let yLeft = AntOptions.PERCEPTION_RADIUS * Math.sin(thetaLeft);
-			let xRight = AntOptions.PERCEPTION_RADIUS * Math.cos(thetaRight);
-			let yRight = AntOptions.PERCEPTION_RADIUS * Math.sin(thetaRight);
+			const thetaLeft = AntOptions.PERCEPTION_START_ANGLE;
+			const thetaRight = AntOptions.PERCEPTION_END_ANGLE;
+			const xLeft = AntOptions.PERCEPTION_RADIUS * Math.cos(thetaLeft);
+			const yLeft = AntOptions.PERCEPTION_RADIUS * Math.sin(thetaLeft);
+			const xRight = AntOptions.PERCEPTION_RADIUS * Math.cos(thetaRight);
+			const yRight = AntOptions.PERCEPTION_RADIUS * Math.sin(thetaRight);
 			this.ctx.strokeStyle = 'red';
 			line(this.ctx, 0, 0, xLeft, yLeft);
 			line(this.ctx, 0, 0, xRight, yRight);
 			// Calculate perception points and draw them
-			let angleBetween =
+			const angleBetween =
 				(AntOptions.PERCEPTION_END_ANGLE - AntOptions.PERCEPTION_START_ANGLE) /
 				(AntOptions.PERCEPTION_POINTS_HORIZONTAL - 1);
-			let distanceBetween =
+			const distanceBetween =
 				AntOptions.PERCEPTION_RADIUS / AntOptions.PERCEPTION_POINTS_VERTICAL;
 
 			for (let x = 0; x < AntOptions.PERCEPTION_POINTS_HORIZONTAL; x++) {
 				for (let y = 1; y <= AntOptions.PERCEPTION_POINTS_VERTICAL; y++) {
-					let theta = angleBetween * x + AntOptions.PERCEPTION_START_ANGLE;
+					const theta = angleBetween * x + AntOptions.PERCEPTION_START_ANGLE;
 
-					let perceptionX = distanceBetween * y * Math.cos(theta);
-					let perceptionY = distanceBetween * y * Math.sin(theta);
+					const perceptionX = distanceBetween * y * Math.cos(theta);
+					const perceptionY = distanceBetween * y * Math.sin(theta);
 
 					if (
 						this.perceptionDraw.has(
@@ -263,11 +263,11 @@ export default class Ant {
 			this.perceptionDraw = new Set();
 		}
 
-		let posAhead = this.vel.copy();
+		const posAhead = this.vel.copy();
 		posAhead.setMag(AntOptions.IMG_HEIGHT / 2);
 		posAhead.add(this.pos);
-		let cellAhead = worldGrid.getCellFromCoordsSafe(posAhead.x, posAhead.y);
-		let cell = worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y);
+		const cellAhead = worldGrid.getCellFromCoordsSafe(posAhead.x, posAhead.y);
+		const cell = worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y);
 		cell?.addDensity();
 		if (
 			cellAhead &&
@@ -305,37 +305,37 @@ export default class Ant {
 			return;
 		}
 
-		let angleBetween =
+		const angleBetween =
 			(AntOptions.PERCEPTION_END_ANGLE - AntOptions.PERCEPTION_START_ANGLE) /
 			(AntOptions.PERCEPTION_POINTS_HORIZONTAL - 1);
-		let distanceBetween =
+		const distanceBetween =
 			AntOptions.PERCEPTION_RADIUS / AntOptions.PERCEPTION_POINTS_VERTICAL;
 
 		let closestIndex = AntOptions.PERCEPTION_POINTS_VERTICAL + 1;
 		let closestFoodPoint: Vector | null = null;
 		let maxIntensity = 0;
 		let maxIntensityPoint: Vector | null = null;
-		let angle = this.vel.heading();
+		const angle = this.vel.heading();
 
-		let horizontalOffset = -AntOptions.IMG_WIDTH / 2;
-		let thetaLeft = Math.PI / 4 + angle + Math.PI;
-		let thetaRight = -Math.PI / 4 + angle + Math.PI;
-		let perceptionXLeft = horizontalOffset * Math.cos(thetaLeft);
-		let perceptionYLeft = horizontalOffset * Math.sin(thetaLeft);
-		let perceptionXRight = horizontalOffset * Math.cos(thetaRight);
-		let perceptionYRight = horizontalOffset * Math.sin(thetaRight);
-		let perceptionPointLeft = this.pos
+		const horizontalOffset = -AntOptions.IMG_WIDTH / 2;
+		const thetaLeft = Math.PI / 4 + angle + Math.PI;
+		const thetaRight = -Math.PI / 4 + angle + Math.PI;
+		const perceptionXLeft = horizontalOffset * Math.cos(thetaLeft);
+		const perceptionYLeft = horizontalOffset * Math.sin(thetaLeft);
+		const perceptionXRight = horizontalOffset * Math.cos(thetaRight);
+		const perceptionYRight = horizontalOffset * Math.sin(thetaRight);
+		const perceptionPointLeft = this.pos
 			.copy()
 			.add(perceptionXLeft, perceptionYLeft);
-		let perceptionPointRight = this.pos
+		const perceptionPointRight = this.pos
 			.copy()
 			.add(perceptionXRight, perceptionYRight);
 
-		let cellPerceptionLeft = worldGrid.getCellFromCoordsSafe(
+		const cellPerceptionLeft = worldGrid.getCellFromCoordsSafe(
 			perceptionPointLeft.x,
 			perceptionPointLeft.y,
 		);
-		let cellPerceptionRight = worldGrid.getCellFromCoordsSafe(
+		const cellPerceptionRight = worldGrid.getCellFromCoordsSafe(
 			perceptionPointRight.x,
 			perceptionPointRight.y,
 		);
@@ -343,11 +343,11 @@ export default class Ant {
 			(cellPerceptionLeft && cellPerceptionLeft.wall === 1) ||
 			(cellPerceptionRight && cellPerceptionRight.wall === 1)
 		) {
-			let perceptionPointWall = cellPerceptionLeft
+			const perceptionPointWall = cellPerceptionLeft
 				? perceptionPointLeft
 				: perceptionPointRight;
 
-			let force = perceptionPointWall.sub(this.pos);
+			const force = perceptionPointWall.sub(this.pos);
 
 			force.sub(this.vel);
 			force.mult(-1);
@@ -358,17 +358,17 @@ export default class Ant {
 		if (this.directionClock >= AntOptions.DIRECTION_PERIOD) {
 			for (let x = 0; x < AntOptions.PERCEPTION_POINTS_HORIZONTAL; x++) {
 				for (let y = 1; y <= AntOptions.PERCEPTION_POINTS_VERTICAL; y++) {
-					let theta =
+					const theta =
 						angleBetween * x +
 						AntOptions.PERCEPTION_START_ANGLE +
 						angle +
 						Math.PI / 2;
 
-					let perceptionX = distanceBetween * y * Math.cos(theta);
-					let perceptionY = distanceBetween * y * Math.sin(theta);
-					let perceptionPoint = this.pos.copy().add(perceptionX, perceptionY);
+					const perceptionX = distanceBetween * y * Math.cos(theta);
+					const perceptionY = distanceBetween * y * Math.sin(theta);
+					const perceptionPoint = this.pos.copy().add(perceptionX, perceptionY);
 
-					let cellPerception = worldGrid.getCellFromCoordsSafe(
+					const cellPerception = worldGrid.getCellFromCoordsSafe(
 						perceptionPoint.x,
 						perceptionPoint.y,
 					);
@@ -376,9 +376,9 @@ export default class Ant {
 					if (cellPerception) {
 						// Check for walls
 						if (cellPerception.wall === 1 && (y === 1 || y === 2)) {
-							let force = perceptionPoint.sub(this.pos);
+							const force = perceptionPoint.sub(this.pos);
 
-							let forceMultiplier =
+							const forceMultiplier =
 								x + 1 > AntOptions.PERCEPTION_POINTS_HORIZONTAL / 2
 									? AntOptions.PERCEPTION_POINTS_HORIZONTAL - x
 									: x + 1;
@@ -508,17 +508,17 @@ export default class Ant {
 			return;
 		}
 
-		let angleBetween =
+		const angleBetween =
 			(AntOptions.PERCEPTION_END_ANGLE - AntOptions.PERCEPTION_START_ANGLE) /
 			(AntOptions.PERCEPTION_POINTS_HORIZONTAL - 1);
-		let distanceBetween =
+		const distanceBetween =
 			AntOptions.PERCEPTION_RADIUS / AntOptions.PERCEPTION_POINTS_VERTICAL;
 
 		let closestIndex = AntOptions.PERCEPTION_POINTS_VERTICAL + 1;
 		let closestFoodPoint: Vector | null = null;
 		let maxIntensity = 0;
 		let maxIntensityPoint: Vector | null = null;
-		let angle = this.vel.heading();
+		const angle = this.vel.heading();
 
 		const wallForce = this.vel.copy().add(this.acc).limit(this.maxSpeed);
 		const perceptionAheadPosition = this.pos.copy().add(wallForce);
@@ -544,17 +544,17 @@ export default class Ant {
 		if (this.directionClock >= AntOptions.DIRECTION_PERIOD) {
 			for (let x = 0; x < AntOptions.PERCEPTION_POINTS_HORIZONTAL; x++) {
 				for (let y = 1; y <= AntOptions.PERCEPTION_POINTS_VERTICAL; y++) {
-					let theta =
+					const theta =
 						angleBetween * x +
 						AntOptions.PERCEPTION_START_ANGLE +
 						angle +
 						Math.PI / 2;
 
-					let perceptionX = distanceBetween * y * Math.cos(theta);
-					let perceptionY = distanceBetween * y * Math.sin(theta);
-					let perceptionPoint = this.pos.copy().add(perceptionX, perceptionY);
+					const perceptionX = distanceBetween * y * Math.cos(theta);
+					const perceptionY = distanceBetween * y * Math.sin(theta);
+					const perceptionPoint = this.pos.copy().add(perceptionX, perceptionY);
 
-					let cellPerception = worldGrid.getCellFromCoordsSafe(
+					const cellPerception = worldGrid.getCellFromCoordsSafe(
 						perceptionPoint.x,
 						perceptionPoint.y,
 					);
@@ -562,9 +562,9 @@ export default class Ant {
 					if (cellPerception) {
 						// Check for walls
 						if (cellPerception.wall === 1 && (y === 1 || y === 2)) {
-							let force = perceptionPoint.sub(this.pos);
+							const force = perceptionPoint.sub(this.pos);
 
-							let forceMultiplier =
+							const forceMultiplier =
 								x + 1 > AntOptions.PERCEPTION_POINTS_HORIZONTAL / 2
 									? AntOptions.PERCEPTION_POINTS_HORIZONTAL - x
 									: x + 1;
@@ -654,10 +654,10 @@ export default class Ant {
 	addMarker(worldGrid: WorldGrid, dt: number) {
 		this.markerClock += dt;
 		if (this.markerClock >= AntOptions.MARKER_PERIOD) {
-			let [x, y] = worldGrid.getCellCoords(this.pos.x, this.pos.y);
+			const [x, y] = worldGrid.getCellCoords(this.pos.x, this.pos.y);
 			if (!worldGrid.checkCoords(x, y)) return;
 
-			let intensity =
+			const intensity =
 				AntOptions.MARKER_DEFAULT_INTENSITY *
 				Math.exp(-0.15 * this.internalClock);
 

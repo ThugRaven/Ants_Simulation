@@ -162,7 +162,7 @@ let isControlsPanelVisible = false;
 let lastUpdateTime = 0;
 // let mainLoopAnimationFrame = -1;
 // let performanceStats = new PerformanceStats();
-let performanceStats = new PerformanceStats([
+const performanceStats = new PerformanceStats([
 	{
 		mode: 0,
 		stats: [
@@ -185,7 +185,7 @@ let performanceStats = new PerformanceStats([
 		],
 	},
 ]);
-let [
+const [
 	fpsDisplay,
 	msDisplay,
 	clearDisplay,
@@ -196,18 +196,18 @@ let [
 	allDisplay,
 ] = performanceStats.createPerformanceDisplay(performanceDisplay);
 
-let offsetY = canvasContainer.getBoundingClientRect().top;
+const offsetY = canvasContainer.getBoundingClientRect().top;
 let mouseX = 0;
 let mouseY = 0;
 let canvasScale = 1;
 let isPanning = false;
 let wasPanning = false;
 let panningTimeout = 0;
-let panStart = {
+const panStart = {
 	x: 0,
 	y: 0,
 };
-let cameraOffset = {
+const cameraOffset = {
 	x: 0,
 	y: 0,
 };
@@ -215,102 +215,102 @@ let cameraOffset = {
 let brushSize = 5;
 
 // Grids
-let [width, height] = calcWorldSize({
+const [width, height] = calcWorldSize({
 	width: CanvasOptions.WIDTH,
 	height: CanvasOptions.HEIGHT,
 	cellSize: MarkerOptions.SIZE,
 });
 
-let markersGrid = new WorldCanvas(canvasMarkers, {
+const markersGrid = new WorldCanvas(canvasMarkers, {
 	width: width / MarkerOptions.SIZE,
 	height: height / MarkerOptions.SIZE,
 	cellSize: 1,
 });
 canvasMarkers.style.transform = `scale(${MarkerOptions.SIZE})`;
-let ctxMarkers = markersGrid.create();
+const ctxMarkers = markersGrid.create();
 
-let foodGrid = new WorldCanvas(canvasFood, {
+const foodGrid = new WorldCanvas(canvasFood, {
 	width: width / (MarkerOptions.SIZE / FoodOptions.SIZE),
 	height: height / (MarkerOptions.SIZE / FoodOptions.SIZE),
 	cellSize: MarkerOptions.SIZE / FoodOptions.SIZE,
 });
 canvasFood.style.transform = `scale(${MarkerOptions.SIZE / FoodOptions.SIZE})`;
-let ctxFood = foodGrid.create();
+const ctxFood = foodGrid.create();
 
-let antsGrid = new WorldCanvas(canvas, {
+const antsGrid = new WorldCanvas(canvas, {
 	width: width,
 	height: height,
 	cellSize: MarkerOptions.SIZE,
 });
-let ctxAnts = antsGrid.create();
+const ctxAnts = antsGrid.create();
 
-let canvasAntInstance = new ImageInstance({
+const canvasAntInstance = new ImageInstance({
 	width: AntOptions.IMG_WIDTH,
 	height: AntOptions.IMG_HEIGHT,
 });
 
-let canvasAntFoodInstance = new ImageInstance({
+const canvasAntFoodInstance = new ImageInstance({
 	width: AntOptions.FOOD_SIZE,
 	height: AntOptions.FOOD_SIZE,
 });
 
-let colonyGrid = new WorldCanvas(canvasColony, {
+const colonyGrid = new WorldCanvas(canvasColony, {
 	width: width,
 	height: height,
 	cellSize: MarkerOptions.SIZE,
 });
-let ctxColony = colonyGrid.create();
+const ctxColony = colonyGrid.create();
 
-let wallsGrid = new WorldCanvas(canvasWalls, {
+const wallsGrid = new WorldCanvas(canvasWalls, {
 	width: width / MarkerOptions.SIZE,
 	height: height / MarkerOptions.SIZE,
 	cellSize: 1,
 });
 canvasWalls.style.transform = `scale(${MarkerOptions.SIZE})`;
-let ctxWalls = wallsGrid.create();
+const ctxWalls = wallsGrid.create();
 
-let editGrid = new WorldCanvas(canvasEdit, {
+const editGrid = new WorldCanvas(canvasEdit, {
 	width: width / MarkerOptions.SIZE,
 	height: height / MarkerOptions.SIZE,
 	cellSize: 1,
 });
 canvasEdit.style.transform = `scale(${MarkerOptions.SIZE})`;
-let ctxEdit = editGrid.create();
+const ctxEdit = editGrid.create();
 
-let editPreviewGrid = new WorldCanvas(canvasEditPreview, {
+const editPreviewGrid = new WorldCanvas(canvasEditPreview, {
 	width: width / MarkerOptions.SIZE,
 	height: height / MarkerOptions.SIZE,
 	cellSize: 1,
 });
 canvasEditPreview.style.transform = `scale(${MarkerOptions.SIZE})`;
-let ctxEditPreview = editPreviewGrid.create();
+const ctxEditPreview = editPreviewGrid.create();
 
-let worldGrid = new WorldGrid({
+const worldGrid = new WorldGrid({
 	width: width / MarkerOptions.SIZE,
 	height: height / MarkerOptions.SIZE,
 	cellSize: 1,
 });
 
-let mapGenerator = new MapGenerator({
+const mapGenerator = new MapGenerator({
 	width: worldGrid.width,
 	height: worldGrid.height,
 	fillRatio: MapGeneratorOptions.FILL_RATIO,
 });
 
 // Markers image data
-let markersImageData = ctxMarkers?.createImageData(
+const markersImageData = ctxMarkers?.createImageData(
 	worldGrid.width,
 	worldGrid.height,
 );
 
 // Density image data
-let densityImageData = ctxMarkers?.createImageData(
+const densityImageData = ctxMarkers?.createImageData(
 	worldGrid.width,
 	worldGrid.height,
 );
 
 // Colony
-let colony = new Colony({
+const colony = new Colony({
 	id: 1,
 	pos: {
 		x: width / 2,
@@ -319,6 +319,8 @@ let colony = new Colony({
 });
 
 window.addEventListener('keydown', (e) => {
+	console.log(e);
+
 	switch (e.code) {
 		case 'Space':
 			e.preventDefault();
@@ -401,7 +403,7 @@ canvasContainer.addEventListener('click', () => {
 canvasContainer.addEventListener('contextmenu', (e) => {
 	e.preventDefault();
 	if (isEditMode) return;
-	let target = createVector(
+	const target = createVector(
 		// (mouseX - cameraOffset.x * canvasScale) / canvasScale,
 		// (mouseY - cameraOffset.y * canvasScale) / canvasScale,
 		Math.floor((mouseX / canvasScale - cameraOffset.x) / MarkerOptions.SIZE),
@@ -522,7 +524,7 @@ btnFoodBrush.addEventListener('click', () => {
 
 btnSave.addEventListener('click', () => {
 	if (ctxEdit && ctxWalls) {
-		let imageData = ctxEdit.getImageData(
+		const imageData = ctxEdit.getImageData(
 			0,
 			0,
 			worldGrid.width,
@@ -532,13 +534,13 @@ btnSave.addEventListener('click', () => {
 		ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
 
 		for (let i = 0; i < imageData.data.length; i += 4) {
-			let cell = worldGrid.cells[i / 4];
+			const cell = worldGrid.cells[i / 4];
 
 			// Modify pixel data
-			let r = imageData.data[i + 0]; // R value
-			let g = imageData.data[i + 1]; // G value
-			let b = imageData.data[i + 2]; // B value
-			let a = imageData.data[i + 3]; // A value
+			const r = imageData.data[i + 0]; // R value
+			const g = imageData.data[i + 1]; // G value
+			const b = imageData.data[i + 2]; // B value
+			const a = imageData.data[i + 3]; // A value
 
 			if (g <= 160 && g > 0 && g > r && g > b) {
 				// Food
@@ -628,23 +630,25 @@ function setup() {
 	}
 
 	if (antIcon) {
-		let xml = new XMLSerializer().serializeToString(antIcon);
+		const xml = new XMLSerializer().serializeToString(antIcon);
 
-		let svg64 = btoa(xml);
-		let b64Start = 'data:image/svg+xml;base64,';
-		let image64 = b64Start + svg64;
+		const svg64 = btoa(xml);
+		const b64Start = 'data:image/svg+xml;base64,';
+		const image64 = b64Start + svg64;
 
-		let antImage = new Image();
+		const antImage = new Image();
 		antImage.src = image64;
 		antImage.onload = () => {
-			let antImageInstance = canvasAntInstance.createInstance((ctx) => {
+			const antImageInstance = canvasAntInstance.createInstance((ctx) => {
 				ctx.drawImage(antImage, 0, 0);
 			});
-			let antFoodImageInstance = canvasAntFoodInstance.createInstance((ctx) => {
-				let offset = AntOptions.FOOD_SIZE / 2;
-				ctx.fillStyle = `hsl(120, 40%, 43%)`;
-				circle(ctx, offset, offset, AntOptions.FOOD_SIZE / 2);
-			});
+			const antFoodImageInstance = canvasAntFoodInstance.createInstance(
+				(ctx) => {
+					const offset = AntOptions.FOOD_SIZE / 2;
+					ctx.fillStyle = `hsl(120, 40%, 43%)`;
+					circle(ctx, offset, offset, AntOptions.FOOD_SIZE / 2);
+				},
+			);
 
 			colony.initialize(
 				antImage,
@@ -727,7 +731,7 @@ function toggleAnts() {
 }
 
 function selectAnt() {
-	let mouseVector = createVector(
+	const mouseVector = createVector(
 		mouseX / canvasScale - cameraOffset.x,
 		mouseY / canvasScale - cameraOffset.y,
 	);
@@ -765,7 +769,7 @@ function addAnt() {
 }
 
 function updateAntInfo() {
-	let selectedAnt = colony.selectedAnt;
+	const selectedAnt = colony.selectedAnt;
 	if (!selectedAnt) return;
 
 	antId!.textContent = selectedAnt.id.toString();
@@ -791,8 +795,8 @@ function updateAntInfo() {
 	}
 	antState!.textContent = state;
 
-	let refillThreshold = AntOptions.AUTONOMY_REFILL / selectedAnt.maxAutonomy;
-	let autonomy = selectedAnt.internalClock / selectedAnt.maxAutonomy;
+	const refillThreshold = AntOptions.AUTONOMY_REFILL / selectedAnt.maxAutonomy;
+	const autonomy = selectedAnt.internalClock / selectedAnt.maxAutonomy;
 	antLifespanPreview!.style.setProperty('--left', `${refillThreshold * 100}%`);
 	antLifespanPreview!.style.setProperty('--width', `${autonomy * 100}%`);
 	antLifespan!.textContent = `${selectedAnt.internalClock.toFixed(
@@ -801,14 +805,14 @@ function updateAntInfo() {
 }
 
 function updateCellInfo(x: number, y: number) {
-	let cell = worldGrid.getCellFromCoordsSafe(x, y);
+	const cell = worldGrid.getCellFromCoordsSafe(x, y);
 	if (!cell) return;
 
 	markerIntensityHome!.textContent = cell.marker.intensity[0].toFixed(2);
 	markerIntensityFood!.textContent = cell.marker.intensity[1].toFixed(2);
 	cellFood!.textContent = cell.food.quantity.toString();
 	cellDensity!.textContent = cell.density.toFixed(2);
-	let color = cell.marker.getMixedColor();
+	const color = cell.marker.getMixedColor();
 	cellPreview!.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
 }
 
@@ -817,12 +821,12 @@ function updateColonyInfo() {
 
 	colonyPopulation!.textContent = `${colony.ants.length} | ${colony.totalAnts}`;
 	colonyFood!.textContent = `${colony.food.toFixed(2)} | ${colony.totalFood}`;
-	let color = colony.colonyColor;
+	const color = colony.colonyColor;
 	colonyPreview!.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
 }
 
 function updatePerformanceDisplay() {
-	let avgMap = performanceStats.update();
+	const avgMap = performanceStats.update();
 	// console.log(...avgMap);
 
 	fpsDisplay.textContent = `${Math.round(avgMap.get('fps') * 100) / 100} fps`;
@@ -899,7 +903,7 @@ function setupMousePanning() {
 }
 
 function zoomCanvas(event: WheelEvent) {
-	let zoomOffset = {
+	const zoomOffset = {
 		x: 0,
 		y: 0,
 	};
@@ -931,7 +935,7 @@ function moveCamera(x: number, y: number) {
 }
 
 function zoomCamera(zoomIn: boolean) {
-	let zoomOffset = {
+	const zoomOffset = {
 		x: 0,
 		y: 0,
 	};
@@ -949,7 +953,7 @@ function zoomCamera(zoomIn: boolean) {
 }
 
 function alignCamera() {
-	let canvasCenter = {
+	const canvasCenter = {
 		x: window.innerWidth / 2 - width / 2,
 		y: window.innerHeight / 2 - height / 2,
 	};
@@ -962,7 +966,7 @@ function alignCamera() {
 }
 
 function trackAntCamera(x: number, y: number) {
-	let antCenter = {
+	const antCenter = {
 		x: window.innerWidth / 2 / canvasScale - x,
 		y: window.innerHeight / 2 / canvasScale - y,
 	};
