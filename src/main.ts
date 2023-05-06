@@ -348,7 +348,9 @@ window.addEventListener('keydown', (e) => {
 			removeAnt();
 			break;
 		case 'Insert':
-			addAnt();
+			for (let i = 0; i < (e.ctrlKey ? 10 : e.shiftKey ? 100 : 1); i++) {
+				addAnt();
+			}
 			break;
 		case 'KeyF':
 			performanceStats.changeMode();
