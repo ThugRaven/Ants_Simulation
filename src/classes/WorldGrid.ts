@@ -24,11 +24,11 @@ export default class WorldGrid {
 	}
 
 	addBorderWalls() {
-		let borderSize = MapGeneratorOptions.BORDER_SIZE;
+		const borderSize = MapGeneratorOptions.BORDER_SIZE;
 		for (let x = 0; x < this.width; x++) {
 			for (let y = 0; y < borderSize; y++) {
-				let cellTop = this.cells[this.getIndexFromCoords(x, y)];
-				let cellBottom =
+				const cellTop = this.cells[this.getIndexFromCoords(x, y)];
+				const cellBottom =
 					this.cells[this.getIndexFromCoords(x, this.height - y - 1)];
 				cellTop.wall = 1;
 				cellBottom.wall = 1;
@@ -37,8 +37,8 @@ export default class WorldGrid {
 
 		for (let x = 0; x < borderSize; x++) {
 			for (let y = 0; y < this.height; y++) {
-				let cellLeft = this.cells[this.getIndexFromCoords(x, y)];
-				let cellRight =
+				const cellLeft = this.cells[this.getIndexFromCoords(x, y)];
+				const cellRight =
 					this.cells[this.getIndexFromCoords(this.width - x - 1, y)];
 				cellLeft.wall = 1;
 				cellRight.wall = 1;
@@ -62,7 +62,7 @@ export default class WorldGrid {
 	}
 
 	addMarker(x: number, y: number, type: MarkerTypes, intensity: number) {
-		let cell = this.cells[this.getIndexFromCoords(x, y)];
+		const cell = this.cells[this.getIndexFromCoords(x, y)];
 		if (type === MarkerTypes.TO_HOME) {
 			cell.marker.intensity[0] = Math.min(
 				1,
@@ -77,10 +77,10 @@ export default class WorldGrid {
 	}
 
 	addFood(x: number, y: number, quantity: number) {
-		let index = this.getIndexFromCoords(x, y);
+		const index = this.getIndexFromCoords(x, y);
 		if (index > this.cells.length || index < 0) return;
 
-		let cell = this.cells[index];
+		const cell = this.cells[index];
 		cell.food.quantity = Math.min(cell.food.quantity + quantity, 100);
 		cell.food.changed = true;
 	}
@@ -91,8 +91,8 @@ export default class WorldGrid {
 		update = true,
 	) {
 		for (let i = 0; i < markersImageData.data.length; i += 4) {
-			let cell = this.cells[i / 4];
-			let colors = cell.marker.getMixedColor();
+			const cell = this.cells[i / 4];
+			const colors = cell.marker.getMixedColor();
 
 			// Modify pixel data
 			markersImageData.data[i + 0] = colors[0]; // R value
@@ -110,7 +110,7 @@ export default class WorldGrid {
 	drawFood(ctx: CanvasRenderingContext2D) {
 		for (let i = 0; i < this.cells.length; i++) {
 			if (this.cells[i].food.changed) {
-				let [x, y] = this.getCoordsFromIndex(i);
+				const [x, y] = this.getCoordsFromIndex(i);
 				this.cells[i].food.draw(ctx, x, y);
 			}
 		}
@@ -120,7 +120,7 @@ export default class WorldGrid {
 		ctx.fillStyle = 'rgb(163, 163, 163)';
 		for (let x = 0; x < this.width; x++) {
 			for (let y = 0; y < this.height; y++) {
-				let cell = this.cells[this.getIndexFromCoords(x, y)];
+				const cell = this.cells[this.getIndexFromCoords(x, y)];
 				if (cell.wall === 1) {
 					cell.drawWall(ctx, x, y);
 				}
@@ -134,8 +134,8 @@ export default class WorldGrid {
 		update = true,
 	) {
 		for (let i = 0; i < densityImageData.data.length; i += 4) {
-			let cell = this.cells[i / 4];
-			let ratio = cell.density;
+			const cell = this.cells[i / 4];
+			const ratio = cell.density;
 
 			// Modify pixel data
 			densityImageData.data[i + 0] = 4 * ratio; // R value
@@ -159,14 +159,14 @@ export default class WorldGrid {
 	}
 
 	getCoordsFromIndex(index: number) {
-		let x = index % this.width;
-		let y = Math.floor(index / this.width);
+		const x = index % this.width;
+		const y = Math.floor(index / this.width);
 		return [x, y];
 	}
 
 	getCellCoords(x: number, y: number) {
-		let xCell = Math.floor(x / MarkerOptions.SIZE);
-		let yCell = Math.floor(y / MarkerOptions.SIZE);
+		const xCell = Math.floor(x / MarkerOptions.SIZE);
+		const yCell = Math.floor(y / MarkerOptions.SIZE);
 		return [xCell, yCell];
 	}
 
@@ -178,7 +178,7 @@ export default class WorldGrid {
 	}
 
 	getCellFromCoordsSafe(x: number, y: number) {
-		let [xCell, yCell] = this.getCellCoords(x, y);
+		const [xCell, yCell] = this.getCellCoords(x, y);
 		if (this.checkCoords(xCell, yCell)) {
 			return this.getCellFromCoords(xCell, yCell, true);
 		} else {

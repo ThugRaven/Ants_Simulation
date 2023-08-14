@@ -13,11 +13,11 @@ export default class Marker {
 		}
 
 		// Get default marker colors
-		let [rH, gH, bH] = MarkerColors.TO_HOME;
-		let [rF, gF, bF] = MarkerColors.TO_FOOD;
+		const [rH, gH, bH] = MarkerColors.TO_HOME;
+		const [rF, gF, bF] = MarkerColors.TO_FOOD;
 
 		// Multiply colors by intensity
-		let toHomeIntensity = [
+		const toHomeIntensity = [
 			this.intensity[0] * rH,
 			this.intensity[0] * gH,
 			this.intensity[0] * bH,
@@ -30,7 +30,7 @@ export default class Marker {
 			];
 		}
 
-		let toFoodIntensity = [
+		const toFoodIntensity = [
 			this.intensity[1] * rF,
 			this.intensity[1] * gF,
 			this.intensity[1] * bF,

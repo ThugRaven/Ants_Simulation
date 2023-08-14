@@ -80,10 +80,10 @@ export default class PerformanceStats {
 	}
 
 	createPerformanceDisplay(container: HTMLDivElement) {
-		let elements = [];
+		const elements = [];
 
 		for (const [key, value] of this.measurementArray) {
-			let span = document.createElement('span');
+			const span = document.createElement('span');
 			span.dataset[key.toString()] = '';
 			span.title = value.title;
 
@@ -101,14 +101,14 @@ export default class PerformanceStats {
 	}
 
 	startMeasurement(name: string) {
-		let measurement = this.measurementArray.get(name);
+		const measurement = this.measurementArray.get(name);
 		if (measurement && measurement.mode <= this.mode) {
 			measurement.startTime = performance.now();
 		}
 	}
 
 	endMeasurement(name: string) {
-		let measurement = this.measurementArray.get(name);
+		const measurement = this.measurementArray.get(name);
 		if (measurement && measurement.startTime && measurement.mode <= this.mode) {
 			measurement.performanceArray[measurement.index] =
 				performance.now() - measurement.startTime;
@@ -116,14 +116,14 @@ export default class PerformanceStats {
 	}
 
 	setPerformance(name: string, value: number) {
-		let measurement = this.measurementArray.get(name);
+		const measurement = this.measurementArray.get(name);
 		if (measurement && measurement.mode <= this.mode) {
 			measurement.performanceArray[measurement.index] = value;
 		}
 	}
 
 	update() {
-		let avgMap = new Map();
+		const avgMap = new Map();
 
 		for (const key of this.measurementArray.keys()) {
 			avgMap.set(key, 0);

@@ -44,8 +44,8 @@ export function calcWorldSize(worldCanvasOptions: WorldCanvasOptions) {
 		cols--;
 	}
 
-	let newWidth = rows * worldCanvasOptions.cellSize;
-	let newHeight = cols * worldCanvasOptions.cellSize;
+	const newWidth = rows * worldCanvasOptions.cellSize;
+	const newHeight = cols * worldCanvasOptions.cellSize;
 
 	console.log(
 		`Calculate sizes:\n${

@@ -58,14 +58,14 @@ export default class MapGenerator {
 	}
 
 	smoothMap() {
-		let mapCopy = [];
+		const mapCopy = [];
 		for (let i = 0; i < this.map.length; i++) {
 			mapCopy[i] = this.map[i].slice();
 		}
 
 		for (let x = 0; x < this.width; x++) {
 			for (let y = 0; y < this.height; y++) {
-				let wallCount = this.getNeighbourWallCount(x, y);
+				const wallCount = this.getNeighbourWallCount(x, y);
 				if (wallCount > 4) {
 					mapCopy[x][y] = 1;
 				} else if (wallCount < 4) {
@@ -95,7 +95,7 @@ export default class MapGenerator {
 	}
 
 	addBorderWalls() {
-		let borderSize = MapGeneratorOptions.BORDER_SIZE;
+		const borderSize = MapGeneratorOptions.BORDER_SIZE;
 		for (let x = 0; x < this.width; x++) {
 			for (let y = 0; y < borderSize; y++) {
 				this.map[x][y] = 1;
@@ -112,13 +112,13 @@ export default class MapGenerator {
 	}
 
 	processMap() {
-		let wallRegions = this.getRegions(1);
+		const wallRegions = this.getRegions(1);
 
 		if (!wallRegions) {
 			return;
 		}
 
-		let wallThresholdSize = this.threshold;
+		const wallThresholdSize = this.threshold;
 		for (const wallRegion of wallRegions) {
 			if (wallRegion.length < wallThresholdSize) {
 				for (const cell of wallRegion) {
@@ -127,13 +127,13 @@ export default class MapGenerator {
 			}
 		}
 
-		let roomRegions = this.getRegions(0);
+		const roomRegions = this.getRegions(0);
 
 		if (!roomRegions) {
 			return;
 		}
 
-		let roomThresholdSize = this.threshold;
+		const roomThresholdSize = this.threshold;
 		for (const roomRegion of roomRegions) {
 			if (roomRegion.length < roomThresholdSize) {
 				for (const cell of roomRegion) {
@@ -144,15 +144,15 @@ export default class MapGenerator {
 	}
 
 	getRegions(cellType: number) {
-		let regions: Coord[][] = [];
-		let mapFlags = Array.from(Array(this.width), () =>
+		const regions: Coord[][] = [];
+		const mapFlags = Array.from(Array(this.width), () =>
 			new Array(this.height).fill(0),
 		);
 
 		for (let x = 0; x < this.width; x++) {
 			for (let y = 0; y < this.height; y++) {
 				if (mapFlags[x][y] === 0 && this.map[x][y] === cellType) {
-					let newRegion = this.getRegionCells(x, y);
+					const newRegion = this.getRegionCells(x, y);
 
 					if (!newRegion) {
 						return;
@@ -171,18 +171,18 @@ export default class MapGenerator {
 	}
 
 	getRegionCells(cellX: number, cellY: number) {
-		let cells: Coord[] = [];
-		let mapFlags = Array.from(Array(this.width), () =>
+		const cells: Coord[] = [];
+		const mapFlags = Array.from(Array(this.width), () =>
 			new Array(this.height).fill(0),
 		);
-		let cellType = this.map[cellX][cellY];
+		const cellType = this.map[cellX][cellY];
 
-		let queue: Coord[] = [];
+		const queue: Coord[] = [];
 		queue.push({ x: cellX, y: cellY });
 		mapFlags[cellX][cellY] = 1;
 
 		while (queue.length > 0) {
-			let cell = queue.shift();
+			const cell = queue.shift();
 			if (!cell) {
 				return;
 			}

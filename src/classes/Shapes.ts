@@ -3,8 +3,8 @@ export function circle(
 	x: number,
 	y: number,
 	radius: number,
-	fill: boolean = true,
-	stroke: boolean = false,
+	fill = true,
+	stroke = false,
 ) {
 	ctx.beginPath();
 	ctx.arc(x, y, radius, 0, Math.PI * 2);
