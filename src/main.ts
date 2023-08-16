@@ -145,6 +145,7 @@ const btnGenerateMap = document.getElementById(
 let isRunning = false;
 let isDrawingMarkers = true;
 let isDrawingDensity = false;
+let isDrawingAdvancedDensity = false;
 let isDebugMode = false;
 let isTracking = false;
 let isEditMode = false;
@@ -682,12 +683,19 @@ function toggleMarkers() {
 	isDrawingMarkers = !isDrawingMarkers;
 	if (isDrawingMarkers) {
 		isDrawingDensity = false;
+		isDrawingAdvancedDensity = false;
 	}
 }
 
 function toggleDensity() {
-	isDrawingDensity = !isDrawingDensity;
-	if (isDrawingDensity) {
+	isDrawingAdvancedDensity = isDrawingDensity
+		? !isDrawingAdvancedDensity
+		: isDrawingAdvancedDensity;
+	isDrawingDensity = isDrawingAdvancedDensity
+		? isDrawingDensity
+		: !isDrawingDensity;
+
+	if (isDrawingDensity || isDrawingAdvancedDensity) {
 		isDrawingMarkers = false;
 	}
 }
@@ -813,7 +821,11 @@ function updateCellInfo(x: number, y: number) {
 	markerIntensityHome!.textContent = cell.marker.intensity[0].toFixed(2);
 	markerIntensityFood!.textContent = cell.marker.intensity[1].toFixed(2);
 	cellFood!.textContent = cell.food.quantity.toString();
-	cellDensity!.textContent = cell.density.toFixed(2);
+	cellDensity!.textContent = (
+		cell.density[0] +
+		cell.density[1] +
+		cell.density[2]
+	).toFixed(2);
 	const color = cell.marker.getMixedColor();
 	cellPreview!.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
 }
@@ -1013,8 +1025,14 @@ function main(currentTime: number) {
 	performanceStats.startMeasurement('grid');
 	if (isDrawingMarkers && markersImageData) {
 		worldGrid.drawMarkers(ctxMarkers, markersImageData, isRunning);
-	} else if (isDrawingDensity && densityImageData) {
+	} else if (
+		isDrawingDensity &&
+		!isDrawingAdvancedDensity &&
+		densityImageData
+	) {
 		worldGrid.drawDensity(ctxMarkers, densityImageData, isRunning);
+	} else if (isDrawingDensity && isDrawingAdvancedDensity && densityImageData) {
+		worldGrid.drawDensity(ctxMarkers, densityImageData, isRunning, true);
 	} else if (isRunning) {
 		worldGrid.update();
 	}

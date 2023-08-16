@@ -268,7 +268,10 @@ export default class Ant {
 		posAhead.add(this.pos);
 		const cellAhead = worldGrid.getCellFromCoordsSafe(posAhead.x, posAhead.y);
 		const cell = worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y);
-		cell?.addDensity();
+		cell?.addDensity(
+			this.state === AntStates.TO_HOME,
+			this.state === AntStates.REFILL,
+		);
 		if (
 			cellAhead &&
 			cellAhead.food.quantity > 0 &&
@@ -465,49 +468,7 @@ export default class Ant {
 		this.wander();
 	}
 
-	searchSimple(worldGrid: WorldGrid, colony: Colony) {
-		if (this.debug) {
-			this.perceptionDraw = new Set();
-		}
-
-		const cell = worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y);
-		cell?.addDensity();
-		if (
-			cell &&
-			cell.food.quantity > 0 &&
-			(this.state === AntStates.TO_FOOD || this.state === AntStates.REFILL)
-		) {
-			this.state = AntStates.TO_HOME;
-			this.foodAmount = cell.pick();
-			this.vel.setHeading(this.vel.heading() + Math.PI);
-			this.internalClock = 0;
-			return;
-		}
-
-		if (
-			cell &&
-			cell.colony &&
-			(this.state === AntStates.REFILL || this.state === AntStates.TO_HOME)
-		) {
-			if (this.state === AntStates.TO_HOME) {
-				this.vel.setHeading(this.vel.heading() + Math.PI);
-				colony.addFood(this.foodAmount);
-			}
-			if (
-				this.state === AntStates.REFILL &&
-				!colony.useFood(ColonyOptions.ANT_REFILL_FOOD_AMOUNT)
-			) {
-				return;
-			}
-			this.state = AntStates.TO_FOOD;
-			this.internalClock = 0;
-			return;
-		}
-
-		if (Math.random() < this.freedomCoef) {
-			return;
-		}
-
+	perception(worldGrid: WorldGrid) {
 		const angleBetween =
 			(AntOptions.PERCEPTION_END_ANGLE - AntOptions.PERCEPTION_START_ANGLE) /
 			(AntOptions.PERCEPTION_POINTS_HORIZONTAL - 1);
@@ -647,6 +608,55 @@ export default class Ant {
 
 			this.directionClock = 0;
 		}
+	}
+
+	searchSimple(worldGrid: WorldGrid, colony: Colony) {
+		if (this.debug) {
+			this.perceptionDraw = new Set();
+		}
+
+		const cell = worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y);
+		cell?.addDensity(
+			this.state === AntStates.TO_HOME,
+			this.state === AntStates.REFILL,
+		);
+		if (
+			cell &&
+			cell.food.quantity > 0 &&
+			(this.state === AntStates.TO_FOOD || this.state === AntStates.REFILL)
+		) {
+			this.state = AntStates.TO_HOME;
+			this.foodAmount = cell.pick();
+			this.vel.setHeading(this.vel.heading() + Math.PI);
+			this.internalClock = 0;
+			return;
+		}
+
+		if (
+			cell &&
+			cell.colony &&
+			(this.state === AntStates.REFILL || this.state === AntStates.TO_HOME)
+		) {
+			if (this.state === AntStates.TO_HOME) {
+				this.vel.setHeading(this.vel.heading() + Math.PI);
+				colony.addFood(this.foodAmount);
+			}
+			if (
+				this.state === AntStates.REFILL &&
+				!colony.useFood(ColonyOptions.ANT_REFILL_FOOD_AMOUNT)
+			) {
+				return;
+			}
+			this.state = AntStates.TO_FOOD;
+			this.internalClock = 0;
+			return;
+		}
+
+		if (Math.random() < this.freedomCoef) {
+			return;
+		}
+
+		this.perception(worldGrid);
 
 		this.wander();
 	}

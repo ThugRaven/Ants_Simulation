@@ -54,10 +54,13 @@ export default class WorldGrid {
 
 	updateCell(cell: WorldCell) {
 		cell.marker.update();
-		if (cell.density > 0.01) {
-			cell.density *= 0.99;
-		} else {
-			cell.density = 0;
+
+		for (let i = 0; i < 3; i++) {
+			if (cell.density[i] > 0.01) {
+				cell.density[i] *= 0.99;
+			} else {
+				cell.density[i] = 0;
+			}
 		}
 	}
 
@@ -132,16 +135,25 @@ export default class WorldGrid {
 		ctx: CanvasRenderingContext2D,
 		densityImageData: ImageData,
 		update = true,
+		advanced = false,
 	) {
 		for (let i = 0; i < densityImageData.data.length; i += 4) {
 			const cell = this.cells[i / 4];
 			const ratio = cell.density;
 
 			// Modify pixel data
-			densityImageData.data[i + 0] = 4 * ratio; // R value
-			densityImageData.data[i + 1] = ratio; // G value
-			densityImageData.data[i + 2] = ratio; // B value
-			densityImageData.data[i + 3] = 255; // A value
+			if (!advanced) {
+				const ratioAll = ratio[0] + ratio[1] + ratio[2];
+				densityImageData.data[i + 0] = 4 * ratioAll; // R value
+				densityImageData.data[i + 1] = ratioAll; // G value
+				densityImageData.data[i + 2] = ratioAll; // B value
+				densityImageData.data[i + 3] = 255; // A value
+			} else {
+				densityImageData.data[i + 0] = 4 * ratio[0]; // R value
+				densityImageData.data[i + 1] = 4 * ratio[1]; // G value
+				densityImageData.data[i + 2] = 4 * ratio[2]; // B value
+				densityImageData.data[i + 3] = 255; // A value
+			}
 
 			if (update) {
 				this.updateCell(cell);
