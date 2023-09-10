@@ -272,20 +272,34 @@ export class Vector {
 
 	normalize() {
 		const len = this.mag();
-		if (len !== 0) this.mult(1 / len);
+		if (len !== 0) {
+			this.x *= 1 / len;
+			this.y *= 1 / len;
+			this.z *= 1 / len;
+		}
 		return this;
 	}
 
 	limit(max: number) {
 		const mSq = this.magSq();
 		if (mSq > max * max) {
-			this.div(Math.sqrt(mSq)).mult(max);
+			this.x /= Math.sqrt(mSq);
+			this.y /= Math.sqrt(mSq);
+			this.z /= Math.sqrt(mSq);
+
+			this.x *= max;
+			this.y *= max;
+			this.z *= max;
 		}
 		return this;
 	}
 
 	setMag(n: number) {
-		return this.normalize().mult(n);
+		const vector = this.normalize();
+		vector.x *= n;
+		vector.y *= n;
+		vector.z *= n;
+		return vector;
 	}
 
 	heading() {
