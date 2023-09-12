@@ -154,6 +154,7 @@ let isErasing = false;
 let isWallMode = false;
 let isFoodMode = false;
 let isPanMode = false;
+let isFirstTime = true;
 
 let isColonyPanelVisible = false;
 let isCellPanelVisible = false;
@@ -670,6 +671,11 @@ function setup() {
 }
 
 function toggleLoop() {
+	if (isFirstTime) {
+		colony.isDrawingAnts = true;
+		isFirstTime = false;
+	}
+
 	isRunning = !isRunning;
 
 	colony.isRunning = isRunning;
@@ -737,6 +743,12 @@ function togglePanMode() {
 }
 
 function toggleAnts() {
+	if (isFirstTime) {
+		isFirstTime = false;
+		colony.isDrawingAnts = false;
+		return;
+	}
+
 	colony.isDrawingAnts = !colony.isDrawingAnts;
 }
 
