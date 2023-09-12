@@ -9,6 +9,7 @@ import WorldCanvas, { calcWorldSize } from './classes/WorldCanvas';
 import WorldGrid from './classes/WorldGrid';
 import {
 	AntOptions,
+	ANTS_DRAW_PERIOD,
 	AntStates,
 	BrushOptions,
 	CAMERA_MOVE_BY,
@@ -1116,6 +1117,7 @@ function setCamera() {
 	cameraContainer.style.transform = `scale(${canvasScale}) translate(${cameraOffset.x}px, ${cameraOffset.y}px)`;
 }
 
+let antsDrawClock = 0;
 function main(currentTime: number) {
 	if (
 		ctxMarkers == null ||
@@ -1132,6 +1134,7 @@ function main(currentTime: number) {
 	performanceStats.startMeasurement('all');
 
 	const deltaTime = (currentTime - lastUpdateTime) / 1000;
+	antsDrawClock += deltaTime;
 
 	if (performanceStats.isMeasuring) {
 		performanceStats.setPerformance('fps', 1 / deltaTime);
@@ -1139,7 +1142,9 @@ function main(currentTime: number) {
 	}
 
 	performanceStats.startMeasurement('clear');
-	ctxAnts.clearRect(0, 0, width, height);
+	if (antsDrawClock > ANTS_DRAW_PERIOD / canvasScale) {
+		ctxAnts.clearRect(0, 0, width, height);
+	}
 	ctxMarkers.clearRect(0, 0, worldGrid.width, worldGrid.height);
 	performanceStats.endMeasurement('clear');
 
@@ -1197,7 +1202,11 @@ function main(currentTime: number) {
 
 	colony.updateColony(deltaTime);
 	performanceStats.startMeasurement('ants');
-	colony.updateAndDrawAnts(worldGrid, deltaTime);
+	if (antsDrawClock > ANTS_DRAW_PERIOD / canvasScale) {
+		colony.updateAndDrawAnts(worldGrid, deltaTime);
+	} else {
+		colony.updateAndDrawAnts(worldGrid, deltaTime, false);
+	}
 	performanceStats.endMeasurement('ants');
 
 	performanceStats.startMeasurement('panels');
@@ -1210,23 +1219,26 @@ function main(currentTime: number) {
 		ctxAnts.fillStyle = 'red';
 		circle(ctxAnts, target.x, target.y, 4);
 		updateCellInfo(target.x, target.y);
-		ctxAnts.fillStyle = 'rgb(255, 0, 0, 0.1)';
-		const padding = {
-			x: AntOptions.IMG_HEIGHT * canvasScale,
-			y: AntOptions.IMG_HEIGHT * canvasScale,
-		};
 
-		const size = {
-			x: (window.innerWidth + padding.x) / canvasScale,
-			y: (window.innerHeight - offsetY + padding.y) / canvasScale,
-		};
-		rect(
-			ctxAnts,
-			center.x - size.x / 2,
-			center.y - offsetY / 2 / canvasScale - size.y / 2,
-			size.x,
-			size.y,
-		);
+		if (antsDrawClock > ANTS_DRAW_PERIOD / canvasScale) {
+			ctxAnts.fillStyle = 'rgb(255, 0, 0, 0.1)';
+			const padding = {
+				x: AntOptions.IMG_HEIGHT * canvasScale,
+				y: AntOptions.IMG_HEIGHT * canvasScale,
+			};
+
+			const size = {
+				x: (window.innerWidth + padding.x) / canvasScale,
+				y: (window.innerHeight - offsetY + padding.y) / canvasScale,
+			};
+			rect(
+				ctxAnts,
+				center.x - size.x / 2,
+				center.y - offsetY / 2 / canvasScale - size.y / 2,
+				size.x,
+				size.y,
+			);
+		}
 	}
 
 	updateColonyInfo();
@@ -1237,5 +1249,8 @@ function main(currentTime: number) {
 		updatePerformanceDisplay();
 	}
 
+	if (antsDrawClock > ANTS_DRAW_PERIOD / canvasScale) {
+		antsDrawClock = 0;
+	}
 	lastUpdateTime = currentTime;
 }

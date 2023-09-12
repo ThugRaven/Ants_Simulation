@@ -113,7 +113,7 @@ export default class Colony {
 		}
 	}
 
-	updateAndDrawAnts(worldGrid: WorldGrid, dt: number) {
+	updateAndDrawAnts(worldGrid: WorldGrid, dt: number, draw = true) {
 		let removeAnt = false;
 		for (let i = 0; i < this.ants.length; i++) {
 			if (this.isRunning) {
@@ -137,28 +137,30 @@ export default class Colony {
 			// 	isVisible = true;
 			// }
 
-			const padding = {
-				x: AntOptions.IMG_HEIGHT * canvasScale,
-				y: AntOptions.IMG_HEIGHT * canvasScale,
-			};
+			if (draw) {
+				const padding = {
+					x: AntOptions.IMG_HEIGHT * canvasScale,
+					y: AntOptions.IMG_HEIGHT * canvasScale,
+				};
 
-			const width = (window.innerWidth + padding.x) / canvasScale;
-			const height = (window.innerHeight - offsetY + padding.y) / canvasScale;
+				const width = (window.innerWidth + padding.x) / canvasScale;
+				const height = (window.innerHeight - offsetY + padding.y) / canvasScale;
 
-			const x = cameraCenter.x - width / 2;
-			const y = cameraCenter.y - offsetY / 2 / canvasScale - height / 2;
+				const x = cameraCenter.x - width / 2;
+				const y = cameraCenter.y - offsetY / 2 / canvasScale - height / 2;
 
-			if (
-				this.ants[i].pos.x >= x &&
-				this.ants[i].pos.x <= x + width &&
-				this.ants[i].pos.y >= y &&
-				this.ants[i].pos.y <= y + height
-			) {
-				isVisible = true;
-			}
+				if (
+					this.ants[i].pos.x >= x &&
+					this.ants[i].pos.x <= x + width &&
+					this.ants[i].pos.y >= y &&
+					this.ants[i].pos.y <= y + height
+				) {
+					isVisible = true;
+				}
 
-			if (this.isDrawingAnts && isVisible) {
-				this.ants[i].draw();
+				if (this.isDrawingAnts && isVisible) {
+					this.ants[i].draw();
+				}
 			}
 
 			// Remove ant

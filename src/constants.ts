@@ -74,6 +74,8 @@ export const AntOptions = {
 	FOOD_SIZE: 16,
 } as const;
 
+export const ANTS_DRAW_PERIOD = 0.005;
+
 // FOOD
 export const FoodOptions = {
 	SIZE: 15,
