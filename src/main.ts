@@ -198,10 +198,10 @@ const [
 	allDisplay,
 ] = performanceStats.createPerformanceDisplay(performanceDisplay);
 
-const offsetY = canvasContainer.getBoundingClientRect().top;
+export const offsetY = canvasContainer.getBoundingClientRect().top;
 let mouseX = 0;
 let mouseY = 0;
-let canvasScale = 1;
+export let canvasScale = 1;
 let isPanning = false;
 let wasPanning = false;
 let panningTimeout = 0;
@@ -213,7 +213,7 @@ const cameraOffset = {
 	x: 0,
 	y: 0,
 };
-const cameraCenter = {
+export const cameraCenter = {
 	x: 0,
 	y: 0,
 };
@@ -323,8 +323,6 @@ const colony = new Colony({
 		y: height / 2,
 	},
 });
-
-colony.offsetY = offsetY;
 
 window.addEventListener('keydown', (e) => {
 	console.log(e);
@@ -987,11 +985,10 @@ function zoomCanvas(event: WheelEvent) {
 		(event.clientY - offsetY - window.innerHeight / 2) / canvasScale -
 		zoomOffset.y;
 
-	colony.cameraCenter = {
-		x: cameraCenter.x < 0 ? Math.abs(cameraCenter.x) : cameraCenter.x * -1,
-		y: cameraCenter.y < 0 ? Math.abs(cameraCenter.y) : cameraCenter.y * -1,
-	};
-	colony.canvasScale = canvasScale;
+	cameraCenter.x =
+		cameraCenter.x < 0 ? Math.abs(cameraCenter.x) : cameraCenter.x * -1;
+	cameraCenter.y =
+		cameraCenter.y < 0 ? Math.abs(cameraCenter.y) : cameraCenter.y * -1;
 
 	setCamera();
 }
@@ -1035,13 +1032,12 @@ function panCanvas(event: MouseEvent) {
 		panStart.y;
 	console.log(cameraCenter);
 	console.log(window.innerWidth, window.innerHeight);
-	colony.cameraCenter = {
-		x: cameraCenter.x < 0 ? Math.abs(cameraCenter.x) : cameraCenter.x * -1,
-		y: cameraCenter.y < 0 ? Math.abs(cameraCenter.y) : cameraCenter.y * -1,
-	};
-	colony.canvasScale = canvasScale;
 
-	console.log(`--- END ---`);
+	(cameraCenter.x =
+		cameraCenter.x < 0 ? Math.abs(cameraCenter.x) : cameraCenter.x * -1),
+		(cameraCenter.y =
+			cameraCenter.y < 0 ? Math.abs(cameraCenter.y) : cameraCenter.y * -1),
+		console.log(`--- END ---`);
 
 	setCamera();
 }
@@ -1049,6 +1045,9 @@ function panCanvas(event: MouseEvent) {
 function moveCamera(x: number, y: number) {
 	cameraOffset.x += x;
 	cameraOffset.y += y;
+
+	cameraCenter.x -= x;
+	cameraCenter.y -= y;
 
 	setCamera();
 }
@@ -1060,13 +1059,24 @@ function zoomCamera(zoomIn: boolean) {
 	};
 
 	zoomOffset.x = window.innerWidth / 2 / canvasScale - cameraOffset.x;
-	zoomOffset.y = window.innerWidth / 2 / canvasScale - cameraOffset.y;
+	zoomOffset.y = window.innerHeight / 2 / canvasScale - cameraOffset.y;
 
 	canvasScale *= 0.999 ** (zoomIn ? -100 : 100);
 	canvasScale = Math.min(Math.max(0.15, canvasScale), 16);
 
 	cameraOffset.x = window.innerWidth / 2 / canvasScale - zoomOffset.x;
-	cameraOffset.y = window.innerWidth / 2 / canvasScale - zoomOffset.y;
+	cameraOffset.y = window.innerHeight / 2 / canvasScale - zoomOffset.y;
+
+	cameraCenter.x =
+		(window.innerWidth / 2 - window.innerWidth / 2) / canvasScale -
+		zoomOffset.x;
+	cameraCenter.y =
+		(window.innerHeight / 2 - window.innerHeight / 2) / canvasScale -
+		zoomOffset.y;
+	cameraCenter.x =
+		cameraCenter.x < 0 ? Math.abs(cameraCenter.x) : cameraCenter.x * -1;
+	cameraCenter.y =
+		cameraCenter.y < 0 ? Math.abs(cameraCenter.y) : cameraCenter.y * -1;
 
 	setCamera();
 }
@@ -1080,6 +1090,9 @@ function alignCamera() {
 	canvasScale = 1;
 	cameraOffset.x = canvasCenter.x;
 	cameraOffset.y = canvasCenter.y;
+
+	cameraCenter.x = width / 2;
+	cameraCenter.y = height / 2;
 
 	setCamera();
 }
@@ -1095,11 +1108,6 @@ function trackAntCamera(x: number, y: number) {
 
 	cameraCenter.x = window.innerWidth / 2 / canvasScale - antCenter.x;
 	cameraCenter.y = window.innerHeight / 2 / canvasScale - antCenter.y;
-
-	colony.cameraCenter = {
-		x: cameraCenter.x,
-		y: cameraCenter.y,
-	};
 
 	setCamera();
 }

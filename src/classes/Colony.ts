@@ -1,4 +1,5 @@
 import { AntOptions, ColonyOptions, MarkerOptions } from '../constants';
+import { cameraCenter, canvasScale, offsetY } from '../main';
 import Ant from './Ant';
 import { circle } from './Shapes';
 import { Vector } from './Vector';
@@ -32,9 +33,6 @@ export default class Colony {
 	colonyClock: number;
 	antsCtx: CanvasRenderingContext2D | null;
 	selectedAnt: Ant | null;
-	cameraCenter: { x: number; y: number };
-	canvasScale: number;
-	offsetY: number;
 
 	food: number;
 	totalFood: number;
@@ -59,9 +57,6 @@ export default class Colony {
 		this.colonyClock = 0;
 		this.antsCtx = null;
 		this.selectedAnt = null;
-		this.cameraCenter = { x: 0, y: 0 };
-		this.canvasScale = 1;
-		this.offsetY = 0;
 
 		this.food = 0;
 		this.totalFood = 0;
@@ -143,17 +138,15 @@ export default class Colony {
 			// }
 
 			const padding = {
-				x: AntOptions.IMG_HEIGHT * this.canvasScale,
-				y: AntOptions.IMG_HEIGHT * this.canvasScale,
+				x: AntOptions.IMG_HEIGHT * canvasScale,
+				y: AntOptions.IMG_HEIGHT * canvasScale,
 			};
 
-			const width = (window.innerWidth + padding.x) / this.canvasScale;
-			const height =
-				(window.innerHeight - this.offsetY + padding.y) / this.canvasScale;
+			const width = (window.innerWidth + padding.x) / canvasScale;
+			const height = (window.innerHeight - offsetY + padding.y) / canvasScale;
 
-			const x = this.cameraCenter.x - width / 2;
-			const y =
-				this.cameraCenter.y - this.offsetY / 2 / this.canvasScale - height / 2;
+			const x = cameraCenter.x - width / 2;
+			const y = cameraCenter.y - offsetY / 2 / canvasScale - height / 2;
 
 			if (
 				this.ants[i].pos.x >= x &&
@@ -163,9 +156,6 @@ export default class Colony {
 			) {
 				isVisible = true;
 			}
-			// if (worldGrid) {
-			// 	isVisible = true;
-			// }
 
 			if (this.isDrawingAnts && isVisible) {
 				this.ants[i].draw();
