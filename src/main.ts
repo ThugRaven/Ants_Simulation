@@ -2,7 +2,7 @@ import Colony from './classes/Colony';
 import ImageInstance from './classes/ImageInstance';
 import MapGenerator from './classes/MapGenerator';
 import PerformanceStats from './classes/PerformanceStats';
-import { circle } from './classes/Shapes';
+import { circle, rect } from './classes/Shapes';
 import { toggleButton, togglePanelAndButton } from './classes/Utils';
 import { createVector } from './classes/Vector';
 import WorldCanvas, { calcWorldSize } from './classes/WorldCanvas';
@@ -213,6 +213,10 @@ const cameraOffset = {
 	x: 0,
 	y: 0,
 };
+const cameraCenter = {
+	x: 0,
+	y: 0,
+};
 
 let brushSize = 5;
 
@@ -319,6 +323,8 @@ const colony = new Colony({
 		y: height / 2,
 	},
 });
+
+colony.offsetY = offsetY;
 
 window.addEventListener('keydown', (e) => {
 	console.log(e);
@@ -643,9 +649,40 @@ function setup() {
 		const antImage = new Image();
 		antImage.src = image64;
 		antImage.onload = () => {
-			const antImageInstance = canvasAntInstance.createInstance((ctx) => {
-				ctx.drawImage(antImage, 0, 0);
-			});
+			const antImageInstance = canvasAntInstance.createInstance(
+				(ctx, canvas) => {
+					const temp = new ImageInstance({
+						width: AntOptions.IMG_WIDTH,
+						height: AntOptions.IMG_HEIGHT,
+					});
+					// ctx.imageSmoothingEnabled = false;
+
+					// temp.createInstance((tempCtx, tempCanvas) => {
+					// 	tempCanvas.width = antImage.width * 0.5;
+					// 	tempCanvas.height = antImage.height * 0.5;
+					// 	tempCtx.drawImage(
+					// 		antImage,
+					// 		0,
+					// 		0,
+					// 		tempCanvas.width,
+					// 		tempCanvas.height,
+					// 	);
+					// 	ctx.drawImage(
+					// 		tempCanvas,
+					// 		0,
+					// 		0,
+					// 		tempCanvas.width,
+					// 		tempCanvas.height,
+					// 		0,
+					// 		0,
+					// 		canvasAntInstance.width,
+					// 		canvasAntInstance.height,
+					// 	);
+					// });
+
+					ctx.drawImage(antImage, 0, 0);
+				},
+			);
 			const antFoodImageInstance = canvasAntFoodInstance.createInstance(
 				(ctx) => {
 					const offset = AntOptions.FOOD_SIZE / 2;
@@ -704,6 +741,7 @@ function toggleDensity() {
 	if (isDrawingDensity || isDrawingAdvancedDensity) {
 		isDrawingMarkers = false;
 	}
+	console.log(isDrawingDensity, isDrawingAdvancedDensity, isDrawingMarkers);
 }
 
 function toggleDebug() {
@@ -943,12 +981,67 @@ function zoomCanvas(event: WheelEvent) {
 	cameraOffset.x = event.clientX / canvasScale - zoomOffset.x;
 	cameraOffset.y = (event.clientY - offsetY) / canvasScale - zoomOffset.y;
 
+	cameraCenter.x =
+		(event.clientX - window.innerWidth / 2) / canvasScale - zoomOffset.x;
+	cameraCenter.y =
+		(event.clientY - offsetY - window.innerHeight / 2) / canvasScale -
+		zoomOffset.y;
+
+	colony.cameraCenter = {
+		x: cameraCenter.x < 0 ? Math.abs(cameraCenter.x) : cameraCenter.x * -1,
+		y: cameraCenter.y < 0 ? Math.abs(cameraCenter.y) : cameraCenter.y * -1,
+	};
+	colony.canvasScale = canvasScale;
+
 	setCamera();
 }
 
 function panCanvas(event: MouseEvent) {
+	console.log(event);
+
 	cameraOffset.x = event.clientX / canvasScale - panStart.x;
 	cameraOffset.y = (event.clientY - offsetY) / canvasScale - panStart.y;
+
+	const canvasCenter = {
+		x: window.innerWidth / 2 - width / 2,
+		y: window.innerHeight / 2 - height / 2,
+	};
+	const cameraOffsetTemp = { x: 0, y: 0 };
+	cameraOffsetTemp.x =
+		(event.clientX - canvasCenter.x) / canvasScale - panStart.x;
+	cameraOffsetTemp.y =
+		(event.clientY - offsetY - canvasCenter.y) / canvasScale - panStart.y;
+	console.log(`--- START ---`);
+
+	console.log(cameraOffset);
+	console.log(canvasCenter);
+	console.log(canvasScale);
+	console.log(cameraOffsetTemp);
+
+	const zoomOffset = {
+		x: 0,
+		y: 0,
+	};
+
+	zoomOffset.x = event.clientX / canvasScale - cameraOffset.x;
+	zoomOffset.y = (event.clientY - offsetY) / canvasScale - cameraOffset.y;
+
+	console.log(zoomOffset);
+	console.log(event.clientX, event.clientY);
+	cameraCenter.x =
+		(event.clientX - window.innerWidth / 2) / canvasScale - panStart.x;
+	cameraCenter.y =
+		(event.clientY - offsetY - window.innerHeight / 2) / canvasScale -
+		panStart.y;
+	console.log(cameraCenter);
+	console.log(window.innerWidth, window.innerHeight);
+	colony.cameraCenter = {
+		x: cameraCenter.x < 0 ? Math.abs(cameraCenter.x) : cameraCenter.x * -1,
+		y: cameraCenter.y < 0 ? Math.abs(cameraCenter.y) : cameraCenter.y * -1,
+	};
+	colony.canvasScale = canvasScale;
+
+	console.log(`--- END ---`);
 
 	setCamera();
 }
@@ -999,6 +1092,14 @@ function trackAntCamera(x: number, y: number) {
 
 	cameraOffset.x = antCenter.x;
 	cameraOffset.y = antCenter.y;
+
+	cameraCenter.x = window.innerWidth / 2 / canvasScale - antCenter.x;
+	cameraCenter.y = window.innerHeight / 2 / canvasScale - antCenter.y;
+
+	colony.cameraCenter = {
+		x: cameraCenter.x,
+		y: cameraCenter.y,
+	};
 
 	setCamera();
 }
@@ -1059,6 +1160,11 @@ function main(currentTime: number) {
 		mouseY / canvasScale - cameraOffset.y,
 	);
 
+	const center = createVector(
+		cameraCenter.x > 0 ? Math.abs(cameraCenter.x) : cameraCenter.x * -1,
+		cameraCenter.y > 0 ? Math.abs(cameraCenter.y) : cameraCenter.y * -1,
+	);
+
 	if (isEditMode) {
 		// Draw brush preview
 		ctxEditPreview.clearRect(0, 0, worldGrid.width, worldGrid.height);
@@ -1096,6 +1202,23 @@ function main(currentTime: number) {
 		ctxAnts.fillStyle = 'red';
 		circle(ctxAnts, target.x, target.y, 4);
 		updateCellInfo(target.x, target.y);
+		ctxAnts.fillStyle = 'rgb(255, 0, 0, 0.1)';
+		const padding = {
+			x: AntOptions.IMG_HEIGHT * canvasScale,
+			y: AntOptions.IMG_HEIGHT * canvasScale,
+		};
+
+		const size = {
+			x: (window.innerWidth + padding.x) / canvasScale,
+			y: (window.innerHeight - offsetY + padding.y) / canvasScale,
+		};
+		rect(
+			ctxAnts,
+			center.x - size.x / 2,
+			center.y - offsetY / 2 / canvasScale - size.y / 2,
+			size.x,
+			size.y,
+		);
 	}
 
 	updateColonyInfo();

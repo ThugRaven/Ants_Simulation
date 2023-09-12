@@ -32,6 +32,9 @@ export default class Colony {
 	colonyClock: number;
 	antsCtx: CanvasRenderingContext2D | null;
 	selectedAnt: Ant | null;
+	cameraCenter: { x: number; y: number };
+	canvasScale: number;
+	offsetY: number;
 
 	food: number;
 	totalFood: number;
@@ -51,11 +54,14 @@ export default class Colony {
 		this.antFoodImageInstance = null;
 		this.antId = 0;
 		this.isRunning = false;
-		this.isDrawingAnts = true;
+		this.isDrawingAnts = false;
 		this.isDebugMode = false;
 		this.colonyClock = 0;
 		this.antsCtx = null;
 		this.selectedAnt = null;
+		this.cameraCenter = { x: 0, y: 0 };
+		this.canvasScale = 1;
+		this.offsetY = 0;
 
 		this.food = 0;
 		this.totalFood = 0;
@@ -128,7 +134,40 @@ export default class Colony {
 			}
 
 			// Draw ants
-			if (this.isDrawingAnts) {
+			let isVisible = false;
+			// const dist = this.ants[i].pos.dist(
+			// 	new Vector(this.cameraCenter.x, this.cameraCenter.y),
+			// );
+			// if (dist < ANTS_VISIBLE_RADIUS / this.canvasScale) {
+			// 	isVisible = true;
+			// }
+
+			const padding = {
+				x: AntOptions.IMG_HEIGHT * this.canvasScale,
+				y: AntOptions.IMG_HEIGHT * this.canvasScale,
+			};
+
+			const width = (window.innerWidth + padding.x) / this.canvasScale;
+			const height =
+				(window.innerHeight - this.offsetY + padding.y) / this.canvasScale;
+
+			const x = this.cameraCenter.x - width / 2;
+			const y =
+				this.cameraCenter.y - this.offsetY / 2 / this.canvasScale - height / 2;
+
+			if (
+				this.ants[i].pos.x >= x &&
+				this.ants[i].pos.x <= x + width &&
+				this.ants[i].pos.y >= y &&
+				this.ants[i].pos.y <= y + height
+			) {
+				isVisible = true;
+			}
+			// if (worldGrid) {
+			// 	isVisible = true;
+			// }
+
+			if (this.isDrawingAnts && isVisible) {
 				this.ants[i].draw();
 			}
 
