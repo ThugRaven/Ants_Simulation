@@ -503,12 +503,12 @@ export default class Ant {
 
 		if (this.directionClock >= AntOptions.DIRECTION_PERIOD) {
 			for (let x = 0; x < AntOptions.PERCEPTION_POINTS_HORIZONTAL; x++) {
+				const theta =
+					angleBetween * x +
+					AntOptions.PERCEPTION_START_ANGLE +
+					angle +
+					Math.PI / 2;
 				for (let y = 1; y <= AntOptions.PERCEPTION_POINTS_VERTICAL; y++) {
-					const theta =
-						angleBetween * x +
-						AntOptions.PERCEPTION_START_ANGLE +
-						angle +
-						Math.PI / 2;
 					const perceptionX = distanceBetween * y * Math.cos(theta);
 					const perceptionY = distanceBetween * y * Math.sin(theta);
 					const perceptionPoint = this.pos.copy().add(perceptionX, perceptionY);
