@@ -147,7 +147,6 @@ export default class Ant {
 	}
 
 	draw() {
-		this.ctx.save();
 		this.ctx.translate(this.pos.x, this.pos.y);
 		this.ctx.rotate(this.vel.heading() + Math.PI / 2);
 
@@ -250,12 +249,12 @@ export default class Ant {
 			}
 		}
 
-		this.ctx.restore();
-
 		if (this.debug) {
 			this.ctx.fillStyle = 'white';
 			circle(this.ctx, this.pos.x, this.pos.y, 3);
 		}
+
+		this.ctx.resetTransform();
 	}
 
 	search(worldGrid: WorldGrid, colony: Colony) {
@@ -510,7 +509,6 @@ export default class Ant {
 						AntOptions.PERCEPTION_START_ANGLE +
 						angle +
 						Math.PI / 2;
-
 					const perceptionX = distanceBetween * y * Math.cos(theta);
 					const perceptionY = distanceBetween * y * Math.sin(theta);
 					const perceptionPoint = this.pos.copy().add(perceptionX, perceptionY);
