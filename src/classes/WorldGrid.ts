@@ -1,4 +1,9 @@
-import { MapGeneratorOptions, MarkerOptions, MarkerTypes } from '../constants';
+import {
+	MapGeneratorOptions,
+	MarkerColors,
+	MarkerOptions,
+	MarkerTypes,
+} from '../constants';
 import WorldCell from './WorldCell';
 
 interface WorldGridOptions {
@@ -95,12 +100,10 @@ export default class WorldGrid {
 	) {
 		for (let i = 0; i < markersImageData.data.length; i += 4) {
 			const cell = this.cells[i / 4];
-			const colors = cell.marker.getMixedColor();
-
 			// Modify pixel data
-			markersImageData.data[i + 0] = colors[0]; // R value
-			markersImageData.data[i + 1] = colors[1]; // G value
-			markersImageData.data[i + 2] = colors[2]; // B value
+			markersImageData.data[i + 0] = cell.marker.intensity[0] * 255; // R value
+			markersImageData.data[i + 1] = cell.marker.intensity[1] * 255; // G value
+			markersImageData.data[i + 2] = 0; // B value
 			markersImageData.data[i + 3] = 255; // A value
 
 			if (update) {
