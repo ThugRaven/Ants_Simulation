@@ -14,6 +14,9 @@ interface ColonyOptions {
 	colonyColor?: number[];
 }
 
+const windowWidth = window.innerWidth;
+const windowHeight = window.innerHeight;
+
 export default class Colony {
 	id: number;
 	x: number;
@@ -130,12 +133,6 @@ export default class Colony {
 
 			// Draw ants
 			let isVisible = false;
-			// const dist = this.ants[i].pos.dist(
-			// 	new Vector(this.cameraCenter.x, this.cameraCenter.y),
-			// );
-			// if (dist < ANTS_VISIBLE_RADIUS / this.canvasScale) {
-			// 	isVisible = true;
-			// }
 
 			if (draw) {
 				const padding = {
@@ -143,8 +140,8 @@ export default class Colony {
 					y: AntOptions.IMG_HEIGHT * canvasScale,
 				};
 
-				const width = (window.innerWidth + padding.x) / canvasScale;
-				const height = (window.innerHeight - offsetY + padding.y) / canvasScale;
+				const width = (windowWidth + padding.x) / canvasScale;
+				const height = (windowHeight - offsetY + padding.y) / canvasScale;
 
 				const x = cameraCenter.x - width / 2;
 				const y = cameraCenter.y - offsetY / 2 / canvasScale - height / 2;
