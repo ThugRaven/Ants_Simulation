@@ -74,12 +74,12 @@ export default class WorldGrid {
 		if (type === MarkerTypes.TO_HOME) {
 			cell.marker.intensity[0] = Math.min(
 				1,
-				Math.max(cell.marker.intensity[0], intensity),
+				Math.max(cell.marker.getToHomeIntensity(), intensity),
 			);
 		} else if (type === MarkerTypes.TO_FOOD) {
 			cell.marker.intensity[1] = Math.min(
 				1,
-				Math.max(cell.marker.intensity[1], intensity),
+				Math.max(cell.marker.getToFoodIntensity(), intensity),
 			);
 		}
 	}
@@ -101,8 +101,8 @@ export default class WorldGrid {
 		for (let i = 0; i < markersImageData.data.length; i += 4) {
 			const cell = this.cells[i / 4];
 			// Modify pixel data
-			markersImageData.data[i + 0] = cell.marker.intensity[0] * 255; // R value
-			markersImageData.data[i + 1] = cell.marker.intensity[1] * 255; // G value
+			markersImageData.data[i + 0] = cell.marker.getToHomeIntensity() * 255; // R value
+			markersImageData.data[i + 1] = cell.marker.getToFoodIntensity() * 255; // G value
 			markersImageData.data[i + 2] = 0; // B value
 			markersImageData.data[i + 3] = 255; // A value
 

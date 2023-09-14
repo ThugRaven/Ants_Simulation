@@ -578,12 +578,12 @@ export default class Ant {
 							this.state === AntStates.TO_HOME ||
 							this.state === AntStates.REFILL
 						) {
-							intensity = cellPerception.marker.intensity[0];
+							intensity = cellPerception.marker.getToHomeIntensity();
 						} else if (
 							this.state === AntStates.TO_FOOD ||
 							this.state === AntStates.REFILL
 						) {
-							intensity = cellPerception.marker.intensity[1];
+							intensity = cellPerception.marker.getToFoodIntensity();
 						}
 
 						if (intensity > maxIntensity) {

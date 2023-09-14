@@ -7,6 +7,14 @@ export default class Marker {
 		this.intensity = intensity;
 	}
 
+	getToHomeIntensity() {
+		return this.intensity[0];
+	}
+
+	getToFoodIntensity() {
+		return this.intensity[1];
+	}
+
 	getMixedColor() {
 		if (this.intensity[0] === 0 && this.intensity[1] === 0) {
 			return [0, 0, 0];
