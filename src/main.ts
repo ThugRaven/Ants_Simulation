@@ -218,6 +218,8 @@ export const cameraCenter = {
 	x: 0,
 	y: 0,
 };
+let antsDrawClock = 0;
+let scheduleRegularDraw = false;
 
 let brushSize = 5;
 
@@ -867,8 +869,12 @@ function updateCellInfo(x: number, y: number) {
 	const cell = worldGrid.getCellFromCoordsSafe(x, y);
 	if (!cell) return;
 
-	markerIntensityHome!.textContent = cell.marker.intensity[0].toFixed(2);
-	markerIntensityFood!.textContent = cell.marker.intensity[1].toFixed(2);
+	markerIntensityHome!.textContent = cell.marker
+		.getToHomeIntensity()
+		.toFixed(2);
+	markerIntensityFood!.textContent = cell.marker
+		.getToFoodIntensity()
+		.toFixed(2);
 	cellFood!.textContent = cell.food.quantity.toString();
 	cellDensity!.textContent = (
 		cell.density[0] +
@@ -1115,9 +1121,9 @@ function trackAntCamera(x: number, y: number) {
 
 function setCamera() {
 	cameraContainer.style.transform = `scale(${canvasScale}) translate(${cameraOffset.x}px, ${cameraOffset.y}px)`;
+	scheduleRegularDraw = true;
 }
 
-let antsDrawClock = 0;
 function main(currentTime: number) {
 	if (
 		ctxMarkers == null ||
@@ -1136,13 +1142,18 @@ function main(currentTime: number) {
 	const deltaTime = (currentTime - lastUpdateTime) / 1000;
 	antsDrawClock += deltaTime;
 
+	const readyToDraw =
+		((scheduleRegularDraw || isRunning) &&
+			antsDrawClock > ANTS_DRAW_PERIOD / canvasScale) ||
+		antsDrawClock > (ANTS_DRAW_PERIOD * 10) / canvasScale;
+
 	if (performanceStats.isMeasuring) {
 		performanceStats.setPerformance('fps', 1 / deltaTime);
 		performanceStats.setPerformance('ms', currentTime - lastUpdateTime);
 	}
 
 	performanceStats.startMeasurement('clear');
-	if (antsDrawClock > ANTS_DRAW_PERIOD / canvasScale) {
+	if (readyToDraw) {
 		ctxAnts.clearRect(0, 0, width, height);
 	}
 	ctxMarkers.clearRect(0, 0, worldGrid.width, worldGrid.height);
@@ -1202,7 +1213,7 @@ function main(currentTime: number) {
 
 	colony.updateColony(deltaTime);
 	performanceStats.startMeasurement('ants');
-	if (antsDrawClock > ANTS_DRAW_PERIOD / canvasScale) {
+	if (readyToDraw) {
 		colony.updateAndDrawAnts(worldGrid, deltaTime);
 	} else {
 		colony.updateAndDrawAnts(worldGrid, deltaTime, false);
@@ -1215,7 +1226,7 @@ function main(currentTime: number) {
 		trackAntCamera(colony.selectedAnt.pos.x, colony.selectedAnt.pos.y);
 	}
 
-	if (isDebugMode) {
+	if (isDebugMode && readyToDraw) {
 		ctxAnts.fillStyle = 'red';
 		circle(ctxAnts, target.x, target.y, 4);
 		updateCellInfo(target.x, target.y);
@@ -1249,7 +1260,8 @@ function main(currentTime: number) {
 		updatePerformanceDisplay();
 	}
 
-	if (antsDrawClock > ANTS_DRAW_PERIOD / canvasScale) {
+	if (readyToDraw) {
+		scheduleRegularDraw = false;
 		antsDrawClock = 0;
 	}
 	lastUpdateTime = currentTime;
