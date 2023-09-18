@@ -650,40 +650,38 @@ function setup() {
 		const antImage = new Image();
 		antImage.src = image64;
 		antImage.onload = () => {
-			const antImageInstance = canvasAntInstance.createInstance(
-				(ctx, canvas) => {
-					const temp = new ImageInstance({
-						width: AntOptions.IMG_WIDTH,
-						height: AntOptions.IMG_HEIGHT,
-					});
-					// ctx.imageSmoothingEnabled = false;
+			const antImageInstance = canvasAntInstance.createInstance((ctx) => {
+				// const temp = new ImageInstance({
+				// 	width: AntOptions.IMG_WIDTH,
+				// 	height: AntOptions.IMG_HEIGHT,
+				// });
+				// ctx.imageSmoothingEnabled = false;
 
-					// temp.createInstance((tempCtx, tempCanvas) => {
-					// 	tempCanvas.width = antImage.width * 0.5;
-					// 	tempCanvas.height = antImage.height * 0.5;
-					// 	tempCtx.drawImage(
-					// 		antImage,
-					// 		0,
-					// 		0,
-					// 		tempCanvas.width,
-					// 		tempCanvas.height,
-					// 	);
-					// 	ctx.drawImage(
-					// 		tempCanvas,
-					// 		0,
-					// 		0,
-					// 		tempCanvas.width,
-					// 		tempCanvas.height,
-					// 		0,
-					// 		0,
-					// 		canvasAntInstance.width,
-					// 		canvasAntInstance.height,
-					// 	);
-					// });
+				// temp.createInstance((tempCtx, tempCanvas) => {
+				// 	tempCanvas.width = antImage.width * 0.5;
+				// 	tempCanvas.height = antImage.height * 0.5;
+				// 	tempCtx.drawImage(
+				// 		antImage,
+				// 		0,
+				// 		0,
+				// 		tempCanvas.width,
+				// 		tempCanvas.height,
+				// 	);
+				// 	ctx.drawImage(
+				// 		tempCanvas,
+				// 		0,
+				// 		0,
+				// 		tempCanvas.width,
+				// 		tempCanvas.height,
+				// 		0,
+				// 		0,
+				// 		canvasAntInstance.width,
+				// 		canvasAntInstance.height,
+				// 	);
+				// });
 
-					ctx.drawImage(antImage, 0, 0);
-				},
-			);
+				ctx.drawImage(antImage, 0, 0);
+			});
 			const antFoodImageInstance = canvasAntFoodInstance.createInstance(
 				(ctx) => {
 					const offset = AntOptions.FOOD_SIZE / 2;
@@ -696,7 +694,7 @@ function setup() {
 				antImage,
 				antImageInstance,
 				antFoodImageInstance,
-				ctxAnts!,
+				ctxAnts,
 				worldGrid,
 			);
 		};
@@ -714,11 +712,15 @@ function toggleLoop() {
 		isFirstTime = false;
 	}
 
+	if (!pauseIndicator) {
+		return;
+	}
+
 	isRunning = !isRunning;
 
 	colony.isRunning = isRunning;
 
-	pauseIndicator!.style.display = isRunning ? 'none' : 'block';
+	pauseIndicator.style.display = isRunning ? 'none' : 'block';
 	btnPlay.style.display = isRunning ? 'none' : 'flex';
 	btnPause.style.display = isRunning ? 'flex' : 'none';
 }
@@ -833,11 +835,22 @@ function updateAntInfo() {
 	const selectedAnt = colony.selectedAnt;
 	if (!selectedAnt) return;
 
-	antId!.textContent = selectedAnt.id.toString();
-	antPos!.textContent = `${selectedAnt.pos.x.toFixed(
+	if (
+		!antId ||
+		!antPos ||
+		!antVel ||
+		!antState ||
+		!antLifespanPreview ||
+		!antLifespan
+	) {
+		return;
+	}
+
+	antId.textContent = selectedAnt.id.toString();
+	antPos.textContent = `${selectedAnt.pos.x.toFixed(
 		2,
 	)} : ${selectedAnt.pos.y.toFixed(2)}`;
-	antVel!.textContent = `${selectedAnt.vel.x.toFixed(
+	antVel.textContent = `${selectedAnt.vel.x.toFixed(
 		2,
 	)} : ${selectedAnt.vel.y.toFixed(2)}`;
 	let state = '';
@@ -854,13 +867,13 @@ function updateAntInfo() {
 		default:
 			break;
 	}
-	antState!.textContent = state;
+	antState.textContent = state;
 
 	const refillThreshold = AntOptions.AUTONOMY_REFILL / selectedAnt.maxAutonomy;
 	const autonomy = selectedAnt.internalClock / selectedAnt.maxAutonomy;
-	antLifespanPreview!.style.setProperty('--left', `${refillThreshold * 100}%`);
-	antLifespanPreview!.style.setProperty('--width', `${autonomy * 100}%`);
-	antLifespan!.textContent = `${selectedAnt.internalClock.toFixed(
+	antLifespanPreview.style.setProperty('--left', `${refillThreshold * 100}%`);
+	antLifespanPreview.style.setProperty('--width', `${autonomy * 100}%`);
+	antLifespan.textContent = `${selectedAnt.internalClock.toFixed(
 		2,
 	)} | ${selectedAnt.maxAutonomy.toFixed(2)}`;
 }
@@ -869,29 +882,39 @@ function updateCellInfo(x: number, y: number) {
 	const cell = worldGrid.getCellFromCoordsSafe(x, y);
 	if (!cell) return;
 
-	markerIntensityHome!.textContent = cell.marker
-		.getToHomeIntensity()
-		.toFixed(2);
-	markerIntensityFood!.textContent = cell.marker
-		.getToFoodIntensity()
-		.toFixed(2);
-	cellFood!.textContent = cell.food.quantity.toString();
-	cellDensity!.textContent = (
+	if (
+		!markerIntensityHome ||
+		!markerIntensityFood ||
+		!cellFood ||
+		!cellDensity ||
+		!cellPreview
+	) {
+		return;
+	}
+
+	markerIntensityHome.textContent = cell.marker.getToHomeIntensity().toFixed(2);
+	markerIntensityFood.textContent = cell.marker.getToFoodIntensity().toFixed(2);
+	cellFood.textContent = cell.food.quantity.toString();
+	cellDensity.textContent = (
 		cell.density[0] +
 		cell.density[1] +
 		cell.density[2]
 	).toFixed(2);
 	const color = cell.marker.getMixedColor();
-	cellPreview!.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+	cellPreview.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
 }
 
 function updateColonyInfo() {
 	if (!colony) return;
 
-	colonyPopulation!.textContent = `${colony.ants.length} | ${colony.totalAnts}`;
-	colonyFood!.textContent = `${colony.food.toFixed(2)} | ${colony.totalFood}`;
+	if (!colonyPopulation || !colonyFood || !colonyPreview) {
+		return;
+	}
+
+	colonyPopulation.textContent = `${colony.ants.length} | ${colony.totalAnts}`;
+	colonyFood.textContent = `${colony.food.toFixed(2)} | ${colony.totalFood}`;
 	const color = colony.colonyColor;
-	colonyPreview!.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+	colonyPreview.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
 }
 
 function updatePerformanceDisplay() {

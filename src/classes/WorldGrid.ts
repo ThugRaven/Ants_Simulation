@@ -1,9 +1,4 @@
-import {
-	MapGeneratorOptions,
-	MarkerColors,
-	MarkerOptions,
-	MarkerTypes,
-} from '../constants';
+import { MapGeneratorOptions, MarkerOptions, MarkerTypes } from '../constants';
 import WorldCell from './WorldCell';
 
 interface WorldGridOptions {
