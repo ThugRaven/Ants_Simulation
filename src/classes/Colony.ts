@@ -1,5 +1,11 @@
 import { AntOptions, ColonyOptions, MarkerOptions } from '../constants';
-import { cameraCenter, canvasScale, offsetY } from '../main';
+import {
+	cameraCenter,
+	canvasScale,
+	offsetY,
+	windowHeight,
+	windowWidth,
+} from '../main';
 import Ant from './Ant';
 import { circle } from './Shapes';
 import { Vector } from './Vector';
@@ -13,9 +19,6 @@ interface ColonyOptions {
 	};
 	colonyColor?: number[];
 }
-
-const windowWidth = window.innerWidth;
-const windowHeight = window.innerHeight;
 
 export default class Colony {
 	id: number;

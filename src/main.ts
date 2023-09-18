@@ -223,6 +223,38 @@ let scheduleRegularDraw = false;
 
 let brushSize = 5;
 
+export let windowWidth = window.innerWidth;
+export let windowHeight = window.innerHeight;
+
+window.addEventListener('resize', () => {
+	windowWidth = window.innerWidth;
+	windowHeight = window.innerHeight;
+
+	const zoomOffset = {
+		x: 0,
+		y: 0,
+	};
+
+	zoomOffset.x = window.innerWidth / 2 / canvasScale - cameraOffset.x;
+	zoomOffset.y = window.innerHeight / 2 / canvasScale - cameraOffset.y;
+
+	cameraOffset.x = window.innerWidth / 2 / canvasScale - zoomOffset.x;
+	cameraOffset.y = window.innerHeight / 2 / canvasScale - zoomOffset.y;
+
+	cameraCenter.x =
+		(window.innerWidth / 2 - window.innerWidth / 2) / canvasScale -
+		zoomOffset.x;
+	cameraCenter.y =
+		(window.innerHeight / 2 - window.innerHeight / 2) / canvasScale -
+		zoomOffset.y;
+	cameraCenter.x =
+		cameraCenter.x < 0 ? Math.abs(cameraCenter.x) : cameraCenter.x * -1;
+	cameraCenter.y =
+		cameraCenter.y < 0 ? Math.abs(cameraCenter.y) : cameraCenter.y * -1;
+
+	setCamera();
+});
+
 // Grids
 const [width, height] = calcWorldSize({
 	width: CanvasOptions.WIDTH,
