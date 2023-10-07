@@ -1,5 +1,6 @@
+import seedrandom from 'seedrandom';
 import { MapGeneratorOptions } from '../constants';
-import { random } from './Utils';
+import { seededRandom } from './Utils';
 import WorldGrid from './WorldGrid';
 
 interface MapGeneratorOptions {
@@ -28,8 +29,25 @@ export default class MapGenerator {
 		this.threshold = (this.width + this.height) / 2;
 	}
 
-	generateMap(worldGrid: WorldGrid) {
-		this.randomFillMap();
+	generateMap(worldGrid: WorldGrid, fromSeed = false) {
+		console.log('Generate Map');
+
+		const url = new URL(window.location.href);
+		const urlSeed = url.searchParams.get('seed');
+		let rng = null;
+		if (fromSeed && urlSeed != null) {
+			rng = seedrandom(urlSeed);
+		} else if (!fromSeed) {
+			const seed = Math.random().toString(36).slice(2, 7);
+			rng = seedrandom(seed);
+			url.searchParams.set('seed', seed);
+		} else {
+			return;
+		}
+		console.log(rng());
+		window.history.pushState({ path: url.href }, '', url.href);
+
+		this.randomFillMap(rng);
 
 		for (let i = 0; i < 15; i++) {
 			this.smoothMap();
@@ -49,10 +67,10 @@ export default class MapGenerator {
 		}
 	}
 
-	randomFillMap() {
+	randomFillMap(rng: seedrandom.PRNG) {
 		for (let x = 0; x < this.width; x++) {
 			for (let y = 0; y < this.height; y++) {
-				this.map[x][y] = random(0, 1) < this.fillRatio ? 1 : 0;
+				this.map[x][y] = seededRandom(0, 1, rng) < this.fillRatio ? 1 : 0;
 			}
 		}
 	}

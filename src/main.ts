@@ -8,16 +8,16 @@ import { createVector } from './classes/Vector';
 import WorldCanvas, { calcWorldSize } from './classes/WorldCanvas';
 import WorldGrid from './classes/WorldGrid';
 import {
-	AntOptions,
 	ANTS_DRAW_PERIOD,
+	AntOptions,
 	AntStates,
 	BrushOptions,
 	CAMERA_MOVE_BY,
 	CanvasOptions,
 	FoodOptions,
+	MIDDLE_BUTTON,
 	MapGeneratorOptions,
 	MarkerOptions,
-	MIDDLE_BUTTON,
 	RIGHT_BUTTON,
 } from './constants';
 import './style.css';
@@ -735,6 +735,9 @@ function setup() {
 	colony.drawColony(ctxColony);
 
 	worldGrid.addBorderWalls();
+	worldGrid.drawWalls(ctxWalls);
+
+	mapGenerator.generateMap(worldGrid, true);
 	worldGrid.drawWalls(ctxWalls);
 }
 
