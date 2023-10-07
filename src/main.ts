@@ -601,7 +601,7 @@ btnSave.addEventListener('click', () => {
 				cell.wall = 1;
 				cell.food.quantity = 0;
 				cell.food.changed = true;
-			} else if (a > 0) {
+			} else if (a > 0 && r < 5 && g < 5 && b < 5) {
 				cell.food.quantity = 0;
 				cell.food.changed = true;
 				cell.wall = 0;
