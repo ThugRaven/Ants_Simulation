@@ -595,7 +595,7 @@ mapForm.addEventListener('submit', (e) => {
 	console.log(mapSeed);
 	isMapPanelVisible = true;
 	isMapPanelVisible = togglePanelAndButton(isMapPanelVisible, mapPanel);
-	if (ctxWalls) {
+	if (ctxWalls && mapSeed) {
 		ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
 		mapGenerator.generateMap(worldGrid, false, mapSeed);
 		worldGrid.drawWalls(ctxWalls);
