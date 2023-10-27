@@ -439,6 +439,17 @@ window.addEventListener('keydown', (e) => {
 		case 'Period':
 			changeBrushSize(BrushOptions.STEP);
 			break;
+		case 'Escape':
+			if (isControlsPanelVisible) {
+				isControlsPanelVisible = togglePanelAndButton(
+					isControlsPanelVisible,
+					controlsPanel,
+				);
+			}
+			if (isMapPanelVisible) {
+				isMapPanelVisible = togglePanelAndButton(isMapPanelVisible, mapPanel);
+			}
+			break;
 		default:
 			break;
 	}
