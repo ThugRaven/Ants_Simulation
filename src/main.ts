@@ -537,6 +537,9 @@ btnControls.addEventListener('click', () => {
 		isControlsPanelVisible,
 		controlsPanel,
 	);
+
+	isMapPanelVisible = true;
+	isMapPanelVisible = togglePanelAndButton(isMapPanelVisible, mapPanel);
 });
 
 btnCloseControls.addEventListener('click', () => {
@@ -549,13 +552,12 @@ btnCloseControls.addEventListener('click', () => {
 
 btnMapPanel.addEventListener('click', () => {
 	isMapPanelVisible = togglePanelAndButton(isMapPanelVisible, mapPanel);
-	// if (confirm('Are you sure you want to generate a new map?')) {
-	// 	if (ctxWalls) {
-	// 		ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
-	// 		mapGenerator.generateMap(worldGrid);
-	// 		worldGrid.drawWalls(ctxWalls);
-	// 	}
-	// }
+
+	isControlsPanelVisible = true;
+	isControlsPanelVisible = togglePanelAndButton(
+		isControlsPanelVisible,
+		controlsPanel,
+	);
 });
 
 btnCloseMap.addEventListener('click', () => {
