@@ -921,15 +921,13 @@ function selectAnt() {
 function removeAnt() {
 	if (colony.removeAnt()) {
 		isAntPanelVisible = true;
-	} else {
-		isAntPanelVisible = false;
-	}
 
-	isAntPanelVisible = togglePanelAndButton(
-		isAntPanelVisible,
-		antPanel,
-		btnAntPanel,
-	);
+		isAntPanelVisible = togglePanelAndButton(
+			isAntPanelVisible,
+			antPanel,
+			btnAntPanel,
+		);
+	}
 }
 
 function addAnt() {
