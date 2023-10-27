@@ -180,8 +180,6 @@ let isControlsPanelVisible = false;
 let isMapPanelVisible = false;
 
 let lastUpdateTime = 0;
-// let mainLoopAnimationFrame = -1;
-// let performanceStats = new PerformanceStats();
 const performanceStats = new PerformanceStats([
 	{
 		mode: 0,
@@ -240,7 +238,11 @@ let scheduleRegularDraw = false;
 
 let brushSize = 5;
 
-let mapSeed = '';
+// Initialize map seed input with parameter from url or empty string
+const url = new URL(window.location.href);
+const urlSeed = url.searchParams.get('seed');
+let mapSeed = urlSeed ?? '';
+mapSeedInput.value = mapSeed;
 
 export let windowWidth = window.innerWidth;
 export let windowHeight = window.innerHeight;
