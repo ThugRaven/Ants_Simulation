@@ -29,7 +29,7 @@ export default class MapGenerator {
 		this.threshold = (this.width + this.height) / 2;
 	}
 
-	generateMap(worldGrid: WorldGrid, fromSeed = false) {
+	generateMap(worldGrid: WorldGrid, fromSeed = false, seed = '') {
 		console.log('Generate Map');
 
 		const url = new URL(window.location.href);
@@ -38,9 +38,9 @@ export default class MapGenerator {
 		if (fromSeed && urlSeed != null) {
 			rng = seedrandom(urlSeed);
 		} else if (!fromSeed) {
-			const seed = Math.random().toString(36).slice(2, 7);
-			rng = seedrandom(seed);
-			url.searchParams.set('seed', seed);
+			const generatedSeed = Math.random().toString(36).slice(2, 7);
+			rng = seedrandom(seed != '' ? seed : generatedSeed);
+			url.searchParams.set('seed', seed != '' ? seed : generatedSeed);
 		} else {
 			return;
 		}

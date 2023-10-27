@@ -139,9 +139,25 @@ const performanceDisplay = document.querySelector(
 	'[data-performance-display]',
 ) as HTMLDivElement;
 
+// Map panel
+const mapPanel = document.getElementById('mapPanel') as HTMLDivElement;
+const btnCloseMap = document.getElementById(
+	'btn-close-map',
+) as HTMLButtonElement;
+const btnCancelMap = document.getElementById(
+	'btn-cancel-map',
+) as HTMLButtonElement;
+const btnMapPanel = document.getElementById(
+	'btn-map-panel',
+) as HTMLButtonElement;
 const btnGenerateMap = document.getElementById(
 	'btn-generate-map',
 ) as HTMLButtonElement;
+const btnGenerateSeed = document.getElementById(
+	'btn-generate-seed',
+) as HTMLButtonElement;
+const mapForm = document.getElementById('map-form') as HTMLFormElement;
+const mapSeedInput = document.getElementById('map-seed') as HTMLInputElement;
 
 let isRunning = false;
 let isDrawingMarkers = true;
@@ -161,6 +177,7 @@ let isColonyPanelVisible = false;
 let isCellPanelVisible = false;
 let isAntPanelVisible = false;
 let isControlsPanelVisible = false;
+let isMapPanelVisible = false;
 
 let lastUpdateTime = 0;
 // let mainLoopAnimationFrame = -1;
@@ -222,6 +239,8 @@ let antsDrawClock = 0;
 let scheduleRegularDraw = false;
 
 let brushSize = 5;
+
+let mapSeed = '';
 
 export let windowWidth = window.innerWidth;
 export let windowHeight = window.innerHeight;
@@ -528,14 +547,45 @@ btnCloseControls.addEventListener('click', () => {
 	);
 });
 
-btnGenerateMap.addEventListener('click', () => {
-	if (confirm('Are you sure you want to generate a new map?')) {
-		if (ctxWalls) {
-			ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
-			mapGenerator.generateMap(worldGrid);
-			worldGrid.drawWalls(ctxWalls);
-		}
+btnMapPanel.addEventListener('click', () => {
+	isMapPanelVisible = togglePanelAndButton(isMapPanelVisible, mapPanel);
+	// if (confirm('Are you sure you want to generate a new map?')) {
+	// 	if (ctxWalls) {
+	// 		ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
+	// 		mapGenerator.generateMap(worldGrid);
+	// 		worldGrid.drawWalls(ctxWalls);
+	// 	}
+	// }
+});
+
+btnCloseMap.addEventListener('click', () => {
+	isMapPanelVisible = true;
+	isMapPanelVisible = togglePanelAndButton(isMapPanelVisible, mapPanel);
+});
+
+btnCancelMap.addEventListener('click', () => {
+	isMapPanelVisible = true;
+	isMapPanelVisible = togglePanelAndButton(isMapPanelVisible, mapPanel);
+});
+
+btnGenerateSeed.addEventListener('click', () => {
+	const seed = Math.random().toString(36).slice(2, 7);
+	console.log(seed);
+	mapSeedInput.value = seed;
+});
+
+mapForm.addEventListener('submit', (e) => {
+	console.log('submit', e);
+	mapSeed = mapSeedInput.value;
+	console.log(mapSeed);
+	isMapPanelVisible = true;
+	isMapPanelVisible = togglePanelAndButton(isMapPanelVisible, mapPanel);
+	if (ctxWalls) {
+		ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
+		mapGenerator.generateMap(worldGrid, false, mapSeed);
+		worldGrid.drawWalls(ctxWalls);
 	}
+	e.preventDefault();
 });
 
 btnEditMode.addEventListener('click', () => {
