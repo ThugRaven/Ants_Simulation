@@ -879,6 +879,11 @@ function toggleTrack() {
 
 function togglePanMode() {
 	isPanMode = !isPanMode;
+	if (isPanMode) {
+		document.body.classList.add('cursor-grabbing');
+	} else {
+		document.body.classList.remove('cursor-grabbing');
+	}
 
 	btnPan.classList.toggle('bg-neutral-600');
 }
@@ -1053,7 +1058,6 @@ function setupMousePanning() {
 			isPanning = true;
 			wasPanning = false;
 			togglePanMode();
-			document.body.classList.add('cursor-grabbing');
 
 			panStart.x = e.clientX / canvasScale - cameraOffset.x;
 			panStart.y = (e.clientY - offsetY) / canvasScale - cameraOffset.y;
@@ -1068,7 +1072,6 @@ function setupMousePanning() {
 				isPanning = true;
 				wasPanning = true;
 				togglePanMode();
-				document.body.classList.add('cursor-grabbing');
 
 				panStart.x = e.clientX / canvasScale - cameraOffset.x;
 				panStart.y = (e.clientY - offsetY) / canvasScale - cameraOffset.y;
@@ -1089,7 +1092,6 @@ function setupMousePanning() {
 		if (isPanning) {
 			isPanning = false;
 			togglePanMode();
-			document.body.classList.remove('cursor-grabbing');
 		}
 	});
 }
