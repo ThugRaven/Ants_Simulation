@@ -1,4 +1,11 @@
 import { AntOptions, ColonyOptions, MarkerOptions } from '../constants';
+import {
+	cameraCenter,
+	canvasScale,
+	offsetY,
+	windowHeight,
+	windowWidth,
+} from '../main';
 import Ant from './Ant';
 import { circle } from './Shapes';
 import { Vector } from './Vector';
@@ -51,7 +58,7 @@ export default class Colony {
 		this.antFoodImageInstance = null;
 		this.antId = 0;
 		this.isRunning = false;
-		this.isDrawingAnts = true;
+		this.isDrawingAnts = false;
 		this.isDebugMode = false;
 		this.colonyClock = 0;
 		this.antsCtx = null;
@@ -75,7 +82,7 @@ export default class Colony {
 		this.antsCtx = antsCtx;
 
 		for (let i = 0; i < this.startingAntsCount; i++) {
-			let ant = new Ant(
+			const ant = new Ant(
 				antsCtx,
 				antImageInstance,
 				antFoodImageInstance,
@@ -93,14 +100,14 @@ export default class Colony {
 			this.totalAnts++;
 		}
 
-		let size = Math.floor(ColonyOptions.COLONY_RADIUS / MarkerOptions.SIZE);
+		const size = Math.floor(ColonyOptions.COLONY_RADIUS / MarkerOptions.SIZE);
 
 		for (let i = 0; i < size; i++) {
-			let cellHorizontal = worldGrid.getCellFromCoordsSafe(
+			const cellHorizontal = worldGrid.getCellFromCoordsSafe(
 				this.x - (size / 2) * MarkerOptions.SIZE + i * MarkerOptions.SIZE,
 				this.y,
 			);
-			let cellVertical = worldGrid.getCellFromCoordsSafe(
+			const cellVertical = worldGrid.getCellFromCoordsSafe(
 				this.x,
 				this.y - (size / 2) * MarkerOptions.SIZE + i * MarkerOptions.SIZE,
 			);
@@ -112,12 +119,12 @@ export default class Colony {
 		}
 	}
 
-	updateAndDrawAnts(worldGrid: WorldGrid, dt: number) {
+	updateAndDrawAnts(worldGrid: WorldGrid, dt: number, draw = true) {
 		let removeAnt = false;
 		for (let i = 0; i < this.ants.length; i++) {
 			if (this.isRunning) {
 				// Update ants
-				this.ants[i].search(worldGrid, this);
+				this.ants[i].searchSimple(worldGrid, this);
 				this.ants[i].update(dt);
 				this.ants[i].addMarker(worldGrid, dt);
 
@@ -128,8 +135,32 @@ export default class Colony {
 			}
 
 			// Draw ants
-			if (this.isDrawingAnts) {
-				this.ants[i].draw();
+			let isVisible = false;
+
+			if (draw) {
+				const padding = {
+					x: AntOptions.IMG_HEIGHT * canvasScale,
+					y: AntOptions.IMG_HEIGHT * canvasScale,
+				};
+
+				const width = (windowWidth + padding.x) / canvasScale;
+				const height = (windowHeight - offsetY + padding.y) / canvasScale;
+
+				const x = cameraCenter.x - width / 2;
+				const y = cameraCenter.y - offsetY / 2 / canvasScale - height / 2;
+
+				if (
+					this.ants[i].pos.x >= x &&
+					this.ants[i].pos.x <= x + width &&
+					this.ants[i].pos.y >= y &&
+					this.ants[i].pos.y <= y + height
+				) {
+					isVisible = true;
+				}
+
+				if (this.isDrawingAnts && isVisible) {
+					this.ants[i].draw();
+				}
 			}
 
 			// Remove ant
@@ -155,15 +186,15 @@ export default class Colony {
 		}
 	}
 
-	createAnt() {
+	createAnt(override = false) {
 		if (
-			this.ants.length < this.maxAntsCount &&
+			(this.ants.length < this.maxAntsCount || override) &&
 			this.antIcon &&
 			this.antImageInstance &&
 			this.antFoodImageInstance &&
 			this.antsCtx
 		) {
-			let ant = new Ant(
+			const ant = new Ant(
 				this.antsCtx,
 				this.antImageInstance,
 				this.antFoodImageInstance,
@@ -195,11 +226,11 @@ export default class Colony {
 
 		let newAnt = null;
 		let minDist = Infinity;
-		let radius = AntOptions.IMG_HEIGHT / 2;
+		const radius = AntOptions.IMG_HEIGHT / 2;
 
 		// Get ant in mouse radius
 		for (const ant of this.ants) {
-			let dist = ant.pos.dist(mouseVector);
+			const dist = ant.pos.dist(mouseVector);
 			if (dist < minDist && dist < radius) {
 				minDist = dist;
 				newAnt = ant;
@@ -215,7 +246,7 @@ export default class Colony {
 			return false;
 		}
 
-		let index = this.ants.findIndex((ant) => ant.id === this.selectedAnt!.id);
+		const index = this.ants.findIndex((ant) => ant.id === this.selectedAnt!.id);
 		if (index != -1) {
 			this.ants.splice(index, 1);
 			this.selectedAnt = null;

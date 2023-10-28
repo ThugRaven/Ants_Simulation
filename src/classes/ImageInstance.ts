@@ -11,8 +11,13 @@ export default class ImageInstance {
 		this.height = imageInstanceOptions.height;
 	}
 
-	createInstance(callback: (ctx: CanvasRenderingContext2D) => void) {
-		let canvas = document.createElement('canvas');
+	createInstance(
+		callback: (
+			ctx: CanvasRenderingContext2D,
+			canvas: HTMLCanvasElement,
+		) => void,
+	) {
+		const canvas = document.createElement('canvas');
 		canvas.width = this.width;
 		canvas.height = this.height;
 
@@ -20,9 +25,9 @@ export default class ImageInstance {
 			`Created canvas image instance with size: ${this.width} x ${this.height}`,
 		);
 
-		let ctx = canvas.getContext('2d');
+		const ctx = canvas.getContext('2d');
 		if (ctx) {
-			callback(ctx);
+			callback(ctx, canvas);
 		}
 
 		return canvas;

@@ -7,17 +7,25 @@ export default class Marker {
 		this.intensity = intensity;
 	}
 
+	getToHomeIntensity() {
+		return this.intensity[0];
+	}
+
+	getToFoodIntensity() {
+		return this.intensity[1];
+	}
+
 	getMixedColor() {
 		if (this.intensity[0] === 0 && this.intensity[1] === 0) {
 			return [0, 0, 0];
 		}
 
 		// Get default marker colors
-		let [rH, gH, bH] = MarkerColors.TO_HOME;
-		let [rF, gF, bF] = MarkerColors.TO_FOOD;
+		const [rH, gH, bH] = MarkerColors.TO_HOME;
+		const [rF, gF, bF] = MarkerColors.TO_FOOD;
 
 		// Multiply colors by intensity
-		let toHomeIntensity = [
+		const toHomeIntensity = [
 			this.intensity[0] * rH,
 			this.intensity[0] * gH,
 			this.intensity[0] * bH,
@@ -30,7 +38,7 @@ export default class Marker {
 			];
 		}
 
-		let toFoodIntensity = [
+		const toFoodIntensity = [
 			this.intensity[1] * rF,
 			this.intensity[1] * gF,
 			this.intensity[1] * bF,

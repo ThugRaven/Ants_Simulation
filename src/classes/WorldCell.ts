@@ -5,14 +5,14 @@ export default class WorldCell {
 	marker: Marker;
 	food: Food;
 	wall: number;
-	density: number;
+	density: [number, number, number];
 	colony: boolean;
 
 	constructor() {
 		this.marker = new Marker([0, 0]);
 		this.food = new Food(0);
 		this.wall = 0;
-		this.density = 0;
+		this.density = [0, 0, 0];
 		this.colony = false;
 	}
 
@@ -28,7 +28,13 @@ export default class WorldCell {
 		ctx.fillRect(x, y, 1, 1);
 	}
 
-	addDensity() {
-		this.density++;
+	addDensity(withFood = false, refill = false) {
+		if (!withFood && !refill) {
+			this.density[0]++;
+		} else if (!refill) {
+			this.density[1]++;
+		} else {
+			this.density[2]++;
+		}
 	}
 }

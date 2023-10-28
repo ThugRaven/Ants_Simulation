@@ -3,8 +3,8 @@ export function circle(
 	x: number,
 	y: number,
 	radius: number,
-	fill: boolean = true,
-	stroke: boolean = false,
+	fill = true,
+	stroke = false,
 ) {
 	ctx.beginPath();
 	ctx.arc(x, y, radius, 0, Math.PI * 2);
@@ -28,4 +28,15 @@ export function line(
 	ctx.lineTo(x2, y2);
 	ctx.stroke();
 	ctx.closePath();
+}
+
+export function rect(
+	ctx: CanvasRenderingContext2D,
+	x: number,
+	y: number,
+	width: number,
+	height: number,
+) {
+	ctx.rect(x, y, width, height);
+	ctx.fill();
 }
