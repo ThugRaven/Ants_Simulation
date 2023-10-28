@@ -11,8 +11,8 @@
 			rel="stylesheet"
 		/>
 		<title>Ants Simulation</title>
-		<script type="module" crossorigin src="/Ants_Simulation/assets/index.dce2c904.js"></script>
-		<link rel="stylesheet" href="/Ants_Simulation/assets/index.e5e0efea.css">
+		<script type="module" crossorigin src="/Ants_Simulation/assets/index.79b42183.js"></script>
+		<link rel="stylesheet" href="/Ants_Simulation/assets/index.dd1513dd.css">
 	</head>
 	<body class="bg-black h-screen overflow-hidden flex flex-col">
 		<header class="bg-neutral-800 flex">
@@ -40,7 +40,7 @@
 					</svg>
 				</button>
 				<button
-					id="btn-generate-map"
+					id="btn-map-panel"
 					class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 p-3 rounded-lg shadow-md aspect-square flex justify-center items-center"
 					title="Generate a map"
 				>
@@ -248,7 +248,7 @@
 						></div>
 					</div>
 					<ul
-						class="flex flex-col items-center justify-center w-full gap-2 list-none my-2"
+						class="flex flex-col items-center justify-center w-full gap-2 list-none mt-2"
 					>
 						<li
 							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
@@ -278,7 +278,7 @@
 						></div>
 					</div>
 					<ul
-						class="flex flex-col items-center justify-center w-full gap-2 list-none my-2"
+						class="flex flex-col items-center justify-center w-full gap-2 list-none mt-2"
 					>
 						<li
 							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
@@ -460,7 +460,7 @@
 
 		<div
 			id="controlsPanel"
-			class="text-white bg-neutral-800 rounded-lg p-4 fixed inset-0 m-auto w-max h-max hidden z-10 shadow"
+			class="text-white bg-neutral-800 rounded-lg p-4 fixed inset-0 lg:m-auto mx-4 my-auto lg:w-max h-max hidden z-10 shadow"
 		>
 			<h2 class="text-4xl font-bold text-center">Controls</h2>
 			<button
@@ -493,7 +493,7 @@
 					<tr>
 						<td class="py-2 pr-2">
 							<kbd
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
 								>Space</kbd
 							>
 						</td>
@@ -506,7 +506,7 @@
 					<tr>
 						<td class="py-2 pr-2">
 							<kbd
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
 								>F</kbd
 							>
 						</td>
@@ -519,7 +519,7 @@
 					<tr>
 						<td class="py-2 pr-2">
 							<kbd
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
 								>M</kbd
 							>
 						</td>
@@ -532,7 +532,7 @@
 					<tr>
 						<td class="py-2 pr-2">
 							<kbd
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
 								>N</kbd
 							>
 						</td>
@@ -545,7 +545,7 @@
 					<tr>
 						<td class="py-2 pr-2">
 							<kbd
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
 								>A</kbd
 							>
 						</td>
@@ -556,7 +556,7 @@
 					<tr>
 						<td class="py-2 pr-2">
 							<kbd
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
 								>D</kbd
 							>
 						</td>
@@ -567,7 +567,7 @@
 					<tr>
 						<td class="py-2 pr-2">
 							<kbd
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
 								>T</kbd
 							>
 						</td>
@@ -580,7 +580,7 @@
 					<tr>
 						<td class="py-2 pr-2">
 							<kbd
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
 								>C</kbd
 							>
 						</td>
@@ -593,7 +593,7 @@
 					<tr>
 						<td class="py-2 pr-2">
 							<kbd
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
 								>Delete</kbd
 							>
 						</td>
@@ -605,12 +605,12 @@
 						<td class="py-2 pr-2">
 							<kbd
 								title="Comma"
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
 								>,</kbd
 							>
 							<kbd
 								title="Period"
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
 								>.</kbd
 							>
 						</td>
@@ -622,7 +622,7 @@
 						<td class="py-2 pr-2">
 							<kbd
 								title="Left Mouse Button"
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
 								>LMB</kbd
 							>
 						</td>
@@ -636,7 +636,7 @@
 						<td class="py-2 pr-2">
 							<kbd
 								title="Left Mouse Button"
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
 								>Hold LMB</kbd
 							>
 						</td>
@@ -645,7 +645,7 @@
 								>Pan camera (only in normal mode, to pan in edit mode use
 								<kbd
 									title="Middle Mouse Button"
-									class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+									class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
 									>MMB</kbd
 								>)</span
 							>
@@ -655,7 +655,7 @@
 						<td class="py-2 pr-2">
 							<kbd
 								title="Right Mouse Button"
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
 								>RMB</kbd
 							>
 						</td>
@@ -669,7 +669,7 @@
 						<td class="py-2 pr-2">
 							<kbd
 								title="Middle Mouse Button"
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
 								>Hold MMB</kbd
 							>
 						</td>
@@ -681,22 +681,22 @@
 						<td class="py-2 pr-2">
 							<kbd
 								title="Arrow Up"
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
 								>↑</kbd
 							>
 							<kbd
 								title="Arrow Down"
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
 								>↓</kbd
 							>
 							<kbd
 								title="Arrow Left"
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
 								>←</kbd
 							>
 							<kbd
 								title="Arrow Right"
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
 								>→</kbd
 							>
 						</td>
@@ -708,16 +708,16 @@
 						<td class="py-2 pr-2">
 							<kbd
 								title="Scroll Wheel"
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
 								>Scroll</kbd
 							>
 							or
 							<kbd
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
 								>-</kbd
 							>
 							<kbd
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow"
+								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
 								>=</kbd
 							>
 						</td>
@@ -727,6 +727,78 @@
 					</tr>
 				</tbody>
 			</table>
+		</div>
+		<div
+			id="mapPanel"
+			class="text-white bg-neutral-800 rounded-lg p-4 fixed inset-0 md:m-auto mx-4 my-auto md:max-w-lg h-max hidden z-10 shadow"
+		>
+			<h2 class="text-4xl font-bold text-center">Generate a map</h2>
+			<button
+				id="btn-close-map"
+				class="bg-neutral-800 hover:bg-neutral-700 focus-visible:bg-neutral-700 m-2 p-3 rounded-full absolute top-0 right-0"
+				title="Close"
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					height="24px"
+					viewBox="0 0 24 24"
+					width="24px"
+					fill="#000000"
+					class="w-8 h-8 fill-white"
+				>
+					<path d="M0 0h24v24H0V0z" fill="none" />
+					<path
+						d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+					/>
+				</svg>
+			</button>
+			<form id="map-form" class="flex flex-col gap-2">
+				<label for="map-seed" class="text-2xl text-center mt-2">Map seed</label>
+				<div class="flex items-center gap-2">
+					<input
+						type="text"
+						name="seed"
+						id="map-seed"
+						class="bg-neutral-700 rounded-lg px-1 py-3 w-full"
+					/>
+					<button
+						id="btn-generate-seed"
+						class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 p-3 rounded-lg shadow-md aspect-square flex justify-center items-center"
+						title="Generate new seed"
+						type="button"
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							height="24px"
+							viewBox="0 0 24 24"
+							width="24px"
+							fill="#000000"
+							class="w-6 h-6 fill-white"
+						>
+							<path d="M0 0h24v24H0V0z" fill="none" />
+							<path
+								d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"
+							/>
+						</svg>
+					</button>
+				</div>
+				<div class="flex gap-2">
+					<button
+						id="btn-generate-map"
+						class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 w-full rounded-lg px-1 py-3 border-2 border-green-500"
+						type="submit"
+					>
+						Ok
+					</button>
+					<button
+						id="btn-cancel-map"
+						class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 w-full rounded-lg px-1 py-3 border-2 border-red-500"
+						type="button"
+					>
+						Cancel
+					</button>
+				</div>
+			</form>
 		</div>
 		<div
 			class="fixed inset-0 border-2 border-red-600 pointer-events-none"
