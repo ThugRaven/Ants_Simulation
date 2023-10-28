@@ -150,9 +150,6 @@ const btnCancelMap = document.getElementById(
 const btnMapPanel = document.getElementById(
 	'btn-map-panel',
 ) as HTMLButtonElement;
-const btnGenerateMap = document.getElementById(
-	'btn-generate-map',
-) as HTMLButtonElement;
 const btnGenerateSeed = document.getElementById(
 	'btn-generate-seed',
 ) as HTMLButtonElement;
