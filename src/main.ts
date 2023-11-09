@@ -153,6 +153,9 @@ const btnMapPanel = document.getElementById(
 const btnGenerateSeed = document.getElementById(
 	'btn-generate-seed',
 ) as HTMLButtonElement;
+const btnGenerateSaveMap = document.getElementById(
+	'btn-generate-save-map',
+) as HTMLButtonElement;
 const mapForm = document.getElementById('map-form') as HTMLFormElement;
 const mapSeedInput = document.getElementById('map-seed') as HTMLInputElement;
 
@@ -633,6 +636,18 @@ mapForm.addEventListener('submit', (e) => {
 		worldGrid.drawWalls(ctxWalls);
 	}
 	e.preventDefault();
+});
+
+btnGenerateSaveMap.addEventListener('click', () => {
+	isMapPanelVisible = true;
+	isMapPanelVisible = togglePanelAndButton(isMapPanelVisible, mapPanel);
+	if (ctxWalls) {
+		ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
+		mapGenerator.generateMap(worldGrid, false);
+		worldGrid.drawWalls(ctxWalls);
+		mapSeedInput.value =
+			new URL(window.location.href).searchParams.get('seed') ?? '';
+	}
 });
 
 btnEditMode.addEventListener('click', () => {
