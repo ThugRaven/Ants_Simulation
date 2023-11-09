@@ -156,10 +156,25 @@ const btnGenerateSeed = document.getElementById(
 const mapForm = document.getElementById('map-form') as HTMLFormElement;
 const mapSeedInput = document.getElementById('map-seed') as HTMLInputElement;
 
+// Layers
+const btnAntsLayer = document.getElementById(
+	'btn-ants-layer',
+) as HTMLButtonElement;
+const btnDensityLayer = document.getElementById(
+	'btn-density-layer',
+) as HTMLButtonElement;
+const btnDensityAllLayer = document.getElementById(
+	'btn-density-all-layer',
+) as HTMLButtonElement;
+const btnMarkersLayer = document.getElementById(
+	'btn-markers-layer',
+) as HTMLButtonElement;
+
 let isRunning = false;
 let isDrawingMarkers = true;
 let isDrawingDensity = false;
 let isDrawingAdvancedDensity = false;
+let disableDensity = false;
 let isDebugMode = false;
 let isTracking = false;
 let isEditMode = false;
@@ -586,6 +601,26 @@ btnGenerateSeed.addEventListener('click', () => {
 	mapSeedInput.value = seed;
 });
 
+btnAntsLayer.addEventListener('click', () => {
+	toggleButton(colony.isDrawingAnts, btnAntsLayer);
+	toggleAnts();
+});
+
+btnDensityLayer.addEventListener('click', () => {
+	toggleButton(colony.isDrawingAnts, btnDensityLayer);
+	toggleDensity(true, false);
+});
+
+btnDensityAllLayer.addEventListener('click', () => {
+	toggleButton(colony.isDrawingAnts, btnDensityAllLayer);
+	toggleDensity(false, true);
+});
+
+btnMarkersLayer.addEventListener('click', () => {
+	toggleButton(colony.isDrawingAnts, btnMarkersLayer);
+	toggleMarkers();
+});
+
 mapForm.addEventListener('submit', (e) => {
 	console.log('submit', e);
 	mapSeed = mapSeedInput.value;
@@ -801,6 +836,11 @@ function setup() {
 
 	mapGenerator.generateMap(worldGrid, true);
 	worldGrid.drawWalls(ctxWalls);
+
+	toggleButton(false, btnAntsLayer);
+	toggleButton(!isDrawingDensity, btnDensityLayer);
+	toggleButton(!isDrawingAdvancedDensity, btnDensityAllLayer);
+	toggleButton(!isDrawingMarkers, btnMarkersLayer);
 }
 
 function toggleLoop() {
@@ -823,25 +863,42 @@ function toggleLoop() {
 }
 
 function toggleMarkers() {
-	isDrawingMarkers = !isDrawingMarkers;
+	isDrawingMarkers = toggleButton(isDrawingMarkers, btnMarkersLayer);
 	if (isDrawingMarkers) {
 		isDrawingDensity = false;
 		isDrawingAdvancedDensity = false;
+		disableDensity = false;
+		toggleButton(true, btnDensityLayer);
+		toggleButton(true, btnDensityAllLayer);
 	}
 }
 
-function toggleDensity() {
-	isDrawingAdvancedDensity = isDrawingDensity
-		? !isDrawingAdvancedDensity
-		: isDrawingAdvancedDensity;
-	isDrawingDensity = isDrawingAdvancedDensity
-		? isDrawingDensity
-		: !isDrawingDensity;
+function toggleDensity(normal?: boolean, advanced?: boolean) {
+	if (!normal && !advanced) {
+		isDrawingAdvancedDensity = isDrawingDensity ? true : false;
+		isDrawingDensity =
+			isDrawingAdvancedDensity || disableDensity ? false : true;
+		disableDensity = !isDrawingDensity && isDrawingAdvancedDensity;
+	} else if (normal) {
+		isDrawingDensity = !isDrawingDensity;
+		isDrawingAdvancedDensity = false;
+	} else if (advanced) {
+		isDrawingAdvancedDensity = !isDrawingAdvancedDensity;
+		isDrawingDensity = false;
+	}
 
 	if (isDrawingDensity || isDrawingAdvancedDensity) {
 		isDrawingMarkers = false;
+		toggleButton(true, btnMarkersLayer);
 	}
-	console.log(isDrawingDensity, isDrawingAdvancedDensity, isDrawingMarkers);
+	console.log(
+		isDrawingDensity,
+		isDrawingAdvancedDensity,
+		disableDensity,
+		isDrawingMarkers,
+	);
+	toggleButton(!isDrawingDensity, btnDensityLayer);
+	toggleButton(!isDrawingAdvancedDensity, btnDensityAllLayer);
 }
 
 function toggleDebug() {
@@ -889,10 +946,11 @@ function toggleAnts() {
 	if (isFirstTime) {
 		isFirstTime = false;
 		colony.isDrawingAnts = false;
+		toggleButton(!colony.isDrawingAnts, btnAntsLayer);
 		return;
 	}
 
-	colony.isDrawingAnts = !colony.isDrawingAnts;
+	colony.isDrawingAnts = toggleButton(colony.isDrawingAnts, btnAntsLayer);
 }
 
 function selectAnt() {
@@ -1282,13 +1340,9 @@ function main(currentTime: number) {
 	performanceStats.startMeasurement('grid');
 	if (isDrawingMarkers && markersImageData) {
 		worldGrid.drawMarkers(ctxMarkers, markersImageData, isRunning);
-	} else if (
-		isDrawingDensity &&
-		!isDrawingAdvancedDensity &&
-		densityImageData
-	) {
+	} else if (isDrawingDensity && densityImageData) {
 		worldGrid.drawDensity(ctxMarkers, densityImageData, isRunning);
-	} else if (isDrawingDensity && isDrawingAdvancedDensity && densityImageData) {
+	} else if (isDrawingAdvancedDensity && densityImageData) {
 		worldGrid.drawDensity(ctxMarkers, densityImageData, isRunning, true);
 	} else if (isRunning) {
 		worldGrid.update();
