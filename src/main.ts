@@ -187,6 +187,7 @@ let isWallMode = false;
 let isFoodMode = false;
 let isPanMode = false;
 let isFirstTime = true;
+let isInInputField = false;
 
 let isColonyPanelVisible = false;
 let isCellPanelVisible = false;
@@ -397,6 +398,9 @@ const colony = new Colony({
 
 window.addEventListener('keydown', (e) => {
 	console.log(e);
+	if (isInInputField) {
+		return;
+	}
 
 	switch (e.code) {
 		case 'Space':
@@ -622,6 +626,14 @@ btnDensityAllLayer.addEventListener('click', () => {
 btnMarkersLayer.addEventListener('click', () => {
 	toggleButton(colony.isDrawingAnts, btnMarkersLayer);
 	toggleMarkers();
+});
+
+mapSeedInput.addEventListener('focus', () => {
+	isInInputField = true;
+});
+
+mapSeedInput.addEventListener('blur', () => {
+	isInInputField = false;
 });
 
 mapForm.addEventListener('submit', (e) => {
