@@ -2,9 +2,9 @@ import Colony from './classes/Colony';
 import ImageInstance from './classes/ImageInstance';
 import MapGenerator from './classes/MapGenerator';
 import PerformanceStats from './classes/PerformanceStats';
-import { circle, rect } from './classes/Shapes';
+import { circle, line, rect } from './classes/Shapes';
 import { toggleButton, togglePanelAndButton } from './classes/Utils';
-import { createVector } from './classes/Vector';
+import { Vector, createVector } from './classes/Vector';
 import WorldCanvas, { calcWorldSize } from './classes/WorldCanvas';
 import WorldGrid from './classes/WorldGrid';
 import {
@@ -1460,6 +1460,87 @@ function main(currentTime: number) {
 		performanceStats.endMeasurement('all');
 		updatePerformanceDisplay();
 	}
+
+	// if (readyToDraw) {
+	const mouseCell = new Vector(target.x, target.y);
+	const rayStart = new Vector(width / 2, height / 2);
+	const rayDir = mouseCell.copy().sub(rayStart).normalize();
+
+	ctxAnts.fillStyle = 'red';
+	circle(ctxAnts, rayStart.x, rayStart.y, 4);
+	ctxAnts.fillStyle = 'green';
+	circle(ctxAnts, mouseCell.x, mouseCell.y, 4);
+	ctxAnts.strokeStyle = 'white';
+	line(ctxAnts, rayStart.x, rayStart.y, mouseCell.x, mouseCell.y);
+
+	const rayUnitStepSize = new Vector(
+		Math.sqrt(1 + (rayDir.y / rayDir.x) * (rayDir.y / rayDir.x)),
+		Math.sqrt(1 + (rayDir.x / rayDir.y) * (rayDir.x / rayDir.y)),
+	);
+
+	const mapCheck = rayStart.copy();
+	const rayLength = new Vector(0, 0);
+	const step = new Vector(0, 0);
+
+	if (rayDir.x < 0) {
+		step.x = -1;
+		rayLength.x = (rayStart.x - Math.round(mapCheck.x)) * rayUnitStepSize.x;
+	} else {
+		step.x = 1;
+		rayLength.x = (Math.round(mapCheck.x + 1) - rayStart.x) * rayUnitStepSize.x;
+	}
+
+	if (rayDir.y < 0) {
+		step.y = -1;
+		rayLength.y = (rayStart.y - Math.round(mapCheck.y)) * rayUnitStepSize.y;
+	} else {
+		step.y = 1;
+		rayLength.y = (Math.round(mapCheck.y + 1) - rayStart.y) * rayUnitStepSize.y;
+	}
+
+	let tileFound = false;
+	const maxDistance = 2000;
+	let distance = 0;
+	while (!tileFound && distance < maxDistance) {
+		if (rayLength.x < rayLength.y) {
+			mapCheck.x += step.x;
+			distance = rayLength.x;
+			rayLength.x += rayUnitStepSize.x;
+		} else {
+			mapCheck.y += step.y;
+			distance = rayLength.y;
+			rayLength.y += rayUnitStepSize.y;
+		}
+		const cell = worldGrid.getCellFromCoordsSafe(mapCheck.x, mapCheck.y);
+
+		if (cell) {
+			cell.density = [100, 100, 100];
+			// cell.marker = new Marker([0.1, 0]);
+		}
+		if (
+			mapCheck.x >= 0 &&
+			mapCheck.x < width &&
+			mapCheck.y >= 0 &&
+			mapCheck.y < height
+		) {
+			// console.log(worldGrid.getCellFromCoordsSafe(mapCheck.x, mapCheck.y));
+			const cell = worldGrid.getCellFromCoordsSafe(mapCheck.x, mapCheck.y);
+
+			if (worldGrid.getCellFromCoordsSafe(mapCheck.x, mapCheck.y)?.wall == 1) {
+				console.log('Tile found');
+				tileFound = true;
+			}
+		}
+	}
+
+	let intersection = new Vector();
+	if (tileFound) {
+		intersection = rayStart.add(rayDir.mult(distance));
+	}
+
+	ctxAnts.fillStyle = 'red';
+	circle(ctxAnts, intersection.x, intersection.y, 10);
+	// }
 
 	if (readyToDraw) {
 		scheduleRegularDraw = false;
