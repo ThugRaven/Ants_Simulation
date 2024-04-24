@@ -173,6 +173,12 @@ const btnMarkersLayer = document.getElementById(
 	'btn-markers-layer',
 ) as HTMLButtonElement;
 
+import MapWorker from './mapWorker?worker';
+const mapWorker = new MapWorker();
+// mapWorker.onmessage = (event) => {
+// 	console.log(`Worker said : ${event.data}`);
+// };
+
 let isRunning = false;
 let isDrawingMarkers = true;
 let isDrawingDensity = false;
@@ -373,6 +379,15 @@ const mapGenerator = new MapGenerator({
 	width: worldGrid.width,
 	height: worldGrid.height,
 	fillRatio: MapGeneratorOptions.FILL_RATIO,
+});
+
+mapWorker.postMessage({
+	action: 'SETUP',
+	mapGeneratorOptions: {
+		width: worldGrid.width,
+		height: worldGrid.height,
+		fillRatio: MapGeneratorOptions.FILL_RATIO,
+	},
 });
 
 // Markers image data
@@ -646,6 +661,8 @@ mapForm.addEventListener('submit', (e) => {
 		ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
 		mapGenerator.generateMap(worldGrid, false, mapSeed);
 		worldGrid.drawWalls(ctxWalls);
+		console.log('mapForm');
+		mapWorker.postMessage('test2');
 	}
 	e.preventDefault();
 });
@@ -659,6 +676,9 @@ btnGenerateSaveMap.addEventListener('click', () => {
 		worldGrid.drawWalls(ctxWalls);
 		mapSeedInput.value =
 			new URL(window.location.href).searchParams.get('seed') ?? '';
+		console.log('btnGenerateSaveMap');
+		mapWorker.postMessage('test');
+		mapWorker.postMessage({ action: 'GENERATE' });
 	}
 });
 
