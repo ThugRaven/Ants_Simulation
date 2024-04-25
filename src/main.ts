@@ -1,9 +1,10 @@
 import Colony from './classes/Colony';
+import Direction from './classes/Direction';
 import ImageInstance from './classes/ImageInstance';
 import MapGenerator from './classes/MapGenerator';
 import PerformanceStats from './classes/PerformanceStats';
 import { circle, line, rect } from './classes/Shapes';
-import { toggleButton, togglePanelAndButton } from './classes/Utils';
+import { random, toggleButton, togglePanelAndButton } from './classes/Utils';
 import { Vector, createVector } from './classes/Vector';
 import WorldCanvas, { calcWorldSize } from './classes/WorldCanvas';
 import WorldGrid from './classes/WorldGrid';
@@ -1329,6 +1330,8 @@ function setCamera() {
 	scheduleRegularDraw = true;
 }
 
+// let angle = Math.PI * 0.5;
+
 function main(currentTime: number) {
 	if (
 		ctxMarkers == null ||
@@ -1473,73 +1476,86 @@ function main(currentTime: number) {
 	ctxAnts.strokeStyle = 'white';
 	line(ctxAnts, rayStart.x, rayStart.y, mouseCell.x, mouseCell.y);
 
-	const rayUnitStepSize = new Vector(
-		Math.sqrt(1 + (rayDir.y / rayDir.x) * (rayDir.y / rayDir.x)),
-		Math.sqrt(1 + (rayDir.x / rayDir.y) * (rayDir.x / rayDir.y)),
-	);
+	// angle += Math.PI * 0.005;
+	// const rayCast = worldGrid.rayCast(
+	// 	mouseCell,
+	// 	new Direction(
+	// 		angle + random(Math.PI * 0.5, Math.PI * 1.5),
+	// 		Math.PI * 0.5,
+	// 		5,
+	// 	),
+	// 	2000,
+	// );
 
-	const mapCheck = rayStart.copy();
-	const rayLength = new Vector(0, 0);
-	const step = new Vector(0, 0);
+	// const rayUnitStepSize = new Vector(
+	// 	Math.sqrt(1 + (rayDir.y / rayDir.x) * (rayDir.y / rayDir.x)),
+	// 	Math.sqrt(1 + (rayDir.x / rayDir.y) * (rayDir.x / rayDir.y)),
+	// );
 
-	if (rayDir.x < 0) {
-		step.x = -1;
-		rayLength.x = (rayStart.x - Math.round(mapCheck.x)) * rayUnitStepSize.x;
-	} else {
-		step.x = 1;
-		rayLength.x = (Math.round(mapCheck.x + 1) - rayStart.x) * rayUnitStepSize.x;
-	}
+	// const mapCheck = rayStart.copy();
+	// const rayLength = new Vector(0, 0);
+	// const step = new Vector(0, 0);
 
-	if (rayDir.y < 0) {
-		step.y = -1;
-		rayLength.y = (rayStart.y - Math.round(mapCheck.y)) * rayUnitStepSize.y;
-	} else {
-		step.y = 1;
-		rayLength.y = (Math.round(mapCheck.y + 1) - rayStart.y) * rayUnitStepSize.y;
-	}
+	// if (rayDir.x < 0) {
+	// 	step.x = -1;
+	// 	rayLength.x = (rayStart.x - Math.round(mapCheck.x)) * rayUnitStepSize.x;
+	// } else {
+	// 	step.x = 1;
+	// 	rayLength.x = (Math.round(mapCheck.x + 1) - rayStart.x) * rayUnitStepSize.x;
+	// }
 
-	let tileFound = false;
-	const maxDistance = 2000;
-	let distance = 0;
-	while (!tileFound && distance < maxDistance) {
-		if (rayLength.x < rayLength.y) {
-			mapCheck.x += step.x;
-			distance = rayLength.x;
-			rayLength.x += rayUnitStepSize.x;
-		} else {
-			mapCheck.y += step.y;
-			distance = rayLength.y;
-			rayLength.y += rayUnitStepSize.y;
-		}
-		const cell = worldGrid.getCellFromCoordsSafe(mapCheck.x, mapCheck.y);
+	// if (rayDir.y < 0) {
+	// 	step.y = -1;
+	// 	rayLength.y = (rayStart.y - Math.round(mapCheck.y)) * rayUnitStepSize.y;
+	// } else {
+	// 	step.y = 1;
+	// 	rayLength.y = (Math.round(mapCheck.y + 1) - rayStart.y) * rayUnitStepSize.y;
+	// }
 
-		if (cell) {
-			cell.density = [100, 100, 100];
-			// cell.marker = new Marker([0.1, 0]);
-		}
-		if (
-			mapCheck.x >= 0 &&
-			mapCheck.x < width &&
-			mapCheck.y >= 0 &&
-			mapCheck.y < height
-		) {
-			// console.log(worldGrid.getCellFromCoordsSafe(mapCheck.x, mapCheck.y));
-			const cell = worldGrid.getCellFromCoordsSafe(mapCheck.x, mapCheck.y);
+	// let tileFound = false;
+	// const maxDistance = 2000;
+	// let distance = 0;
+	// while (!tileFound && distance < maxDistance) {
+	// 	if (rayLength.x < rayLength.y) {
+	// 		mapCheck.x += step.x;
+	// 		distance = rayLength.x;
+	// 		rayLength.x += rayUnitStepSize.x;
+	// 	} else {
+	// 		mapCheck.y += step.y;
+	// 		distance = rayLength.y;
+	// 		rayLength.y += rayUnitStepSize.y;
+	// 	}
+	// 	const cell = worldGrid.getCellFromCoordsSafe(mapCheck.x, mapCheck.y);
 
-			if (worldGrid.getCellFromCoordsSafe(mapCheck.x, mapCheck.y)?.wall == 1) {
-				console.log('Tile found');
-				tileFound = true;
-			}
-		}
-	}
+	// 	if (cell) {
+	// 		cell.density = [100, 100, 100];
+	// 		// cell.marker = new Marker([0.1, 0]);
+	// 	}
+	// 	if (
+	// 		mapCheck.x >= 0 &&
+	// 		mapCheck.x < width &&
+	// 		mapCheck.y >= 0 &&
+	// 		mapCheck.y < height
+	// 	) {
+	// 		// console.log(worldGrid.getCellFromCoordsSafe(mapCheck.x, mapCheck.y));
+	// 		const cell = worldGrid.getCellFromCoordsSafe(mapCheck.x, mapCheck.y);
 
-	let intersection = new Vector();
-	if (tileFound) {
-		intersection = rayStart.add(rayDir.mult(distance));
-	}
+	// 		if (worldGrid.getCellFromCoordsSafe(mapCheck.x, mapCheck.y)?.wall == 1) {
+	// 			console.log('Tile found');
+	// 			tileFound = true;
+	// 		}
+	// 	}
+	// }
 
-	ctxAnts.fillStyle = 'red';
-	circle(ctxAnts, intersection.x, intersection.y, 10);
+	// let intersection = new Vector();
+	// if (tileFound) {
+	// 	intersection = rayStart.add(rayDir.mult(distance));
+	// }
+
+	// if (rayCast) {
+	// 	ctxAnts.fillStyle = 'red';
+	// 	circle(ctxAnts, rayCast.intersection.x, rayCast.intersection.y, 10);
+	// }
 	// }
 
 	if (readyToDraw) {

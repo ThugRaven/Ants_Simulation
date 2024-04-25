@@ -1,4 +1,6 @@
 import { MapGeneratorOptions, MarkerOptions, MarkerTypes } from '../constants';
+import Direction from './Direction';
+import { Vector } from './Vector';
 import WorldCell from './WorldCell';
 
 interface WorldGridOptions {
@@ -198,5 +200,98 @@ export default class WorldGrid {
 
 	checkCoords(x: number, y: number) {
 		return x > -1 && x < this.width && y > -1 && y < this.height;
+	}
+
+	rayCast(position: Vector, direction: Direction, maxDistance: number) {
+		// const rayEnd = position.add(direction.vector.mult(maxDistance));
+		const dX = maxDistance * Math.cos(direction.angle);
+		const dY = maxDistance * Math.sin(direction.angle);
+		const rayEnd = position.copy();
+		rayEnd.x += dX;
+		rayEnd.y += dY;
+		const rayDir = rayEnd.copy().sub(position).normalize();
+
+		const rayUnitStepSize = new Vector(
+			Math.sqrt(1 + (rayDir.y / rayDir.x) * (rayDir.y / rayDir.x)),
+			Math.sqrt(1 + (rayDir.x / rayDir.y) * (rayDir.x / rayDir.y)),
+		);
+
+		const mapCheck = position.copy();
+		const rayLength = new Vector(0, 0);
+		const step = new Vector(0, 0);
+
+		if (rayDir.x < 0) {
+			step.x = -1;
+			rayLength.x = (position.x - Math.round(mapCheck.x)) * rayUnitStepSize.x;
+		} else {
+			step.x = 1;
+			rayLength.x =
+				(Math.round(mapCheck.x + 1) - position.x) * rayUnitStepSize.x;
+		}
+
+		if (rayDir.y < 0) {
+			step.y = -1;
+			rayLength.y = (position.y - Math.round(mapCheck.y)) * rayUnitStepSize.y;
+		} else {
+			step.y = 1;
+			rayLength.y =
+				(Math.round(mapCheck.y + 1) - position.y) * rayUnitStepSize.y;
+		}
+
+		// console.log(rayEnd, rayDir, rayUnitStepSize, mapCheck, rayLength, step);
+
+		let tileFound = false;
+		let distance = 0;
+		while (!tileFound && distance < maxDistance) {
+			if (rayLength.x < rayLength.y) {
+				mapCheck.x += step.x;
+				distance = rayLength.x;
+				rayLength.x += rayUnitStepSize.x;
+			} else {
+				mapCheck.y += step.y;
+				distance = rayLength.y;
+				rayLength.y += rayUnitStepSize.y;
+			}
+			const cell = this.getCellFromCoordsSafe(mapCheck.x, mapCheck.y);
+
+			// if (cell) {
+			// 	cell.density = [100, 100, 100];
+			// 	// cell.marker = new Marker([0.1, 0]);
+			// }
+
+			if (
+				mapCheck.x >= 0 &&
+				mapCheck.x < this.width * MarkerOptions.SIZE &&
+				mapCheck.y >= 0 &&
+				mapCheck.y < this.height * MarkerOptions.SIZE
+			) {
+				// console.log(worldGrid.getCellFromCoordsSafe(mapCheck.x, mapCheck.y));
+
+				if (
+					// cell &&
+					// (cell.food.quantity > 0 ||
+					// 	cell.marker.getToFoodIntensity() > 0 ||
+					// 	cell.marker.getToHomeIntensity() > 0 ||
+					// 	cell.wall)
+					cell &&
+					cell.wall == 1
+				) {
+					console.log('Tile found');
+					tileFound = true;
+
+					return {
+						cell,
+						distance,
+						intersection: position.add(rayDir.mult(distance)),
+					};
+				}
+			}
+
+			// return {
+			// 	cell,
+			// 	distance,
+			// 	intersection: position.add(rayDir.mult(distance)),
+			// };
+		}
 	}
 }
