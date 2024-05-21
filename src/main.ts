@@ -1036,9 +1036,9 @@ function updateAntInfo() {
 	antPos.textContent = `${selectedAnt.pos.x.toFixed(
 		2,
 	)} : ${selectedAnt.pos.y.toFixed(2)}`;
-	antVel.textContent = `${selectedAnt.vel.x.toFixed(
+	antVel.textContent = `${selectedAnt.direction.vector.x.toFixed(
 		2,
-	)} : ${selectedAnt.vel.y.toFixed(2)}`;
+	)} : ${selectedAnt.direction.vector.y.toFixed(2)}`;
 	let state = '';
 	switch (selectedAnt.state) {
 		case AntStates.TO_HOME:

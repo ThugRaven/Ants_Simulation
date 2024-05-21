@@ -266,6 +266,10 @@ export class Vector {
 		return x * x + y * y + z * z;
 	}
 
+	dot(x: number, y?: number, z?: number) {
+		return this.x * (x || 0) + this.y * (y || 0) + this.z * (z || 0);
+	}
+
 	dist(v: Vector) {
 		return v.copy().sub(this).mag();
 	}

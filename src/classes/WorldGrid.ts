@@ -1,5 +1,6 @@
 import { MapGeneratorOptions, MarkerOptions, MarkerTypes } from '../constants';
 import Direction from './Direction';
+import { circle } from './Shapes';
 import { Vector } from './Vector';
 import WorldCell from './WorldCell';
 
@@ -202,7 +203,12 @@ export default class WorldGrid {
 		return x > -1 && x < this.width && y > -1 && y < this.height;
 	}
 
-	rayCast(position: Vector, direction: Direction, maxDistance: number) {
+	rayCast(
+		position: Vector,
+		direction: Direction,
+		maxDistance: number,
+		ctx: CanvasRenderingContext2D,
+	) {
 		// const rayEnd = position.add(direction.vector.mult(maxDistance));
 		const dX = maxDistance * Math.cos(direction.angle);
 		const dY = maxDistance * Math.sin(direction.angle);
@@ -210,6 +216,9 @@ export default class WorldGrid {
 		rayEnd.x += dX;
 		rayEnd.y += dY;
 		const rayDir = rayEnd.copy().sub(position).normalize();
+		circle(ctx, position.x, position.y, 5, true);
+		ctx.fillStyle = 'red';
+		circle(ctx, rayEnd.x, rayEnd.y, 5, true);
 
 		const rayUnitStepSize = new Vector(
 			Math.sqrt(1 + (rayDir.y / rayDir.x) * (rayDir.y / rayDir.x)),
@@ -276,13 +285,19 @@ export default class WorldGrid {
 					cell &&
 					cell.wall == 1
 				) {
-					console.log('Tile found');
+					// console.log('Tile found');
 					tileFound = true;
+					const normal = new Vector(
+						rayLength.x < rayLength.y ? 1 : 0,
+						rayLength.y < rayLength.x ? 1 : 0,
+					);
 
 					return {
 						cell,
 						distance,
+						normal,
 						intersection: position.add(rayDir.mult(distance)),
+						rayEnd,
 					};
 				}
 			}

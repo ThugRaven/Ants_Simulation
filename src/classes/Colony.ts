@@ -6,8 +6,9 @@ import {
 	windowHeight,
 	windowWidth,
 } from '../main';
-import Ant from './Ant';
+import AntRayCasts from './AntRayCasts';
 import { circle } from './Shapes';
+import { random } from './Utils';
 import { Vector } from './Vector';
 import WorldGrid from './WorldGrid';
 
@@ -26,7 +27,7 @@ export default class Colony {
 	y: number;
 	startingAntsCount: number;
 	maxAntsCount: number;
-	ants: Ant[];
+	ants: AntRayCasts[];
 	totalAnts: number;
 	colonyColor: number[];
 	antIcon: HTMLImageElement | null;
@@ -38,7 +39,7 @@ export default class Colony {
 	isDebugMode: boolean;
 	colonyClock: number;
 	antsCtx: CanvasRenderingContext2D | null;
-	selectedAnt: Ant | null;
+	selectedAnt: AntRayCasts | null;
 
 	food: number;
 	totalFood: number;
@@ -82,7 +83,7 @@ export default class Colony {
 		this.antsCtx = antsCtx;
 
 		for (let i = 0; i < this.startingAntsCount; i++) {
-			const ant = new Ant(
+			const ant = new AntRayCasts(
 				antsCtx,
 				antImageInstance,
 				antFoodImageInstance,
@@ -90,8 +91,8 @@ export default class Colony {
 				{
 					id: this.antId + 1,
 					pos: {
-						x: this.x,
-						y: this.y,
+						x: this.x + random(-500, 500),
+						y: this.y + random(-500, 500),
 					},
 				},
 			);
@@ -124,8 +125,10 @@ export default class Colony {
 		for (let i = 0; i < this.ants.length; i++) {
 			if (this.isRunning) {
 				// Update ants
-				this.ants[i].searchSimple(worldGrid, this);
-				this.ants[i].update(dt);
+				// this.ants[i].searchSimple(worldGrid, this);
+				// this.ants[i].update(worldGrid, dt);
+				this.ants[i].update(worldGrid, dt, this);
+				this.ants[i].find(worldGrid);
 				this.ants[i].addMarker(worldGrid, dt);
 
 				// Mark ant for deletion
@@ -194,7 +197,7 @@ export default class Colony {
 			this.antFoodImageInstance &&
 			this.antsCtx
 		) {
-			const ant = new Ant(
+			const ant = new AntRayCasts(
 				this.antsCtx,
 				this.antImageInstance,
 				this.antFoodImageInstance,
