@@ -168,24 +168,17 @@ export default class Ant {
 					break;
 				}
 
-				if (
-					this.state === AntStates.TO_FOOD &&
-					cell.marker.getToFoodIntensity() > 0 &&
-					cell.marker.getToFoodIntensity() > maxIntensity
-				) {
-					maxIntensity = cell.marker.getToFoodIntensity();
+				const wallRepellent = cell.dist * cell.dist;
+				const markerIntensity = cell.getIntensity(this.state) * wallRepellent;
+
+				if (markerIntensity > maxIntensity) {
+					maxIntensity = markerIntensity;
 					maxDirection = angleToCell;
-					// console.log('Max intensity food: ', maxIntensity);
+					maxCell = cell;
 				}
 
-				if (
-					this.state === AntStates.TO_HOME &&
-					cell.marker.getToHomeIntensity() > 0 &&
-					cell.marker.getToHomeIntensity() > maxIntensity
-				) {
-					maxIntensity = cell.marker.getToHomeIntensity();
-					maxDirection = angleToCell;
-					// console.log('Max intensity home: ', maxIntensity);
+				if (markerIntensity < minIntensity) {
+					minIntensity = markerIntensity;
 				}
 			}
 

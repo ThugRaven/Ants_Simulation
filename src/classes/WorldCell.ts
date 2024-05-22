@@ -1,3 +1,4 @@
+import { AntStates } from '../constants';
 import Food from './Food';
 import Marker from './Marker';
 
@@ -7,6 +8,8 @@ export default class WorldCell {
 	wall: number;
 	density: [number, number, number];
 	colony: boolean;
+	dist: number;
+	minIntensity: number;
 
 	constructor() {
 		this.marker = new Marker([0, 0]);
@@ -14,6 +17,8 @@ export default class WorldCell {
 		this.wall = 0;
 		this.density = [0, 0, 0];
 		this.colony = false;
+		this.dist = 0;
+		this.minIntensity = 0.1;
 	}
 
 	update() {
@@ -36,5 +41,19 @@ export default class WorldCell {
 		} else {
 			this.density[2]++;
 		}
+	}
+
+	getIntensity(antState: AntStates) {
+		return Math.max(
+			this.minIntensity,
+			antState === AntStates.TO_FOOD
+				? this.marker.getToFoodIntensity()
+				: antState === AntStates.TO_HOME
+				? this.marker.getToHomeIntensity()
+				: Math.max(
+						this.marker.getToFoodIntensity(),
+						this.marker.getToHomeIntensity(),
+				  ),
+		);
 	}
 }
