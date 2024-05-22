@@ -18,22 +18,13 @@ export default class Direction {
 	}
 
 	update(dt: number) {
-		// console.log(this.vector, this.targetVector);
-		// console.log(this.angle, this.targetAngle);
-
 		this.updateVector();
-		// console.log(this.vector);
 		const directionNormalized = createVector(-this.vector.y, this.vector.x);
 		const directionDelta = this.targetVector
 			.copy()
 			.dot(directionNormalized.x, directionNormalized.y);
-		// const directionDelta = createVector().dotV(this.targetVector, directionNormalized);
-		// console.log(this.targetVector);
-		// console.log(directionNormalized);
-		// console.log(directionDelta);
 
 		this.angle += this.rotationSpeed * directionDelta * dt;
-		// console.log(this.angle);
 	}
 
 	setDirectionImmediate(d: Vector) {
@@ -60,7 +51,6 @@ export default class Direction {
 	}
 
 	getVec() {
-		// this.updateVector();
 		return this.vector;
 	}
 
