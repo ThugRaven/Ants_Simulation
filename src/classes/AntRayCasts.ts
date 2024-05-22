@@ -131,12 +131,13 @@ export default class Ant {
 			this.directionClock = 0;
 
 			let maxIntensity = 0;
-			let maxDirection = createVector();
+			let maxDirection = this.direction.getVec();
 
 			for (let i = 0; i < 32; i++) {
 				const randAngle = random(-Math.PI * (1 / 3), Math.PI * (1 / 3));
 				const distance = random(0, this.maxSpeed);
-				const sampleAngle = this.direction.angle + randAngle;
+				const currentAngle = maxDirection.heading();
+				const sampleAngle = currentAngle + randAngle;
 				const angleToCell = createVector(
 					Math.cos(sampleAngle),
 					Math.sin(sampleAngle),
