@@ -1,11 +1,11 @@
 import Colony from './classes/Colony';
-import Direction from './classes/Direction';
 import ImageInstance from './classes/ImageInstance';
 import MapGenerator from './classes/MapGenerator';
 import PerformanceStats from './classes/PerformanceStats';
 import { circle, line, rect } from './classes/Shapes';
-import { random, toggleButton, togglePanelAndButton } from './classes/Utils';
+import { toggleButton, togglePanelAndButton } from './classes/Utils';
 import { Vector, createVector } from './classes/Vector';
+import WallDistance from './classes/WallDistance';
 import WorldCanvas, { calcWorldSize } from './classes/WorldCanvas';
 import WorldGrid from './classes/WorldGrid';
 import {
@@ -84,6 +84,7 @@ const markerIntensityFood = document.querySelector<HTMLSpanElement>(
 );
 const cellFood = document.querySelector<HTMLSpanElement>('[data-cell-food]');
 const cellDensity = document.querySelector<HTMLSpanElement>('[data-density]');
+const cellWallDistance = document.querySelector<HTMLSpanElement>('[data-dist]');
 
 // Colony panel
 const btnColonyPanel = document.getElementById(
@@ -369,6 +370,8 @@ const worldGrid = new WorldGrid({
 	height: height / MarkerOptions.SIZE,
 	cellSize: 1,
 });
+
+const wallDistance = new WallDistance();
 
 const mapGenerator = new MapGenerator({
 	width: worldGrid.width,
@@ -736,6 +739,8 @@ btnSave.addEventListener('click', () => {
 		worldGrid.drawWalls(ctxWalls);
 		ctxEdit.clearRect(0, 0, worldGrid.width, worldGrid.height);
 
+		wallDistance.calculateDistances(worldGrid);
+
 		// Hide edit panel after save
 		isEditMode = togglePanelAndButton(isEditMode, editPanel, btnEditMode);
 		canvasEdit.style.display = 'none';
@@ -1073,7 +1078,8 @@ function updateCellInfo(x: number, y: number) {
 		!markerIntensityFood ||
 		!cellFood ||
 		!cellDensity ||
-		!cellPreview
+		!cellPreview ||
+		!cellWallDistance
 	) {
 		return;
 	}
@@ -1088,6 +1094,7 @@ function updateCellInfo(x: number, y: number) {
 	).toFixed(2);
 	const color = cell.marker.getMixedColor();
 	cellPreview.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+	cellWallDistance.textContent = cell.dist.toFixed(2);
 }
 
 function updateColonyInfo() {
