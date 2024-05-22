@@ -79,29 +79,17 @@ export default class Ant {
 	}
 
 	updatePosition(worldGrid: WorldGrid, dt: number) {
-		// console.log('--- UPDATE ---');
-
-		// const v = this.direction.vector;
-		// const v = new Vector(Math.PI * 0.5, 0);
-		// const v = new Vector(
-		// 	random(-Math.PI * 2, Math.PI * 2),
-		// 	random(-Math.PI * 2, Math.PI * 2),
-		// );
 		const v = this.direction.getVec();
-		console.log(v);
 
 		const rayCast = worldGrid.rayCast(
 			this.pos.copy(),
-			this.direction,
-			// new Direction(random(Math.PI * 0.5, Math.PI * 1.5), Math.PI * 0.5, 5),
-			// new Direction(Math.PI * 0.5, Math.PI * 0.5, 5),
-			dt * this.maxSpeed * 5,
+			createVector(
+				this.direction.vector.heading(),
+				this.direction.vector.heading(),
+			),
+			dt * this.maxSpeed * 2,
 			this.ctx,
 		);
-		// console.log('--- V ---');
-		// console.log(v);
-		// console.log(this.direction.angle);
-		// console.log(this.direction.targetVector);
 
 		if (rayCast?.cell) {
 			circle(
@@ -111,11 +99,6 @@ export default class Ant {
 				30,
 				true,
 			);
-			// this.direction.targetVector = v;
-			// this.direction.vector = v;
-			// const a = Math.acos(v.x / Math.sqrt(v.x * v.x + v.y * v.y));
-			// this.direction.angle = v.y > 0 ? a : -a;
-			// this.direction.targetAngle = this.direction.angle;
 			const vec = v.copy();
 			vec.x *= rayCast.normal.x != 0 ? -1 : 1;
 			vec.y *= rayCast.normal.y != 0 ? -1 : 1;
@@ -131,7 +114,9 @@ export default class Ant {
 			this.directionClock = 0;
 
 			let maxIntensity = 0;
+			let minIntensity = 1;
 			let maxDirection = this.direction.getVec();
+			let maxCell = null;
 
 			for (let i = 0; i < 32; i++) {
 				const randAngle = random(-Math.PI * (1 / 3), Math.PI * (1 / 3));
@@ -143,26 +128,35 @@ export default class Ant {
 					Math.sin(sampleAngle),
 				);
 
+				const rayCast = worldGrid.rayCast(
+					this.pos.copy(),
+					createVector(sampleAngle, sampleAngle),
+					distance,
+					this.ctx,
+				);
+
+				if (rayCast?.cell) {
+					continue;
+				}
+
 				const cellVector = this.pos.copy().add(angleToCell.mult(distance));
 				const cell = worldGrid.getCellFromCoordsSafe(
 					cellVector.x,
 					cellVector.y,
 				);
 
+				if (cell) {
+					cell.density = [cell.density[0], cell.density[1], 100];
+				}
+
 				if (!cell) {
 					continue;
 				}
-
-				// if (cell) {
-				// 	cell.density = [100, 100, 100];
-				// 	// cell.marker = new Marker([0.1, 0]);
-				// }
 
 				if (
 					(cell.food.quantity > 0 && this.state === AntStates.TO_FOOD) ||
 					(this.state === AntStates.TO_HOME && cell.colony)
 				) {
-					// console.log('Found food/colony');
 					maxDirection = angleToCell;
 					this.direction.setDirectionAngle(maxDirection.heading());
 					break;
@@ -182,12 +176,15 @@ export default class Ant {
 				}
 			}
 
-			if (maxIntensity) {
-				// console.log(maxDirection.heading());
+			if (maxIntensity == minIntensity) {
+				return;
+			}
 
+			if (maxIntensity) {
+				if (maxCell) {
+					maxCell.density = [0, 100, 0];
+				}
 				this.direction.setDirectionAngle(maxDirection.heading());
-				// console.log('--- MAX INTENSITY UPDATE ---');
-				// console.log(this.direction);
 			}
 		}
 	}
@@ -271,12 +268,6 @@ export default class Ant {
 		);
 
 		this.updatePosition(worldGrid, dt);
-		// if (this.debug) {
-		// 	console.log(test, this.direction.targetVector);
-		// 	if (test != this.direction.targetVector) {
-		// 		console.log('----- DIFFERENT -----');
-		// 	}
-		// }
 
 		const cell = worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y);
 		if (
@@ -287,10 +278,6 @@ export default class Ant {
 			this.state = AntStates.TO_HOME;
 			this.foodAmount = cell.pick();
 			this.direction.addImmediate(Math.PI);
-			// this.direction = new Direction(
-			// 	this.direction.angle + Math.PI,
-			// 	this.direction.targetAngle + Math.PI,
-			// );
 			this.internalClock = 0;
 			return;
 		}
@@ -302,10 +289,6 @@ export default class Ant {
 		) {
 			if (this.state === AntStates.TO_HOME) {
 				this.direction.addImmediate(Math.PI);
-				// this.direction = new Direction(
-				// 	this.direction.angle + Math.PI,
-				// 	this.direction.targetAngle + Math.PI,
-				// );
 				colony.addFood(this.foodAmount);
 			}
 			if (
@@ -318,20 +301,10 @@ export default class Ant {
 			this.internalClock = 0;
 			return;
 		}
-
-		// if (this.directionClock >= AntOptions.DIRECTION_PERIOD) {
-		// 	this.directionClock = 0;
-		// }
-
-		// this.vel.add(this.acc);
-		// this.vel.limit(this.maxSpeed);
-		// this.pos.add(this.vel);
-		// this.acc.set(0, 0);
 	}
 
 	draw() {
 		this.ctx.translate(this.pos.x, this.pos.y);
-		// this.ctx.rotate(this.vel.heading() + Math.PI / 2);
 		this.ctx.rotate(this.direction.vector.heading() + Math.PI / 2);
 
 		const horizontalOffset = -AntOptions.IMG_WIDTH / 2;
@@ -347,13 +320,6 @@ export default class Ant {
 		}
 
 		// Draw ant
-		// this.ctx.drawImage(
-		// 	this.antIcon,
-		// 	horizontalOffset,
-		// 	verticalOffset,
-		// 	AntOptions.IMG_WIDTH,
-		// 	AntOptions.IMG_HEIGHT,
-		// );
 		this.ctx.drawImage(this.antImageInstance, horizontalOffset, verticalOffset);
 
 		// Draw debug shapes

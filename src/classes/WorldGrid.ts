@@ -1,5 +1,4 @@
 import { MapGeneratorOptions, MarkerOptions, MarkerTypes } from '../constants';
-import Direction from './Direction';
 import { circle } from './Shapes';
 import { Vector } from './Vector';
 import WorldCell from './WorldCell';
@@ -205,17 +204,18 @@ export default class WorldGrid {
 
 	rayCast(
 		position: Vector,
-		direction: Direction,
+		direction: Vector,
 		maxDistance: number,
 		ctx: CanvasRenderingContext2D,
 	) {
-		// const rayEnd = position.add(direction.vector.mult(maxDistance));
-		const dX = maxDistance * Math.cos(direction.angle);
-		const dY = maxDistance * Math.sin(direction.angle);
+		const dX = maxDistance * Math.cos(direction.x);
+		const dY = maxDistance * Math.sin(direction.y);
 		const rayEnd = position.copy();
 		rayEnd.x += dX;
 		rayEnd.y += dY;
+
 		const rayDir = rayEnd.copy().sub(position).normalize();
+		ctx.fillStyle = 'green';
 		circle(ctx, position.x, position.y, 5, true);
 		ctx.fillStyle = 'red';
 		circle(ctx, rayEnd.x, rayEnd.y, 5, true);
@@ -247,8 +247,6 @@ export default class WorldGrid {
 				(Math.round(mapCheck.y + 1) - position.y) * rayUnitStepSize.y;
 		}
 
-		// console.log(rayEnd, rayDir, rayUnitStepSize, mapCheck, rayLength, step);
-
 		let tileFound = false;
 		let distance = 0;
 		while (!tileFound && distance < maxDistance) {
@@ -263,10 +261,9 @@ export default class WorldGrid {
 			}
 			const cell = this.getCellFromCoordsSafe(mapCheck.x, mapCheck.y);
 
-			// if (cell) {
-			// 	cell.density = [100, 100, 100];
-			// 	// cell.marker = new Marker([0.1, 0]);
-			// }
+			if (cell) {
+				cell.density = [25, cell.density[1], cell.density[2]];
+			}
 
 			if (
 				mapCheck.x >= 0 &&
@@ -274,18 +271,7 @@ export default class WorldGrid {
 				mapCheck.y >= 0 &&
 				mapCheck.y < this.height * MarkerOptions.SIZE
 			) {
-				// console.log(worldGrid.getCellFromCoordsSafe(mapCheck.x, mapCheck.y));
-
-				if (
-					// cell &&
-					// (cell.food.quantity > 0 ||
-					// 	cell.marker.getToFoodIntensity() > 0 ||
-					// 	cell.marker.getToHomeIntensity() > 0 ||
-					// 	cell.wall)
-					cell &&
-					cell.wall == 1
-				) {
-					// console.log('Tile found');
+				if (cell && cell.wall == 1) {
 					tileFound = true;
 					const normal = new Vector(
 						rayLength.x < rayLength.y ? 1 : 0,
@@ -301,12 +287,8 @@ export default class WorldGrid {
 					};
 				}
 			}
-
-			// return {
-			// 	cell,
-			// 	distance,
-			// 	intersection: position.add(rayDir.mult(distance)),
-			// };
 		}
+
+		return null;
 	}
 }
