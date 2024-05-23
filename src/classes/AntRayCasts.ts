@@ -43,6 +43,7 @@ export default class Ant {
 	freedomCoef: number;
 	foodAmount: number;
 	maxAutonomy: number;
+	hits: number;
 
 	constructor(
 		ctx: CanvasRenderingContext2D,
@@ -59,10 +60,7 @@ export default class Ant {
 		this.pos = createVector(options.pos.x, options.pos.y);
 		this.vel = createVector(0, 0);
 		this.acc = createVector(0, 0);
-		this.direction = new Direction(
-			random(-Math.PI * 2, Math.PI * 2),
-			random(-Math.PI * 2, Math.PI * 2),
-		);
+		this.direction = new Direction(random(-Math.PI * 2, Math.PI * 2));
 		this.maxSpeed = 250;
 		this.maxForce = 0.25;
 		this.state = AntStates.TO_FOOD;
@@ -76,6 +74,7 @@ export default class Ant {
 		this.freedomCoef = random(0.01, 0.1);
 		this.foodAmount = 0;
 		this.maxAutonomy = AntOptions.AUTONOMY_MAX - random(0, 50);
+		this.hits = 0;
 	}
 
 	updatePosition(worldGrid: WorldGrid, dt: number) {
@@ -87,24 +86,34 @@ export default class Ant {
 				this.direction.vector.heading(),
 				this.direction.vector.heading(),
 			),
-			dt * this.maxSpeed * 2,
+			AntOptions.IMG_HEIGHT / 2 + dt * this.maxSpeed,
 			this.ctx,
 		);
 
 		if (rayCast?.cell) {
-			circle(
-				this.ctx,
-				rayCast.intersection.x,
-				rayCast.intersection.y,
-				30,
-				true,
-			);
+			// circle(
+			// 	this.ctx,
+			// 	rayCast.intersection.x,
+			// 	rayCast.intersection.y,
+			// 	30,
+			// 	true,
+			// );
 			const vec = v.copy();
-			vec.x *= rayCast.normal.x != 0 ? -1 : 1;
-			vec.y *= rayCast.normal.y != 0 ? -1 : 1;
 
+			if (this.hits > 4) {
+				vec.setHeading(vec.heading() + Math.PI / 2);
+			} else if (this.hits > 2) {
+				vec.x *= rayCast.normal.x != 0 ? 1 : -1;
+				vec.y *= rayCast.normal.y != 0 ? 1 : -1;
+			} else {
+				vec.x *= rayCast.normal.x != 0 ? -1 : 1;
+				vec.y *= rayCast.normal.y != 0 ? -1 : 1;
+			}
+
+			this.hits++;
 			this.direction.setDirectionImmediate(vec);
 		} else {
+			this.hits = 0;
 			this.pos.add(v.mult(dt * this.maxSpeed));
 		}
 	}
@@ -159,7 +168,7 @@ export default class Ant {
 				) {
 					maxDirection = angleToCell;
 					this.direction.setDirectionAngle(maxDirection.heading());
-					break;
+					return;
 				}
 
 				const wallRepellent = cell.dist * cell.dist;
@@ -257,8 +266,6 @@ export default class Ant {
 			this.isDead = true;
 		}
 
-		// console.log(this.direction);
-		const test = this.direction.vector;
 		this.direction.update(dt);
 		this.direction.setAndAddDirectionAngle(
 			random(
