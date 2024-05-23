@@ -76,6 +76,7 @@ const cellPanel = document.getElementById('cellPanel') as HTMLDivElement;
 const cellPreview = document.querySelector<HTMLDivElement>(
 	'[data-cell-preview]',
 );
+const cellCoords = document.querySelector<HTMLSpanElement>('[data-coords]');
 const markerIntensityHome = document.querySelector<HTMLSpanElement>(
 	'[data-intensity-home]',
 );
@@ -85,6 +86,7 @@ const markerIntensityFood = document.querySelector<HTMLSpanElement>(
 const cellFood = document.querySelector<HTMLSpanElement>('[data-cell-food]');
 const cellDensity = document.querySelector<HTMLSpanElement>('[data-density]');
 const cellWallDistance = document.querySelector<HTMLSpanElement>('[data-dist]');
+const cellColony = document.querySelector<HTMLSpanElement>('[data-colony]');
 
 // Colony panel
 const btnColonyPanel = document.getElementById(
@@ -1079,11 +1081,14 @@ function updateCellInfo(x: number, y: number) {
 		!cellFood ||
 		!cellDensity ||
 		!cellPreview ||
-		!cellWallDistance
+		!cellWallDistance ||
+		!cellColony ||
+		!cellCoords
 	) {
 		return;
 	}
 
+	cellCoords.textContent = `${x.toFixed(0)}-${y.toFixed(0)}`;
 	markerIntensityHome.textContent = cell.marker.getToHomeIntensity().toFixed(2);
 	markerIntensityFood.textContent = cell.marker.getToFoodIntensity().toFixed(2);
 	cellFood.textContent = cell.food.quantity.toString();
@@ -1095,6 +1100,7 @@ function updateCellInfo(x: number, y: number) {
 	const color = cell.marker.getMixedColor();
 	cellPreview.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
 	cellWallDistance.textContent = cell.dist.toFixed(2);
+	cellColony.textContent = cell.colony ? 'Yes' : 'No';
 }
 
 function updateColonyInfo() {
