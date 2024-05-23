@@ -70,6 +70,135 @@ export default class Colony {
 		this.maxFood = ColonyOptions.COLONY_MAX_FOOD;
 	}
 
+	drawMidpointCircle(
+		worldGrid: WorldGrid,
+		centerX: number,
+		centerY: number,
+		radius: number,
+	) {
+		let x = radius;
+		let y = 0;
+		let p = 1 - radius;
+
+		this.drawSymmetricPoints(worldGrid, centerX, centerY, x, y);
+
+		if (radius > 0) {
+			while (x > y) {
+				y++;
+
+				if (p <= 0) {
+					p = p + 2 * y + 1;
+				} else {
+					x--;
+					p = p + 2 * y - 2 * x + 1;
+				}
+
+				this.drawSymmetricPoints(worldGrid, centerX, centerY, x, y);
+			}
+		}
+	}
+
+	drawSymmetricPoints(
+		worldGrid: WorldGrid,
+		cx: number,
+		cy: number,
+		x: number,
+		y: number,
+	) {
+		x *= MarkerOptions.SIZE;
+		y *= MarkerOptions.SIZE;
+
+		const q1 = worldGrid.getCellFromCoordsSafe(cx + x, cy + y);
+		if (q1) {
+			q1.colony = true;
+		}
+		const q2 = worldGrid.getCellFromCoordsSafe(cx - x, cy + y);
+		if (q2) {
+			q2.colony = true;
+		}
+		const q3 = worldGrid.getCellFromCoordsSafe(cx + x, cy - y);
+		if (q3) {
+			q3.colony = true;
+		}
+		const q4 = worldGrid.getCellFromCoordsSafe(cx - x, cy - y);
+		if (q4) {
+			q4.colony = true;
+		}
+		const q5 = worldGrid.getCellFromCoordsSafe(cx + y, cy + x);
+		if (q5) {
+			q5.colony = true;
+		}
+		const q6 = worldGrid.getCellFromCoordsSafe(cx - y, cy + x);
+		if (q6) {
+			q6.colony = true;
+		}
+		const q7 = worldGrid.getCellFromCoordsSafe(cx + y, cy - x);
+		if (q7) {
+			q7.colony = true;
+		}
+		const q8 = worldGrid.getCellFromCoordsSafe(cx - y, cy - x);
+		if (q8) {
+			q8.colony = true;
+		}
+	}
+
+	drawAndFillMidpointCircle(
+		worldGrid: WorldGrid,
+		centerX: number,
+		centerY: number,
+		radius: number,
+	) {
+		let x = radius;
+		let y = 0;
+		let p = 1 - radius;
+
+		this.drawAndFillSymmetricLines(worldGrid, centerX, centerY, x, y);
+
+		if (radius > 0) {
+			while (x > y) {
+				y++;
+
+				if (p <= 0) {
+					p = p + 2 * y + 1;
+				} else {
+					x--;
+					p = p + 2 * y - 2 * x + 1;
+				}
+
+				this.drawAndFillSymmetricLines(worldGrid, centerX, centerY, x, y);
+			}
+		}
+	}
+
+	drawAndFillSymmetricLines(
+		worldGrid: WorldGrid,
+		cx: number,
+		cy: number,
+		x: number,
+		y: number,
+	) {
+		x *= MarkerOptions.SIZE;
+		y *= MarkerOptions.SIZE;
+		this.drawHorizontalLine(worldGrid, cx - x, cx + x, cy + y);
+		this.drawHorizontalLine(worldGrid, cx - x, cx + x, cy - y);
+		this.drawHorizontalLine(worldGrid, cx - y, cx + y, cy + x);
+		this.drawHorizontalLine(worldGrid, cx - y, cx + y, cy - x);
+	}
+
+	drawHorizontalLine(
+		worldGrid: WorldGrid,
+		xStart: number,
+		xEnd: number,
+		y: number,
+	) {
+		for (let x = xStart; x <= xEnd; x++) {
+			const cell = worldGrid.getCellFromCoordsSafe(x, y);
+			if (cell) {
+				cell.colony = true;
+			}
+		}
+	}
+
 	initialize(
 		antIcon: HTMLImageElement,
 		antImageInstance: HTMLCanvasElement,
@@ -101,23 +230,12 @@ export default class Colony {
 			this.totalAnts++;
 		}
 
-		const size = Math.floor(ColonyOptions.COLONY_RADIUS / MarkerOptions.SIZE);
-
-		for (let i = 0; i < size; i++) {
-			const cellHorizontal = worldGrid.getCellFromCoordsSafe(
-				this.x - (size / 2) * MarkerOptions.SIZE + i * MarkerOptions.SIZE,
-				this.y,
-			);
-			const cellVertical = worldGrid.getCellFromCoordsSafe(
-				this.x,
-				this.y - (size / 2) * MarkerOptions.SIZE + i * MarkerOptions.SIZE,
-			);
-
-			if (cellHorizontal && cellVertical) {
-				cellHorizontal.colony = true;
-				cellVertical.colony = true;
-			}
-		}
+		this.drawAndFillMidpointCircle(
+			worldGrid,
+			this.x,
+			this.y,
+			ColonyOptions.COLONY_RADIUS,
+		);
 	}
 
 	updateAndDrawAnts(worldGrid: WorldGrid, dt: number, draw = true) {
@@ -271,7 +389,12 @@ export default class Colony {
 
 	drawColony(ctx: CanvasRenderingContext2D) {
 		ctx.fillStyle = `rgb(${this.colonyColor[0]}, ${this.colonyColor[1]}, ${this.colonyColor[2]})`;
-		circle(ctx, this.x, this.y, ColonyOptions.COLONY_RADIUS);
+		circle(
+			ctx,
+			this.x,
+			this.y,
+			ColonyOptions.COLONY_RADIUS * MarkerOptions.SIZE + MarkerOptions.SIZE / 2,
+		);
 	}
 
 	addFood(quantity: number) {
