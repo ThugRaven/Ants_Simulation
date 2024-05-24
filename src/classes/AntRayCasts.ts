@@ -277,6 +277,12 @@ export default class Ant {
 		this.updatePosition(worldGrid, dt);
 
 		const cell = worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y);
+
+		cell?.addDensity(
+			this.state === AntStates.TO_HOME,
+			this.state === AntStates.REFILL,
+		);
+
 		if (
 			cell &&
 			cell.food.quantity > 0 &&
