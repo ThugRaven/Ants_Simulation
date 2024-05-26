@@ -652,6 +652,7 @@ mapForm.addEventListener('submit', (e) => {
 		ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
 		mapGenerator.generateMap(worldGrid, false, mapSeed);
 		worldGrid.drawWalls(ctxWalls);
+		wallDistance.calculateDistances(worldGrid);
 	}
 	e.preventDefault();
 });
@@ -663,6 +664,7 @@ btnGenerateSaveMap.addEventListener('click', () => {
 		ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
 		mapGenerator.generateMap(worldGrid, false);
 		worldGrid.drawWalls(ctxWalls);
+		wallDistance.calculateDistances(worldGrid);
 		mapSeedInput.value =
 			new URL(window.location.href).searchParams.get('seed') ?? '';
 	}

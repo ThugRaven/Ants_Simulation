@@ -192,7 +192,7 @@ export default class Ant {
 			}
 
 			if (maxIntensity) {
-				if (maxCell) {
+				if (maxCell && this.debug) {
 					maxCell.density = [0, 100, 0];
 				}
 				this.direction.setDirectionAngle(maxDirection.heading());
