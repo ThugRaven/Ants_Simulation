@@ -63,8 +63,7 @@ export default class Ant {
 		this.vel = createVector(0, 0);
 		this.acc = createVector(0, 0);
 		this.direction = new Direction(random(-Math.PI * 2, Math.PI * 2));
-		this.maxSpeed = 250;
-		this.maxForce = 0.25;
+		this.maxSpeed = 3;
 		this.state = AntStates.TO_FOOD;
 		this.debug = options.debug || false;
 		this.wanderTheta = random(0, Math.PI * 2);
@@ -93,12 +92,7 @@ export default class Ant {
 
 		const rayCast = worldGrid.rayCast(
 			this.pos.copy(),
-			createVector(
-				this.direction.vector.heading(),
-				this.direction.vector.heading(),
-			),
-			AntOptions.IMG_HEIGHT / 2 + dt * this.maxSpeed,
-			this.ctx,
+			AntOptions.IMG_HEIGHT / 2 + this.maxSpeed,
 		);
 
 		if (rayCast?.cell) {
@@ -125,7 +119,7 @@ export default class Ant {
 			this.direction.setDirectionImmediate(vec);
 		} else {
 			this.hits = 0;
-			this.pos.add(v.mult(dt * this.maxSpeed));
+			this.pos.add(v.mult(this.maxSpeed));
 		}
 	}
 
