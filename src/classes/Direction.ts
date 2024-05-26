@@ -7,7 +7,7 @@ export default class Direction {
 	vector: Vector;
 	targetVector: Vector;
 
-	constructor(angle: number, rotationSpeed = 5) {
+	constructor(angle: number, rotationSpeed = 7.5) {
 		this.angle = angle;
 		this.targetAngle = angle;
 		this.rotationSpeed = rotationSpeed;
