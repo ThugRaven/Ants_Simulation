@@ -1449,25 +1449,25 @@ function main(currentTime: number) {
 		circle(ctxAnts, target.x, target.y, 4);
 		updateCellInfo(target.x, target.y);
 
-		if (antsDrawClock > ANTS_DRAW_PERIOD / canvasScale) {
-			ctxAnts.fillStyle = 'rgb(255, 0, 0, 0.1)';
-			const padding = {
-				x: AntOptions.IMG_HEIGHT * canvasScale,
-				y: AntOptions.IMG_HEIGHT * canvasScale,
-			};
+		// if (antsDrawClock > ANTS_DRAW_PERIOD / canvasScale) {
+		// 	ctxAnts.fillStyle = 'rgb(255, 0, 0, 0.1)';
+		// 	const padding = {
+		// 		x: AntOptions.IMG_HEIGHT * canvasScale,
+		// 		y: AntOptions.IMG_HEIGHT * canvasScale,
+		// 	};
 
-			const size = {
-				x: (window.innerWidth + padding.x) / canvasScale,
-				y: (window.innerHeight - offsetY + padding.y) / canvasScale,
-			};
-			rect(
-				ctxAnts,
-				center.x - size.x / 2,
-				center.y - offsetY / 2 / canvasScale - size.y / 2,
-				size.x,
-				size.y,
-			);
-		}
+		// 	const size = {
+		// 		x: (window.innerWidth + padding.x) / canvasScale,
+		// 		y: (window.innerHeight - offsetY + padding.y) / canvasScale,
+		// 	};
+		// 	rect(
+		// 		ctxAnts,
+		// 		center.x - size.x / 2,
+		// 		center.y - offsetY / 2 / canvasScale - size.y / 2,
+		// 		size.x,
+		// 		size.y,
+		// 	);
+		// }
 	}
 
 	updateColonyInfo();
@@ -1479,16 +1479,16 @@ function main(currentTime: number) {
 	}
 
 	// if (readyToDraw) {
-	const mouseCell = new Vector(target.x, target.y);
-	const rayStart = new Vector(width / 2, height / 2);
-	const rayDir = mouseCell.copy().sub(rayStart).normalize();
+	// const mouseCell = new Vector(target.x, target.y);
+	// const rayStart = new Vector(width / 2, height / 2);
+	// const rayDir = mouseCell.copy().sub(rayStart).normalize();
 
-	ctxAnts.fillStyle = 'red';
-	circle(ctxAnts, rayStart.x, rayStart.y, 4);
-	ctxAnts.fillStyle = 'green';
-	circle(ctxAnts, mouseCell.x, mouseCell.y, 4);
-	ctxAnts.strokeStyle = 'white';
-	line(ctxAnts, rayStart.x, rayStart.y, mouseCell.x, mouseCell.y);
+	// ctxAnts.fillStyle = 'red';
+	// circle(ctxAnts, rayStart.x, rayStart.y, 4);
+	// ctxAnts.fillStyle = 'green';
+	// circle(ctxAnts, mouseCell.x, mouseCell.y, 4);
+	// ctxAnts.strokeStyle = 'white';
+	// line(ctxAnts, rayStart.x, rayStart.y, mouseCell.x, mouseCell.y);
 
 	// angle += Math.PI * 0.005;
 	// const rayCast = worldGrid.rayCast(
