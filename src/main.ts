@@ -871,6 +871,7 @@ function setup() {
 
 	mapGenerator.generateMap(worldGrid, true);
 	worldGrid.drawWalls(ctxWalls);
+	wallDistance.calculateDistances(worldGrid);
 
 	toggleButton(false, btnAntsLayer);
 	toggleButton(!isDrawingDensity, btnDensityLayer);
