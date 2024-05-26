@@ -220,8 +220,8 @@ export default class Colony {
 				{
 					id: this.antId + 1,
 					pos: {
-						x: this.x + random(-500, 500),
-						y: this.y + random(-500, 500),
+						x: this.x,
+						y: this.y,
 					},
 				},
 			);
@@ -243,8 +243,8 @@ export default class Colony {
 		for (let i = 0; i < this.ants.length; i++) {
 			if (this.isRunning) {
 				// Update ants
-				this.ants[i].update(worldGrid, dt, this);
 				this.ants[i].find(worldGrid);
+				this.ants[i].update(worldGrid, dt, this);
 				this.ants[i].addMarker(worldGrid, dt);
 
 				// Mark ant for deletion

@@ -1,5 +1,4 @@
 import { MapGeneratorOptions, MarkerOptions, MarkerTypes } from '../constants';
-import { circle } from './Shapes';
 import { Vector } from './Vector';
 import WorldCell from './WorldCell';
 
@@ -202,32 +201,31 @@ export default class WorldGrid {
 		return x > -1 && x < this.width && y > -1 && y < this.height;
 	}
 
-	rayCast(
-		position: Vector,
-		direction: Vector,
-		maxDistance: number,
-		ctx: CanvasRenderingContext2D,
-	) {
-		const dX = maxDistance * Math.cos(direction.x);
-		const dY = maxDistance * Math.sin(direction.y);
+	rayCast(position: Vector, angle: number, maxDistance: number) {
+		const dX = maxDistance * Math.cos(angle);
+		const dY = maxDistance * Math.sin(angle);
+		// const rayEnd = { x: position.x, y: position.y, z: position.z };
 		const rayEnd = position.copy();
 		rayEnd.x += dX;
 		rayEnd.y += dY;
 
 		const rayDir = rayEnd.copy().sub(position).normalize();
-		ctx.fillStyle = 'green';
-		circle(ctx, position.x, position.y, 5, true);
-		ctx.fillStyle = 'red';
-		circle(ctx, rayEnd.x, rayEnd.y, 5, true);
+		// const rayDir = normalize(sub(rayEnd, { x: position.x, y: position.y, z: position.z }));
+		// rayDir = { x:normalize(...{...sub(rayEnd.x, rayEnd.y, 0)})
+		// 	 };
+		// ctx.fillStyle = 'green';
+		// circle(ctx, position.x, position.y, 5, true);
+		// ctx.fillStyle = 'red';
+		// circle(ctx, rayEnd.x, rayEnd.y, 5, true);
 
-		const rayUnitStepSize = new Vector(
-			Math.sqrt(1 + (rayDir.y / rayDir.x) * (rayDir.y / rayDir.x)),
-			Math.sqrt(1 + (rayDir.x / rayDir.y) * (rayDir.x / rayDir.y)),
-		);
+		const rayUnitStepSize = {
+			x: Math.sqrt(1 + (rayDir.y / rayDir.x) * (rayDir.y / rayDir.x)),
+			y: Math.sqrt(1 + (rayDir.x / rayDir.y) * (rayDir.x / rayDir.y)),
+		};
 
-		const mapCheck = position.copy();
-		const rayLength = new Vector(0, 0);
-		const step = new Vector(0, 0);
+		const mapCheck = { x: position.x, y: position.y };
+		const rayLength = { x: 0, y: 0 };
+		const step = { x: 0, y: 0 };
 
 		if (rayDir.x < 0) {
 			step.x = -1;
@@ -259,11 +257,7 @@ export default class WorldGrid {
 				distance = rayLength.y;
 				rayLength.y += rayUnitStepSize.y;
 			}
-			const cell = this.getCellFromCoordsSafe(mapCheck.x, mapCheck.y);
-
-			if (cell) {
-				cell.density = [25, cell.density[1], cell.density[2]];
-			}
+			const cell = this.getCellFromCoords(mapCheck.x, mapCheck.y);
 
 			if (
 				mapCheck.x >= 0 &&
@@ -273,10 +267,10 @@ export default class WorldGrid {
 			) {
 				if (cell && cell.wall == 1) {
 					tileFound = true;
-					const normal = new Vector(
-						rayLength.x < rayLength.y ? 1 : 0,
-						rayLength.y < rayLength.x ? 1 : 0,
-					);
+					const normal = {
+						x: rayLength.x < rayLength.y ? 1 : 0,
+						y: rayLength.y < rayLength.x ? 1 : 0,
+					};
 
 					return {
 						cell,

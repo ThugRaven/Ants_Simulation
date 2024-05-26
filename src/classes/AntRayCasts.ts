@@ -2,13 +2,14 @@ import {
 	AntOptions,
 	AntStates,
 	ColonyOptions,
+	MarkerOptions,
 	MarkerTypes,
 } from '../constants';
 import Colony from './Colony';
 import Direction from './Direction';
-import { circle, line } from './Shapes';
+import { circle } from './Shapes';
 import { random } from './Utils';
-import { createVector, Vector } from './Vector';
+import { Vector, createVector } from './Vector';
 import WorldGrid from './WorldGrid';
 
 interface AntOptions {
@@ -27,15 +28,10 @@ export default class Ant {
 	antIcon: HTMLImageElement;
 	id: number;
 	pos: Vector;
-	vel: Vector;
-	acc: Vector;
 	direction: Direction;
 	maxSpeed: number;
-	maxForce: number;
 	state: number;
 	debug: boolean;
-	wanderTheta: number;
-	perceptionDraw: Set<number>;
 	internalClock: number;
 	markerPeriod: number;
 	markerClock: number;
@@ -60,14 +56,10 @@ export default class Ant {
 		this.antIcon = antIcon;
 		this.id = options.id;
 		this.pos = createVector(options.pos.x, options.pos.y);
-		this.vel = createVector(0, 0);
-		this.acc = createVector(0, 0);
 		this.direction = new Direction(random(-Math.PI * 2, Math.PI * 2));
 		this.maxSpeed = 3;
 		this.state = AntStates.TO_FOOD;
 		this.debug = options.debug || false;
-		this.wanderTheta = random(0, Math.PI * 2);
-		this.perceptionDraw = new Set();
 		this.internalClock = 0;
 		this.markerPeriod =
 			AntOptions.MARKER_PERIOD +
@@ -92,6 +84,7 @@ export default class Ant {
 
 		const rayCast = worldGrid.rayCast(
 			this.pos.copy(),
+			this.direction.vector.heading(),
 			AntOptions.IMG_HEIGHT / 2 + this.maxSpeed,
 		);
 
@@ -119,7 +112,7 @@ export default class Ant {
 			this.direction.setDirectionImmediate(vec);
 		} else {
 			this.hits = 0;
-			this.pos.add(v.mult(this.maxSpeed));
+			this.pos.add(v.multSimple(this.maxSpeed));
 		}
 	}
 
@@ -131,10 +124,13 @@ export default class Ant {
 			let minIntensity = 1;
 			let maxDirection = this.direction.getVec();
 			let maxCell = null;
-
+			// const angle = (Math.PI * (1 / 3) * 2) / 32;
 			for (let i = 0; i < 32; i++) {
 				const randAngle = random(-Math.PI * (1 / 3), Math.PI * (1 / 3));
-				const distance = random(0, this.maxSpeed);
+				// const randAngle = -Math.PI * (1 / 3) + angle * i;
+				// const distance = random(0, this.maxSpeed);
+				const distance = random(0, MarkerOptions.SIZE * 12);
+				// const distance = MarkerOptions.SIZE * 12;
 				const currentAngle = maxDirection.heading();
 				const sampleAngle = currentAngle + randAngle;
 				const angleToCell = createVector(
@@ -144,16 +140,17 @@ export default class Ant {
 
 				const rayCast = worldGrid.rayCast(
 					this.pos.copy(),
-					createVector(sampleAngle, sampleAngle),
+					sampleAngle,
 					distance,
-					this.ctx,
 				);
 
 				if (rayCast?.cell) {
 					continue;
 				}
 
-				const cellVector = this.pos.copy().add(angleToCell.mult(distance));
+				const cellVector = this.pos
+					.copy()
+					.add(angleToCell.multSimple(distance));
 				const cell = worldGrid.getCellFromCoordsSafe(
 					cellVector.x,
 					cellVector.y,
@@ -203,60 +200,6 @@ export default class Ant {
 		}
 	}
 
-	seek(target: Vector) {
-		if (this.debug) {
-			this.ctx.strokeStyle = 'white';
-			line(this.ctx, target.x, target.y, this.pos.x, this.pos.y);
-		}
-
-		const force = target.copy().sub(this.pos);
-		force.setMag(this.maxSpeed);
-		force.sub(this.vel);
-		force.limit(this.maxForce);
-		this.applyForce(force);
-	}
-
-	wander() {
-		const wanderPoint = this.vel.copy();
-		wanderPoint.setMag(AntOptions.WANDER_POINT_MAGNITUDE);
-		wanderPoint.add(this.pos);
-
-		const wanderRadius = AntOptions.WANDER_POINT_RADIUS;
-
-		if (this.debug) {
-			this.ctx.fillStyle = 'red';
-			circle(this.ctx, wanderPoint.x, wanderPoint.y, 4);
-
-			this.ctx.strokeStyle = 'white';
-			circle(this.ctx, wanderPoint.x, wanderPoint.y, wanderRadius, false, true);
-
-			line(this.ctx, this.pos.x, this.pos.y, wanderPoint.x, wanderPoint.y);
-		}
-
-		const theta = this.wanderTheta + this.vel.heading();
-		const x = wanderRadius * Math.cos(theta);
-		const y = wanderRadius * Math.sin(theta);
-		wanderPoint.add(x, y);
-
-		if (this.debug) {
-			this.ctx.fillStyle = 'green';
-			circle(this.ctx, wanderPoint.x, wanderPoint.y, 8);
-			line(this.ctx, this.pos.x, this.pos.y, wanderPoint.x, wanderPoint.y);
-		}
-
-		const steer = wanderPoint.sub(this.pos);
-		steer.setMag(this.maxForce);
-		steer.limit(this.maxForce);
-		this.applyForce(steer);
-
-		const displaceRange = AntOptions.WANDER_DISPLACE_RANGE;
-		this.wanderTheta += random(-displaceRange, displaceRange);
-	}
-
-	applyForce(force: Vector) {
-		this.acc.add(force);
-	}
-
 	update(worldGrid: WorldGrid, dt: number, colony: Colony) {
 		this.internalClock += dt;
 		this.directionClock += dt;
@@ -278,7 +221,6 @@ export default class Ant {
 				AntOptions.DIRECTION_NOISE_RANGE,
 			),
 		);
-
 		this.updatePosition(worldGrid, dt);
 
 		const cell = worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y);
@@ -353,68 +295,6 @@ export default class Ant {
 
 			this.ctx.fillStyle = 'red';
 			circle(this.ctx, 0, 0, 4);
-
-			// FOV
-			this.ctx.beginPath();
-			this.ctx.arc(
-				0,
-				0,
-				AntOptions.PERCEPTION_RADIUS,
-				AntOptions.PERCEPTION_START_ANGLE,
-				AntOptions.PERCEPTION_END_ANGLE,
-			);
-			this.ctx.stroke();
-			this.ctx.strokeStyle = 'white';
-			this.ctx.beginPath();
-			this.ctx.arc(
-				0,
-				0,
-				AntOptions.PERCEPTION_RADIUS,
-				AntOptions.PERCEPTION_END_ANGLE,
-				AntOptions.PERCEPTION_START_ANGLE,
-			);
-			this.ctx.stroke();
-			const thetaLeft = AntOptions.PERCEPTION_START_ANGLE;
-			const thetaRight = AntOptions.PERCEPTION_END_ANGLE;
-			const xLeft = AntOptions.PERCEPTION_RADIUS * Math.cos(thetaLeft);
-			const yLeft = AntOptions.PERCEPTION_RADIUS * Math.sin(thetaLeft);
-			const xRight = AntOptions.PERCEPTION_RADIUS * Math.cos(thetaRight);
-			const yRight = AntOptions.PERCEPTION_RADIUS * Math.sin(thetaRight);
-			this.ctx.strokeStyle = 'red';
-			line(this.ctx, 0, 0, xLeft, yLeft);
-			line(this.ctx, 0, 0, xRight, yRight);
-			// Calculate perception points and draw them
-			const angleBetween =
-				(AntOptions.PERCEPTION_END_ANGLE - AntOptions.PERCEPTION_START_ANGLE) /
-				(AntOptions.PERCEPTION_POINTS_HORIZONTAL - 1);
-			const distanceBetween =
-				AntOptions.PERCEPTION_RADIUS / AntOptions.PERCEPTION_POINTS_VERTICAL;
-
-			for (let x = 0; x < AntOptions.PERCEPTION_POINTS_HORIZONTAL; x++) {
-				for (let y = 1; y <= AntOptions.PERCEPTION_POINTS_VERTICAL; y++) {
-					const theta = angleBetween * x + AntOptions.PERCEPTION_START_ANGLE;
-
-					const perceptionX = distanceBetween * y * Math.cos(theta);
-					const perceptionY = distanceBetween * y * Math.sin(theta);
-
-					if (
-						this.perceptionDraw.has(
-							y * AntOptions.PERCEPTION_POINTS_VERTICAL + x,
-						)
-					) {
-						this.ctx.strokeStyle = 'white';
-						this.ctx.fillStyle = 'white';
-					} else {
-						this.ctx.strokeStyle = 'red';
-						this.ctx.fillStyle = 'green';
-					}
-
-					circle(this.ctx, perceptionX, perceptionY, 4);
-					if (y === AntOptions.PERCEPTION_POINTS_VERTICAL) {
-						line(this.ctx, 0, 0, perceptionX, perceptionY);
-					}
-				}
-			}
 		}
 
 		if (this.debug) {
@@ -423,408 +303,6 @@ export default class Ant {
 		}
 
 		this.ctx.resetTransform();
-	}
-
-	search(worldGrid: WorldGrid, colony: Colony) {
-		if (this.debug) {
-			this.perceptionDraw = new Set();
-		}
-
-		const posAhead = this.vel.copy();
-		posAhead.setMag(AntOptions.IMG_HEIGHT / 2);
-		posAhead.add(this.pos);
-		const cellAhead = worldGrid.getCellFromCoordsSafe(posAhead.x, posAhead.y);
-		const cell = worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y);
-		cell?.addDensity(
-			this.state === AntStates.TO_HOME,
-			this.state === AntStates.REFILL,
-		);
-		if (
-			cellAhead &&
-			cellAhead.food.quantity > 0 &&
-			(this.state === AntStates.TO_FOOD || this.state === AntStates.REFILL)
-		) {
-			this.state = AntStates.TO_HOME;
-			this.foodAmount = cellAhead.pick();
-			this.vel.setHeading(this.vel.heading() + Math.PI);
-			this.internalClock = 0;
-			return;
-		}
-
-		if (
-			cell &&
-			cell.colony &&
-			(this.state === AntStates.REFILL || this.state === AntStates.TO_HOME)
-		) {
-			if (this.state === AntStates.TO_HOME) {
-				this.vel.setHeading(this.vel.heading() + Math.PI);
-				colony.addFood(this.foodAmount);
-			}
-			if (
-				this.state === AntStates.REFILL &&
-				!colony.useFood(ColonyOptions.ANT_REFILL_FOOD_AMOUNT)
-			) {
-				return;
-			}
-			this.state = AntStates.TO_FOOD;
-			this.internalClock = 0;
-			return;
-		}
-
-		if (Math.random() < this.freedomCoef) {
-			return;
-		}
-
-		const angleBetween =
-			(AntOptions.PERCEPTION_END_ANGLE - AntOptions.PERCEPTION_START_ANGLE) /
-			(AntOptions.PERCEPTION_POINTS_HORIZONTAL - 1);
-		const distanceBetween =
-			AntOptions.PERCEPTION_RADIUS / AntOptions.PERCEPTION_POINTS_VERTICAL;
-
-		let closestIndex = AntOptions.PERCEPTION_POINTS_VERTICAL + 1;
-		let closestFoodPoint: Vector | null = null;
-		let maxIntensity = 0;
-		let maxIntensityPoint: Vector | null = null;
-		const angle = this.vel.heading();
-
-		const horizontalOffset = -AntOptions.IMG_WIDTH / 2;
-		const thetaLeft = Math.PI / 4 + angle + Math.PI;
-		const thetaRight = -Math.PI / 4 + angle + Math.PI;
-		const perceptionXLeft = horizontalOffset * Math.cos(thetaLeft);
-		const perceptionYLeft = horizontalOffset * Math.sin(thetaLeft);
-		const perceptionXRight = horizontalOffset * Math.cos(thetaRight);
-		const perceptionYRight = horizontalOffset * Math.sin(thetaRight);
-		const perceptionPointLeft = this.pos
-			.copy()
-			.add(perceptionXLeft, perceptionYLeft);
-		const perceptionPointRight = this.pos
-			.copy()
-			.add(perceptionXRight, perceptionYRight);
-
-		const cellPerceptionLeft = worldGrid.getCellFromCoordsSafe(
-			perceptionPointLeft.x,
-			perceptionPointLeft.y,
-		);
-		const cellPerceptionRight = worldGrid.getCellFromCoordsSafe(
-			perceptionPointRight.x,
-			perceptionPointRight.y,
-		);
-		if (
-			(cellPerceptionLeft && cellPerceptionLeft.wall === 1) ||
-			(cellPerceptionRight && cellPerceptionRight.wall === 1)
-		) {
-			const perceptionPointWall = cellPerceptionLeft
-				? perceptionPointLeft
-				: perceptionPointRight;
-
-			const force = perceptionPointWall.sub(this.pos);
-
-			force.sub(this.vel);
-			force.mult(-1);
-			this.applyForce(force);
-			return;
-		}
-
-		if (this.directionClock >= AntOptions.DIRECTION_PERIOD) {
-			for (let x = 0; x < AntOptions.PERCEPTION_POINTS_HORIZONTAL; x++) {
-				for (let y = 1; y <= AntOptions.PERCEPTION_POINTS_VERTICAL; y++) {
-					const theta =
-						angleBetween * x +
-						AntOptions.PERCEPTION_START_ANGLE +
-						angle +
-						Math.PI / 2;
-
-					const perceptionX = distanceBetween * y * Math.cos(theta);
-					const perceptionY = distanceBetween * y * Math.sin(theta);
-					const perceptionPoint = this.pos.copy().add(perceptionX, perceptionY);
-
-					const cellPerception = worldGrid.getCellFromCoordsSafe(
-						perceptionPoint.x,
-						perceptionPoint.y,
-					);
-
-					if (cellPerception) {
-						// Check for walls
-						if (cellPerception.wall === 1 && (y === 1 || y === 2)) {
-							const force = perceptionPoint.sub(this.pos);
-
-							const forceMultiplier =
-								x + 1 > AntOptions.PERCEPTION_POINTS_HORIZONTAL / 2
-									? AntOptions.PERCEPTION_POINTS_HORIZONTAL - x
-									: x + 1;
-
-							force.setMag(this.maxSpeed);
-							force.sub(this.vel);
-
-							if (y === 1) {
-								force.limit(this.maxForce * forceMultiplier);
-							} else if (y === 2) {
-								force.limit(this.maxForce * 0.5 * forceMultiplier);
-							}
-
-							force.mult(-1);
-							this.applyForce(force);
-							break;
-						}
-
-						// Check for colony
-						if (
-							cellPerception.colony &&
-							(this.state === AntStates.REFILL ||
-								this.state === AntStates.TO_HOME)
-						) {
-							this.seek(perceptionPoint);
-							return;
-						}
-
-						// Check for food
-						if (
-							cellPerception.food.quantity > 0 &&
-							(this.state === AntStates.TO_FOOD ||
-								this.state === AntStates.REFILL)
-						) {
-							if (this.debug) {
-								this.perceptionDraw.add(
-									y * AntOptions.PERCEPTION_POINTS_VERTICAL + x,
-								);
-							}
-
-							// this.seek(perceptionPoint);
-							if (y < closestIndex) {
-								closestIndex = y;
-								closestFoodPoint = perceptionPoint;
-							}
-							break;
-						}
-
-						// Check for highest intensity marker
-						let intensity = 0;
-						if (
-							this.state === AntStates.TO_HOME ||
-							this.state === AntStates.REFILL
-						) {
-							intensity = cellPerception.marker.intensity[0];
-						} else if (
-							this.state === AntStates.TO_FOOD ||
-							this.state === AntStates.REFILL
-						) {
-							intensity = cellPerception.marker.intensity[1];
-						}
-
-						if (intensity > maxIntensity) {
-							maxIntensity = intensity;
-							maxIntensityPoint = perceptionPoint;
-						}
-					}
-				}
-			}
-
-			if (closestFoodPoint) {
-				this.seek(closestFoodPoint);
-				return;
-			}
-
-			if (maxIntensityPoint) {
-				this.seek(maxIntensityPoint);
-				return;
-			}
-
-			this.directionClock = 0;
-		}
-
-		this.wander();
-	}
-
-	perception(worldGrid: WorldGrid) {
-		const angleBetween =
-			(AntOptions.PERCEPTION_END_ANGLE - AntOptions.PERCEPTION_START_ANGLE) /
-			(AntOptions.PERCEPTION_POINTS_HORIZONTAL - 1);
-		const distanceBetween =
-			AntOptions.PERCEPTION_RADIUS / AntOptions.PERCEPTION_POINTS_VERTICAL;
-
-		let closestIndex = AntOptions.PERCEPTION_POINTS_VERTICAL + 1;
-		let closestFoodPoint: Vector | null = null;
-		let maxIntensity = 0;
-		let maxIntensityPoint: Vector | null = null;
-		const angle = this.vel.heading();
-
-		const wallForce = this.vel.copy().add(this.acc).limit(this.maxSpeed);
-		const perceptionAheadPosition = this.pos.copy().add(wallForce);
-		const cellPerceptionAhead = worldGrid.getCellFromCoordsSafe(
-			perceptionAheadPosition.x,
-			perceptionAheadPosition.y,
-		);
-
-		if (cellPerceptionAhead?.wall === 1) {
-			const force = perceptionAheadPosition.sub(this.pos);
-			if (this.debug) {
-				console.log(force);
-			}
-
-			force.x *= force.x != 0 ? -1 : 1;
-			force.y *= force.y != 0 ? -1 : 1;
-
-			force.sub(this.vel);
-			this.applyForce(force);
-			return;
-		}
-
-		if (this.directionClock >= AntOptions.DIRECTION_PERIOD) {
-			for (let x = 0; x < AntOptions.PERCEPTION_POINTS_HORIZONTAL; x++) {
-				const theta =
-					angleBetween * x +
-					AntOptions.PERCEPTION_START_ANGLE +
-					angle +
-					Math.PI / 2;
-				for (let y = 1; y <= AntOptions.PERCEPTION_POINTS_VERTICAL; y++) {
-					const perceptionX = distanceBetween * y * Math.cos(theta);
-					const perceptionY = distanceBetween * y * Math.sin(theta);
-					const perceptionPoint = this.pos.copy().add(perceptionX, perceptionY);
-
-					const cellPerception = worldGrid.getCellFromCoordsSafe(
-						perceptionPoint.x,
-						perceptionPoint.y,
-					);
-
-					if (cellPerception) {
-						// Check for walls
-						if (cellPerception.wall === 1 && (y === 1 || y === 2)) {
-							const force = perceptionPoint.sub(this.pos);
-
-							const forceMultiplier =
-								x + 1 > AntOptions.PERCEPTION_POINTS_HORIZONTAL / 2
-									? AntOptions.PERCEPTION_POINTS_HORIZONTAL - x
-									: x + 1;
-
-							force.setMag(this.maxSpeed);
-							force.sub(this.vel);
-
-							if (y === 1) {
-								force.limit(this.maxForce * forceMultiplier);
-							} else if (y === 2) {
-								force.limit(this.maxForce * 0.5 * forceMultiplier);
-							}
-
-							force.mult(-1);
-							this.applyForce(force);
-							break;
-						}
-
-						// Check for colony
-						if (
-							cellPerception.colony &&
-							(this.state === AntStates.REFILL ||
-								this.state === AntStates.TO_HOME)
-						) {
-							this.seek(perceptionPoint);
-							return;
-						}
-
-						// Check for food
-						if (
-							cellPerception.food.quantity > 0 &&
-							(this.state === AntStates.TO_FOOD ||
-								this.state === AntStates.REFILL)
-						) {
-							if (this.debug) {
-								this.perceptionDraw.add(
-									y * AntOptions.PERCEPTION_POINTS_VERTICAL + x,
-								);
-							}
-
-							// this.seek(perceptionPoint);
-							if (y < closestIndex) {
-								closestIndex = y;
-								closestFoodPoint = perceptionPoint;
-							}
-							break;
-						}
-
-						// Check for highest intensity marker
-						let intensity = 0;
-						if (
-							this.state === AntStates.TO_HOME ||
-							this.state === AntStates.REFILL
-						) {
-							intensity = cellPerception.marker.getToHomeIntensity();
-						} else if (
-							this.state === AntStates.TO_FOOD ||
-							this.state === AntStates.REFILL
-						) {
-							intensity = cellPerception.marker.getToFoodIntensity();
-						}
-
-						if (intensity > maxIntensity) {
-							maxIntensity = intensity;
-							maxIntensityPoint = perceptionPoint;
-						}
-					}
-				}
-			}
-
-			if (closestFoodPoint) {
-				this.seek(closestFoodPoint);
-				return;
-			}
-
-			if (maxIntensityPoint) {
-				this.seek(maxIntensityPoint);
-				return;
-			}
-
-			this.directionClock = 0;
-		}
-	}
-
-	searchSimple(worldGrid: WorldGrid, colony: Colony) {
-		if (this.debug) {
-			this.perceptionDraw = new Set();
-		}
-
-		const cell = worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y);
-		cell?.addDensity(
-			this.state === AntStates.TO_HOME,
-			this.state === AntStates.REFILL,
-		);
-		if (
-			cell &&
-			cell.food.quantity > 0 &&
-			(this.state === AntStates.TO_FOOD || this.state === AntStates.REFILL)
-		) {
-			this.state = AntStates.TO_HOME;
-			this.foodAmount = cell.pick();
-			this.vel.setHeading(this.vel.heading() + Math.PI);
-			this.internalClock = 0;
-			return;
-		}
-
-		if (
-			cell &&
-			cell.colony &&
-			(this.state === AntStates.REFILL || this.state === AntStates.TO_HOME)
-		) {
-			if (this.state === AntStates.TO_HOME) {
-				this.vel.setHeading(this.vel.heading() + Math.PI);
-				colony.addFood(this.foodAmount);
-			}
-			if (
-				this.state === AntStates.REFILL &&
-				!colony.useFood(ColonyOptions.ANT_REFILL_FOOD_AMOUNT)
-			) {
-				return;
-			}
-			this.state = AntStates.TO_FOOD;
-			this.internalClock = 0;
-			return;
-		}
-
-		if (Math.random() < this.freedomCoef) {
-			return;
-		}
-
-		this.perception(worldGrid);
-
-		this.wander();
 	}
 
 	addMarker(worldGrid: WorldGrid, dt: number) {
