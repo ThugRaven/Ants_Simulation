@@ -37,7 +37,9 @@ export default class Ant {
 	wanderTheta: number;
 	perceptionDraw: Set<number>;
 	internalClock: number;
+	markerPeriod: number;
 	markerClock: number;
+	directionPeriod: number;
 	directionClock: number;
 	isDead: boolean;
 	freedomCoef: number;
@@ -68,8 +70,17 @@ export default class Ant {
 		this.wanderTheta = random(0, Math.PI * 2);
 		this.perceptionDraw = new Set();
 		this.internalClock = 0;
+		this.markerPeriod =
+			AntOptions.MARKER_PERIOD +
+			random(-AntOptions.MARKER_PERIOD * 0.25, AntOptions.MARKER_PERIOD * 0.25);
 		this.markerClock = random(0, AntOptions.MARKER_PERIOD);
-		this.directionClock = 0;
+		this.directionPeriod =
+			AntOptions.DIRECTION_PERIOD +
+			random(
+				-AntOptions.DIRECTION_PERIOD * 0.25,
+				AntOptions.DIRECTION_PERIOD * 0.25,
+			);
+		this.directionClock = random(0, AntOptions.DIRECTION_PERIOD);
 		this.isDead = false;
 		this.freedomCoef = random(0.01, 0.1);
 		this.foodAmount = 0;
@@ -119,7 +130,7 @@ export default class Ant {
 	}
 
 	find(worldGrid: WorldGrid) {
-		if (this.directionClock >= AntOptions.DIRECTION_PERIOD) {
+		if (this.directionClock >= this.directionPeriod) {
 			this.directionClock = 0;
 
 			let maxIntensity = 0;
@@ -824,7 +835,7 @@ export default class Ant {
 
 	addMarker(worldGrid: WorldGrid, dt: number) {
 		this.markerClock += dt;
-		if (this.markerClock >= AntOptions.MARKER_PERIOD) {
+		if (this.markerClock >= this.markerPeriod) {
 			const [x, y] = worldGrid.getCellCoords(this.pos.x, this.pos.y);
 			if (!worldGrid.checkCoords(x, y)) return;
 
