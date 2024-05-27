@@ -245,6 +245,11 @@ export default class WorldGrid {
 				(Math.round(mapCheck.y + 1) - position.y) * rayUnitStepSize.y;
 		}
 
+		const mapSize = {
+			maxWidth: this.width * MarkerOptions.SIZE,
+			maxHeight: this.height * MarkerOptions.SIZE,
+		};
+
 		let tileFound = false;
 		let distance = 0;
 		while (!tileFound && distance < maxDistance) {
@@ -257,29 +262,32 @@ export default class WorldGrid {
 				distance = rayLength.y;
 				rayLength.y += rayUnitStepSize.y;
 			}
-			const cell = this.getCellFromCoords(mapCheck.x, mapCheck.y);
 
 			if (
-				mapCheck.x >= 0 &&
-				mapCheck.x < this.width * MarkerOptions.SIZE &&
-				mapCheck.y >= 0 &&
-				mapCheck.y < this.height * MarkerOptions.SIZE
+				mapCheck.x < 0 ||
+				mapCheck.x >= mapSize.maxWidth ||
+				mapCheck.y < 0 ||
+				mapCheck.y >= mapSize.maxHeight
 			) {
-				if (cell && cell.wall == 1) {
-					tileFound = true;
-					const normal = {
-						x: rayLength.x < rayLength.y ? 1 : 0,
-						y: rayLength.y < rayLength.x ? 1 : 0,
-					};
+				break;
+			}
 
-					return {
-						cell,
-						distance,
-						normal,
-						intersection: position.add(rayDir.mult(distance)),
-						rayEnd,
-					};
-				}
+			const cell = this.getCellFromCoords(mapCheck.x, mapCheck.y);
+
+			if (cell && cell.wall == 1) {
+				tileFound = true;
+				const normal = {
+					x: rayLength.x < rayLength.y ? 1 : 0,
+					y: rayLength.y < rayLength.x ? 1 : 0,
+				};
+
+				return {
+					cell,
+					distance,
+					normal,
+					intersection: position.add(rayDir.mult(distance)),
+					rayEnd,
+				};
 			}
 		}
 
