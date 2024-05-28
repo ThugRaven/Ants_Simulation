@@ -2,9 +2,10 @@ import Colony from './classes/Colony';
 import ImageInstance from './classes/ImageInstance';
 import MapGenerator from './classes/MapGenerator';
 import PerformanceStats from './classes/PerformanceStats';
-import { circle, rect } from './classes/Shapes';
+import { circle, line, rect } from './classes/Shapes';
 import { toggleButton, togglePanelAndButton } from './classes/Utils';
-import { createVector } from './classes/Vector';
+import { Vector, createVector } from './classes/Vector';
+import WallDistance from './classes/WallDistance';
 import WorldCanvas, { calcWorldSize } from './classes/WorldCanvas';
 import WorldGrid from './classes/WorldGrid';
 import {
@@ -75,6 +76,7 @@ const cellPanel = document.getElementById('cellPanel') as HTMLDivElement;
 const cellPreview = document.querySelector<HTMLDivElement>(
 	'[data-cell-preview]',
 );
+const cellCoords = document.querySelector<HTMLSpanElement>('[data-coords]');
 const markerIntensityHome = document.querySelector<HTMLSpanElement>(
 	'[data-intensity-home]',
 );
@@ -83,6 +85,8 @@ const markerIntensityFood = document.querySelector<HTMLSpanElement>(
 );
 const cellFood = document.querySelector<HTMLSpanElement>('[data-cell-food]');
 const cellDensity = document.querySelector<HTMLSpanElement>('[data-density]');
+const cellWallDistance = document.querySelector<HTMLSpanElement>('[data-dist]');
+const cellColony = document.querySelector<HTMLSpanElement>('[data-colony]');
 
 // Colony panel
 const btnColonyPanel = document.getElementById(
@@ -375,6 +379,8 @@ const worldGrid = new WorldGrid({
 	cellSize: 1,
 });
 
+const wallDistance = new WallDistance();
+
 const mapGenerator = new MapGenerator({
 	width: worldGrid.width,
 	height: worldGrid.height,
@@ -661,8 +667,7 @@ mapForm.addEventListener('submit', (e) => {
 		ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
 		mapGenerator.generateMap(worldGrid, false, mapSeed);
 		worldGrid.drawWalls(ctxWalls);
-		console.log('mapForm');
-		mapWorker.postMessage('test2');
+		wallDistance.calculateDistances(worldGrid);
 	}
 	e.preventDefault();
 });
@@ -674,6 +679,7 @@ btnGenerateSaveMap.addEventListener('click', () => {
 		ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
 		mapGenerator.generateMap(worldGrid, false);
 		worldGrid.drawWalls(ctxWalls);
+		wallDistance.calculateDistances(worldGrid);
 		mapSeedInput.value =
 			new URL(window.location.href).searchParams.get('seed') ?? '';
 		console.log('btnGenerateSaveMap');
@@ -754,6 +760,8 @@ btnSave.addEventListener('click', () => {
 		worldGrid.addBorderWalls();
 		worldGrid.drawWalls(ctxWalls);
 		ctxEdit.clearRect(0, 0, worldGrid.width, worldGrid.height);
+
+		wallDistance.calculateDistances(worldGrid);
 
 		// Hide edit panel after save
 		isEditMode = togglePanelAndButton(isEditMode, editPanel, btnEditMode);
@@ -883,6 +891,7 @@ function setup() {
 
 	mapGenerator.generateMap(worldGrid, true);
 	worldGrid.drawWalls(ctxWalls);
+	wallDistance.calculateDistances(worldGrid);
 
 	toggleButton(false, btnAntsLayer);
 	toggleButton(!isDrawingDensity, btnDensityLayer);
@@ -1055,9 +1064,9 @@ function updateAntInfo() {
 	antPos.textContent = `${selectedAnt.pos.x.toFixed(
 		2,
 	)} : ${selectedAnt.pos.y.toFixed(2)}`;
-	antVel.textContent = `${selectedAnt.vel.x.toFixed(
+	antVel.textContent = `${selectedAnt.direction.vector.x.toFixed(
 		2,
-	)} : ${selectedAnt.vel.y.toFixed(2)}`;
+	)} : ${selectedAnt.direction.vector.y.toFixed(2)}`;
 	let state = '';
 	switch (selectedAnt.state) {
 		case AntStates.TO_HOME:
@@ -1092,11 +1101,15 @@ function updateCellInfo(x: number, y: number) {
 		!markerIntensityFood ||
 		!cellFood ||
 		!cellDensity ||
-		!cellPreview
+		!cellPreview ||
+		!cellWallDistance ||
+		!cellColony ||
+		!cellCoords
 	) {
 		return;
 	}
 
+	cellCoords.textContent = `${x.toFixed(0)}-${y.toFixed(0)}`;
 	markerIntensityHome.textContent = cell.marker.getToHomeIntensity().toFixed(2);
 	markerIntensityFood.textContent = cell.marker.getToFoodIntensity().toFixed(2);
 	cellFood.textContent = cell.food.quantity.toString();
@@ -1107,6 +1120,8 @@ function updateCellInfo(x: number, y: number) {
 	).toFixed(2);
 	const color = cell.marker.getMixedColor();
 	cellPreview.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+	cellWallDistance.textContent = cell.dist.toFixed(2);
+	cellColony.textContent = cell.colony ? 'Yes' : 'No';
 }
 
 function updateColonyInfo() {
@@ -1349,6 +1364,8 @@ function setCamera() {
 	scheduleRegularDraw = true;
 }
 
+// let angle = Math.PI * 0.5;
+
 function main(currentTime: number) {
 	if (
 		ctxMarkers == null ||
@@ -1452,25 +1469,25 @@ function main(currentTime: number) {
 		circle(ctxAnts, target.x, target.y, 4);
 		updateCellInfo(target.x, target.y);
 
-		if (antsDrawClock > ANTS_DRAW_PERIOD / canvasScale) {
-			ctxAnts.fillStyle = 'rgb(255, 0, 0, 0.1)';
-			const padding = {
-				x: AntOptions.IMG_HEIGHT * canvasScale,
-				y: AntOptions.IMG_HEIGHT * canvasScale,
-			};
+		// if (antsDrawClock > ANTS_DRAW_PERIOD / canvasScale) {
+		// 	ctxAnts.fillStyle = 'rgb(255, 0, 0, 0.1)';
+		// 	const padding = {
+		// 		x: AntOptions.IMG_HEIGHT * canvasScale,
+		// 		y: AntOptions.IMG_HEIGHT * canvasScale,
+		// 	};
 
-			const size = {
-				x: (window.innerWidth + padding.x) / canvasScale,
-				y: (window.innerHeight - offsetY + padding.y) / canvasScale,
-			};
-			rect(
-				ctxAnts,
-				center.x - size.x / 2,
-				center.y - offsetY / 2 / canvasScale - size.y / 2,
-				size.x,
-				size.y,
-			);
-		}
+		// 	const size = {
+		// 		x: (window.innerWidth + padding.x) / canvasScale,
+		// 		y: (window.innerHeight - offsetY + padding.y) / canvasScale,
+		// 	};
+		// 	rect(
+		// 		ctxAnts,
+		// 		center.x - size.x / 2,
+		// 		center.y - offsetY / 2 / canvasScale - size.y / 2,
+		// 		size.x,
+		// 		size.y,
+		// 	);
+		// }
 	}
 
 	updateColonyInfo();
@@ -1480,6 +1497,100 @@ function main(currentTime: number) {
 		performanceStats.endMeasurement('all');
 		updatePerformanceDisplay();
 	}
+
+	// if (readyToDraw) {
+	// const mouseCell = new Vector(target.x, target.y);
+	// const rayStart = new Vector(width / 2, height / 2);
+	// const rayDir = mouseCell.copy().sub(rayStart).normalize();
+
+	// ctxAnts.fillStyle = 'red';
+	// circle(ctxAnts, rayStart.x, rayStart.y, 4);
+	// ctxAnts.fillStyle = 'green';
+	// circle(ctxAnts, mouseCell.x, mouseCell.y, 4);
+	// ctxAnts.strokeStyle = 'white';
+	// line(ctxAnts, rayStart.x, rayStart.y, mouseCell.x, mouseCell.y);
+
+	// angle += Math.PI * 0.005;
+	// const rayCast = worldGrid.rayCast(
+	// 	mouseCell,
+	// 	new Direction(
+	// 		angle + random(Math.PI * 0.5, Math.PI * 1.5),
+	// 		Math.PI * 0.5,
+	// 		5,
+	// 	),
+	// 	2000,
+	// );
+
+	// const rayUnitStepSize = new Vector(
+	// 	Math.sqrt(1 + (rayDir.y / rayDir.x) * (rayDir.y / rayDir.x)),
+	// 	Math.sqrt(1 + (rayDir.x / rayDir.y) * (rayDir.x / rayDir.y)),
+	// );
+
+	// const mapCheck = rayStart.copy();
+	// const rayLength = new Vector(0, 0);
+	// const step = new Vector(0, 0);
+
+	// if (rayDir.x < 0) {
+	// 	step.x = -1;
+	// 	rayLength.x = (rayStart.x - Math.round(mapCheck.x)) * rayUnitStepSize.x;
+	// } else {
+	// 	step.x = 1;
+	// 	rayLength.x = (Math.round(mapCheck.x + 1) - rayStart.x) * rayUnitStepSize.x;
+	// }
+
+	// if (rayDir.y < 0) {
+	// 	step.y = -1;
+	// 	rayLength.y = (rayStart.y - Math.round(mapCheck.y)) * rayUnitStepSize.y;
+	// } else {
+	// 	step.y = 1;
+	// 	rayLength.y = (Math.round(mapCheck.y + 1) - rayStart.y) * rayUnitStepSize.y;
+	// }
+
+	// let tileFound = false;
+	// const maxDistance = 2000;
+	// let distance = 0;
+	// while (!tileFound && distance < maxDistance) {
+	// 	if (rayLength.x < rayLength.y) {
+	// 		mapCheck.x += step.x;
+	// 		distance = rayLength.x;
+	// 		rayLength.x += rayUnitStepSize.x;
+	// 	} else {
+	// 		mapCheck.y += step.y;
+	// 		distance = rayLength.y;
+	// 		rayLength.y += rayUnitStepSize.y;
+	// 	}
+	// 	const cell = worldGrid.getCellFromCoordsSafe(mapCheck.x, mapCheck.y);
+
+	// 	if (cell) {
+	// 		cell.density = [100, 100, 100];
+	// 		// cell.marker = new Marker([0.1, 0]);
+	// 	}
+	// 	if (
+	// 		mapCheck.x >= 0 &&
+	// 		mapCheck.x < width &&
+	// 		mapCheck.y >= 0 &&
+	// 		mapCheck.y < height
+	// 	) {
+	// 		// console.log(worldGrid.getCellFromCoordsSafe(mapCheck.x, mapCheck.y));
+	// 		const cell = worldGrid.getCellFromCoordsSafe(mapCheck.x, mapCheck.y);
+
+	// 		if (worldGrid.getCellFromCoordsSafe(mapCheck.x, mapCheck.y)?.wall == 1) {
+	// 			console.log('Tile found');
+	// 			tileFound = true;
+	// 		}
+	// 	}
+	// }
+
+	// let intersection = new Vector();
+	// if (tileFound) {
+	// 	intersection = rayStart.add(rayDir.mult(distance));
+	// }
+
+	// if (rayCast) {
+	// 	ctxAnts.fillStyle = 'red';
+	// 	circle(ctxAnts, rayCast.intersection.x, rayCast.intersection.y, 10);
+	// }
+	// }
 
 	if (readyToDraw) {
 		scheduleRegularDraw = false;
