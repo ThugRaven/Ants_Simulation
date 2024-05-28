@@ -6,7 +6,7 @@ import {
 	windowHeight,
 	windowWidth,
 } from '../main';
-import Ant from './Ant';
+import AntRayCasts from './AntRayCasts';
 import { circle } from './Shapes';
 import { Vector } from './Vector';
 import WorldGrid from './WorldGrid';
@@ -26,7 +26,7 @@ export default class Colony {
 	y: number;
 	startingAntsCount: number;
 	maxAntsCount: number;
-	ants: Ant[];
+	ants: AntRayCasts[];
 	totalAnts: number;
 	colonyColor: number[];
 	antIcon: HTMLImageElement | null;
@@ -38,7 +38,7 @@ export default class Colony {
 	isDebugMode: boolean;
 	colonyClock: number;
 	antsCtx: CanvasRenderingContext2D | null;
-	selectedAnt: Ant | null;
+	selectedAnt: AntRayCasts | null;
 
 	food: number;
 	totalFood: number;
@@ -69,6 +69,135 @@ export default class Colony {
 		this.maxFood = ColonyOptions.COLONY_MAX_FOOD;
 	}
 
+	drawMidpointCircle(
+		worldGrid: WorldGrid,
+		centerX: number,
+		centerY: number,
+		radius: number,
+	) {
+		let x = radius;
+		let y = 0;
+		let p = 1 - radius;
+
+		this.drawSymmetricPoints(worldGrid, centerX, centerY, x, y);
+
+		if (radius > 0) {
+			while (x > y) {
+				y++;
+
+				if (p <= 0) {
+					p = p + 2 * y + 1;
+				} else {
+					x--;
+					p = p + 2 * y - 2 * x + 1;
+				}
+
+				this.drawSymmetricPoints(worldGrid, centerX, centerY, x, y);
+			}
+		}
+	}
+
+	drawSymmetricPoints(
+		worldGrid: WorldGrid,
+		cx: number,
+		cy: number,
+		x: number,
+		y: number,
+	) {
+		x *= MarkerOptions.SIZE;
+		y *= MarkerOptions.SIZE;
+
+		const q1 = worldGrid.getCellFromCoordsSafe(cx + x, cy + y);
+		if (q1) {
+			q1.colony = true;
+		}
+		const q2 = worldGrid.getCellFromCoordsSafe(cx - x, cy + y);
+		if (q2) {
+			q2.colony = true;
+		}
+		const q3 = worldGrid.getCellFromCoordsSafe(cx + x, cy - y);
+		if (q3) {
+			q3.colony = true;
+		}
+		const q4 = worldGrid.getCellFromCoordsSafe(cx - x, cy - y);
+		if (q4) {
+			q4.colony = true;
+		}
+		const q5 = worldGrid.getCellFromCoordsSafe(cx + y, cy + x);
+		if (q5) {
+			q5.colony = true;
+		}
+		const q6 = worldGrid.getCellFromCoordsSafe(cx - y, cy + x);
+		if (q6) {
+			q6.colony = true;
+		}
+		const q7 = worldGrid.getCellFromCoordsSafe(cx + y, cy - x);
+		if (q7) {
+			q7.colony = true;
+		}
+		const q8 = worldGrid.getCellFromCoordsSafe(cx - y, cy - x);
+		if (q8) {
+			q8.colony = true;
+		}
+	}
+
+	drawAndFillMidpointCircle(
+		worldGrid: WorldGrid,
+		centerX: number,
+		centerY: number,
+		radius: number,
+	) {
+		let x = radius;
+		let y = 0;
+		let p = 1 - radius;
+
+		this.drawAndFillSymmetricLines(worldGrid, centerX, centerY, x, y);
+
+		if (radius > 0) {
+			while (x > y) {
+				y++;
+
+				if (p <= 0) {
+					p = p + 2 * y + 1;
+				} else {
+					x--;
+					p = p + 2 * y - 2 * x + 1;
+				}
+
+				this.drawAndFillSymmetricLines(worldGrid, centerX, centerY, x, y);
+			}
+		}
+	}
+
+	drawAndFillSymmetricLines(
+		worldGrid: WorldGrid,
+		cx: number,
+		cy: number,
+		x: number,
+		y: number,
+	) {
+		x *= MarkerOptions.SIZE;
+		y *= MarkerOptions.SIZE;
+		this.drawHorizontalLine(worldGrid, cx - x, cx + x, cy + y);
+		this.drawHorizontalLine(worldGrid, cx - x, cx + x, cy - y);
+		this.drawHorizontalLine(worldGrid, cx - y, cx + y, cy + x);
+		this.drawHorizontalLine(worldGrid, cx - y, cx + y, cy - x);
+	}
+
+	drawHorizontalLine(
+		worldGrid: WorldGrid,
+		xStart: number,
+		xEnd: number,
+		y: number,
+	) {
+		for (let x = xStart; x <= xEnd; x++) {
+			const cell = worldGrid.getCellFromCoordsSafe(x, y);
+			if (cell) {
+				cell.colony = true;
+			}
+		}
+	}
+
 	initialize(
 		antIcon: HTMLImageElement,
 		antImageInstance: HTMLCanvasElement,
@@ -82,7 +211,7 @@ export default class Colony {
 		this.antsCtx = antsCtx;
 
 		for (let i = 0; i < this.startingAntsCount; i++) {
-			const ant = new Ant(
+			const ant = new AntRayCasts(
 				antsCtx,
 				antImageInstance,
 				antFoodImageInstance,
@@ -100,23 +229,12 @@ export default class Colony {
 			this.totalAnts++;
 		}
 
-		const size = Math.floor(ColonyOptions.COLONY_RADIUS / MarkerOptions.SIZE);
-
-		for (let i = 0; i < size; i++) {
-			const cellHorizontal = worldGrid.getCellFromCoordsSafe(
-				this.x - (size / 2) * MarkerOptions.SIZE + i * MarkerOptions.SIZE,
-				this.y,
-			);
-			const cellVertical = worldGrid.getCellFromCoordsSafe(
-				this.x,
-				this.y - (size / 2) * MarkerOptions.SIZE + i * MarkerOptions.SIZE,
-			);
-
-			if (cellHorizontal && cellVertical) {
-				cellHorizontal.colony = true;
-				cellVertical.colony = true;
-			}
-		}
+		this.drawAndFillMidpointCircle(
+			worldGrid,
+			this.x,
+			this.y,
+			ColonyOptions.COLONY_RADIUS,
+		);
 	}
 
 	updateAndDrawAnts(worldGrid: WorldGrid, dt: number, draw = true) {
@@ -124,8 +242,8 @@ export default class Colony {
 		for (let i = 0; i < this.ants.length; i++) {
 			if (this.isRunning) {
 				// Update ants
-				this.ants[i].searchSimple(worldGrid, this);
-				this.ants[i].update(dt);
+				this.ants[i].find(worldGrid);
+				this.ants[i].update(worldGrid, dt, this);
 				this.ants[i].addMarker(worldGrid, dt);
 
 				// Mark ant for deletion
@@ -194,7 +312,7 @@ export default class Colony {
 			this.antFoodImageInstance &&
 			this.antsCtx
 		) {
-			const ant = new Ant(
+			const ant = new AntRayCasts(
 				this.antsCtx,
 				this.antImageInstance,
 				this.antFoodImageInstance,
@@ -246,7 +364,7 @@ export default class Colony {
 			return false;
 		}
 
-		const index = this.ants.findIndex((ant) => ant.id === this.selectedAnt!.id);
+		const index = this.ants.findIndex((ant) => ant.id === this.selectedAnt?.id);
 		if (index != -1) {
 			this.ants.splice(index, 1);
 			this.selectedAnt = null;
@@ -270,7 +388,12 @@ export default class Colony {
 
 	drawColony(ctx: CanvasRenderingContext2D) {
 		ctx.fillStyle = `rgb(${this.colonyColor[0]}, ${this.colonyColor[1]}, ${this.colonyColor[2]})`;
-		circle(ctx, this.x, this.y, ColonyOptions.COLONY_RADIUS);
+		circle(
+			ctx,
+			this.x,
+			this.y,
+			ColonyOptions.COLONY_RADIUS * MarkerOptions.SIZE + MarkerOptions.SIZE / 2,
+		);
 	}
 
 	addFood(quantity: number) {

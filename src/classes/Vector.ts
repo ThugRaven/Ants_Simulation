@@ -80,6 +80,13 @@ export class Vector {
 		return this;
 	}
 
+	multSimple(n: number): Vector {
+		this.x *= n;
+		this.y *= n;
+		this.z *= n;
+		return this;
+	}
+
 	mult(n: number): Vector;
 	mult(x: number, y: number, z?: number): Vector;
 	mult(arr: number[]): Vector;
@@ -264,6 +271,10 @@ export class Vector {
 		const y = this.y;
 		const z = this.z;
 		return x * x + y * y + z * z;
+	}
+
+	dot(x: number, y?: number, z?: number) {
+		return this.x * (x || 0) + this.y * (y || 0) + this.z * (z || 0);
 	}
 
 	dist(v: Vector) {

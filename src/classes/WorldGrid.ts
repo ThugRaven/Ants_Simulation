@@ -1,4 +1,5 @@
 import { MapGeneratorOptions, MarkerOptions, MarkerTypes } from '../constants';
+import { Vector } from './Vector';
 import WorldCell from './WorldCell';
 
 interface WorldGridOptions {
@@ -198,5 +199,98 @@ export default class WorldGrid {
 
 	checkCoords(x: number, y: number) {
 		return x > -1 && x < this.width && y > -1 && y < this.height;
+	}
+
+	rayCast(position: Vector, angle: number, maxDistance: number) {
+		const dX = maxDistance * Math.cos(angle);
+		const dY = maxDistance * Math.sin(angle);
+		// const rayEnd = { x: position.x, y: position.y, z: position.z };
+		const rayEnd = position.copy();
+		rayEnd.x += dX;
+		rayEnd.y += dY;
+
+		const rayDir = rayEnd.copy().sub(position).normalize();
+		// const rayDir = normalize(sub(rayEnd, { x: position.x, y: position.y, z: position.z }));
+		// rayDir = { x:normalize(...{...sub(rayEnd.x, rayEnd.y, 0)})
+		// 	 };
+		// ctx.fillStyle = 'green';
+		// circle(ctx, position.x, position.y, 5, true);
+		// ctx.fillStyle = 'red';
+		// circle(ctx, rayEnd.x, rayEnd.y, 5, true);
+
+		const rayUnitStepSize = {
+			x: Math.sqrt(1 + (rayDir.y / rayDir.x) * (rayDir.y / rayDir.x)),
+			y: Math.sqrt(1 + (rayDir.x / rayDir.y) * (rayDir.x / rayDir.y)),
+		};
+
+		const mapCheck = { x: position.x, y: position.y };
+		const rayLength = { x: 0, y: 0 };
+		const step = { x: 0, y: 0 };
+
+		if (rayDir.x < 0) {
+			step.x = -1;
+			rayLength.x = (position.x - Math.round(mapCheck.x)) * rayUnitStepSize.x;
+		} else {
+			step.x = 1;
+			rayLength.x =
+				(Math.round(mapCheck.x + 1) - position.x) * rayUnitStepSize.x;
+		}
+
+		if (rayDir.y < 0) {
+			step.y = -1;
+			rayLength.y = (position.y - Math.round(mapCheck.y)) * rayUnitStepSize.y;
+		} else {
+			step.y = 1;
+			rayLength.y =
+				(Math.round(mapCheck.y + 1) - position.y) * rayUnitStepSize.y;
+		}
+
+		const mapSize = {
+			maxWidth: this.width * MarkerOptions.SIZE,
+			maxHeight: this.height * MarkerOptions.SIZE,
+		};
+
+		let tileFound = false;
+		let distance = 0;
+		while (!tileFound && distance < maxDistance) {
+			if (rayLength.x < rayLength.y) {
+				mapCheck.x += step.x;
+				distance = rayLength.x;
+				rayLength.x += rayUnitStepSize.x;
+			} else {
+				mapCheck.y += step.y;
+				distance = rayLength.y;
+				rayLength.y += rayUnitStepSize.y;
+			}
+
+			if (
+				mapCheck.x < 0 ||
+				mapCheck.x >= mapSize.maxWidth ||
+				mapCheck.y < 0 ||
+				mapCheck.y >= mapSize.maxHeight
+			) {
+				break;
+			}
+
+			const cell = this.getCellFromCoords(mapCheck.x, mapCheck.y);
+
+			if (cell && cell.wall == 1) {
+				tileFound = true;
+				const normal = {
+					x: rayLength.x < rayLength.y ? 1 : 0,
+					y: rayLength.y < rayLength.x ? 1 : 0,
+				};
+
+				return {
+					cell,
+					distance,
+					normal,
+					intersection: position.add(rayDir.mult(distance)),
+					rayEnd,
+				};
+			}
+		}
+
+		return null;
 	}
 }
