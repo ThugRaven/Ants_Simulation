@@ -8,7 +8,6 @@ import {
 } from '../main';
 import AntRayCasts from './AntRayCasts';
 import { circle } from './Shapes';
-import { random } from './Utils';
 import { Vector } from './Vector';
 import WorldGrid from './WorldGrid';
 
@@ -365,7 +364,7 @@ export default class Colony {
 			return false;
 		}
 
-		const index = this.ants.findIndex((ant) => ant.id === this.selectedAnt!.id);
+		const index = this.ants.findIndex((ant) => ant.id === this.selectedAnt?.id);
 		if (index != -1) {
 			this.ants.splice(index, 1);
 			this.selectedAnt = null;

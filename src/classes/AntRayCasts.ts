@@ -79,7 +79,7 @@ export default class Ant {
 		this.hits = 0;
 	}
 
-	updatePosition(worldGrid: WorldGrid, dt: number) {
+	updatePosition(worldGrid: WorldGrid) {
 		const v = this.direction.getVec();
 
 		const rayCast = worldGrid.rayCast(
@@ -156,7 +156,7 @@ export default class Ant {
 					cellVector.y,
 				);
 
-				if (cell) {
+				if (cell && this.debug) {
 					cell.density = [cell.density[0], cell.density[1], 100];
 				}
 
@@ -221,7 +221,7 @@ export default class Ant {
 				AntOptions.DIRECTION_NOISE_RANGE,
 			),
 		);
-		this.updatePosition(worldGrid, dt);
+		this.updatePosition(worldGrid);
 
 		const cell = worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y);
 
