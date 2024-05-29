@@ -98,9 +98,9 @@ export default class Ant {
 			// );
 			const vec = v.copy();
 
-			if (this.hits > 4) {
+			if (this.hits > 16) {
 				vec.setHeading(vec.heading() + Math.PI / 2);
-			} else if (this.hits > 2) {
+			} else if (this.hits > 8) {
 				vec.x *= rayCast.normal.x != 0 ? 1 : -1;
 				vec.y *= rayCast.normal.y != 0 ? 1 : -1;
 			} else {
@@ -108,10 +108,10 @@ export default class Ant {
 				vec.y *= rayCast.normal.y != 0 ? -1 : 1;
 			}
 
-			this.hits++;
+			this.hits += 4;
 			this.direction.setDirectionImmediate(vec);
 		} else {
-			this.hits = 0;
+			this.hits = Math.max(0, this.hits - 1);
 			this.pos.add(v.multSimple(this.maxSpeed));
 		}
 	}
