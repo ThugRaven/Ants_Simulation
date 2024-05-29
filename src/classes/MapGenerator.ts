@@ -1,9 +1,8 @@
 import seedrandom from 'seedrandom';
-import { MapGeneratorOptions } from '../constants';
+import { MapOptions } from '../constants';
 import { seededRandom } from './Utils';
-import WorldGrid from './WorldGrid';
 
-interface MapGeneratorOptions {
+export interface MapGeneratorOptions {
 	width: number;
 	height: number;
 	fillRatio: number;
@@ -29,23 +28,22 @@ export default class MapGenerator {
 		this.threshold = (this.width + this.height) / 2;
 	}
 
-	generateMap(worldGrid: WorldGrid, fromSeed = false, seed = '') {
-		console.log('Generate Map');
+	initialize(mapGeneratorOptions: MapGeneratorOptions) {
+		this.width = mapGeneratorOptions.width;
+		this.height = mapGeneratorOptions.height;
+		this.map = Array.from(Array(this.width), () => new Array(this.height));
+		this.fillRatio = mapGeneratorOptions.fillRatio;
+		this.threshold = (this.width + this.height) / 2;
+	}
 
-		const url = new URL(window.location.href);
-		const urlSeed = url.searchParams.get('seed');
-		let rng = null;
-		if (fromSeed && urlSeed != null) {
-			rng = seedrandom(urlSeed);
-		} else if (!fromSeed) {
-			const generatedSeed = Math.random().toString(36).slice(2, 7);
-			rng = seedrandom(seed != '' ? seed : generatedSeed);
-			url.searchParams.set('seed', seed != '' ? seed : generatedSeed);
-		} else {
-			return;
+	generateMap(seed: string) {
+		console.log('Generate Map');
+		console.log(seed);
+		if (!seed) {
+			return this.map;
 		}
-		console.log(rng());
-		window.history.pushState({ path: url.href }, '', url.href);
+
+		const rng = seedrandom(seed);
 
 		this.randomFillMap(rng);
 
@@ -56,15 +54,50 @@ export default class MapGenerator {
 		this.addBorderWalls();
 		this.processMap();
 
-		for (let x = 0; x < worldGrid.width; x++) {
-			for (let y = 0; y < worldGrid.height; y++) {
-				worldGrid.cells[worldGrid.getIndexFromCoords(x, y)].wall = this.map[x][
-					y
-				]
-					? 1
-					: 0;
+		return this.map;
+	}
+
+	generateMapSteps(
+		seed: string,
+		generate: (map: number[][], last: boolean) => void,
+	) {
+		console.log('Generate Map Steps');
+		let step = 0;
+		const rng = seedrandom(seed);
+
+		const generateStep = () => {
+			if (step == 0) {
+				this.randomFillMap(rng);
+				generate(this.map, false);
 			}
-		}
+
+			if (step == 1) {
+				for (let i = 0; i < 15; i++) {
+					this.smoothMap();
+					generate(this.map, false);
+				}
+			}
+
+			if (step == 2) {
+				this.addBorderWalls();
+				generate(this.map, false);
+			}
+
+			if (step == 3) {
+				this.processMap();
+				generate(this.map, true);
+			}
+
+			if (step == 4) {
+				return;
+			}
+
+			step++;
+
+			generateStep();
+		};
+
+		generateStep();
 	}
 
 	randomFillMap(rng: seedrandom.PRNG) {
@@ -113,7 +146,7 @@ export default class MapGenerator {
 	}
 
 	addBorderWalls() {
-		const borderSize = MapGeneratorOptions.BORDER_SIZE;
+		const borderSize = MapOptions.BORDER_SIZE;
 		for (let x = 0; x < this.width; x++) {
 			for (let y = 0; y < borderSize; y++) {
 				this.map[x][y] = 1;

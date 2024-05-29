@@ -1,10 +1,9 @@
 import Colony from './classes/Colony';
 import ImageInstance from './classes/ImageInstance';
-import MapGenerator from './classes/MapGenerator';
 import PerformanceStats from './classes/PerformanceStats';
-import { circle, line, rect } from './classes/Shapes';
-import { toggleButton, togglePanelAndButton } from './classes/Utils';
-import { Vector, createVector } from './classes/Vector';
+import { circle } from './classes/Shapes';
+import { getSeed, toggleButton, togglePanelAndButton } from './classes/Utils';
+import { createVector } from './classes/Vector';
 import WallDistance from './classes/WallDistance';
 import WorldCanvas, { calcWorldSize } from './classes/WorldCanvas';
 import WorldGrid from './classes/WorldGrid';
@@ -17,11 +16,12 @@ import {
 	CanvasOptions,
 	FoodOptions,
 	MIDDLE_BUTTON,
-	MapGeneratorOptions,
+	MapOptions,
 	MarkerOptions,
 	RIGHT_BUTTON,
 } from './constants';
 import './style.css';
+import MapWorker from './workers/mapWorker?worker';
 
 const canvasContainer = document.getElementById(
 	'canvas-container',
@@ -177,11 +177,39 @@ const btnMarkersLayer = document.getElementById(
 	'btn-markers-layer',
 ) as HTMLButtonElement;
 
-import MapWorker from './mapWorker?worker';
 const mapWorker = new MapWorker();
-// mapWorker.onmessage = (event) => {
-// 	console.log(`Worker said : ${event.data}`);
-// };
+mapWorker.onmessage = (event) => {
+	console.log(`Worker said : ${event.data.action}`);
+
+	if (event.data.action == 'GENERATE_PARTIAL') {
+		if (ctxWalls) {
+			ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
+			worldGrid.generateWalls(event.data.map);
+			worldGrid.drawWalls(ctxWalls, false);
+		}
+	}
+
+	if (event.data.action == 'GENERATE') {
+		const seed = event.data.seed;
+		const url = new URL(window.location.href);
+		if (seed) {
+			url.searchParams.set('seed', seed);
+			window.history.pushState({ path: url.href }, '', url.href);
+		}
+		mapSeedInput.value =
+			new URL(window.location.href).searchParams.get('seed') ?? '';
+
+		if (ctxWalls) {
+			ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
+			worldGrid.generateWalls(event.data.map);
+			console.log('calculate');
+
+			wallDistance.calculateDistances(worldGrid);
+			console.log('draw');
+			worldGrid.drawWalls(ctxWalls);
+		}
+	}
+};
 
 let isRunning = false;
 let isDrawingMarkers = true;
@@ -381,18 +409,12 @@ const worldGrid = new WorldGrid({
 
 const wallDistance = new WallDistance();
 
-const mapGenerator = new MapGenerator({
-	width: worldGrid.width,
-	height: worldGrid.height,
-	fillRatio: MapGeneratorOptions.FILL_RATIO,
-});
-
 mapWorker.postMessage({
 	action: 'SETUP',
 	mapGeneratorOptions: {
 		width: worldGrid.width,
 		height: worldGrid.height,
-		fillRatio: MapGeneratorOptions.FILL_RATIO,
+		fillRatio: MapOptions.FILL_RATIO,
 	},
 });
 
@@ -418,7 +440,7 @@ const colony = new Colony({
 });
 
 window.addEventListener('keydown', (e) => {
-	console.log(e);
+	// console.log(e);
 	if (isInInputField) {
 		return;
 	}
@@ -445,6 +467,12 @@ window.addEventListener('keydown', (e) => {
 			break;
 		case 'KeyC':
 			alignCamera();
+			break;
+		case 'KeyR':
+			if (e.ctrlKey) {
+				break;
+			}
+			mapWorker.postMessage({ action: 'GENERATE', seed: getSeed(false) });
 			break;
 		case 'Delete':
 			removeAnt();
@@ -664,10 +692,14 @@ mapForm.addEventListener('submit', (e) => {
 	isMapPanelVisible = true;
 	isMapPanelVisible = togglePanelAndButton(isMapPanelVisible, mapPanel);
 	if (ctxWalls && mapSeed) {
-		ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
-		mapGenerator.generateMap(worldGrid, false, mapSeed);
-		worldGrid.drawWalls(ctxWalls);
-		wallDistance.calculateDistances(worldGrid);
+		// ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
+		// mapGenerator.generateMap(false, mapSeed);
+		// worldGrid.drawWalls(ctxWalls);
+		// wallDistance.calculateDistances(worldGrid);
+		mapWorker.postMessage({
+			action: 'GENERATE',
+			seed: getSeed(false, mapSeed),
+		});
 	}
 	e.preventDefault();
 });
@@ -676,15 +708,14 @@ btnGenerateSaveMap.addEventListener('click', () => {
 	isMapPanelVisible = true;
 	isMapPanelVisible = togglePanelAndButton(isMapPanelVisible, mapPanel);
 	if (ctxWalls) {
-		ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
-		mapGenerator.generateMap(worldGrid, false);
-		worldGrid.drawWalls(ctxWalls);
-		wallDistance.calculateDistances(worldGrid);
-		mapSeedInput.value =
-			new URL(window.location.href).searchParams.get('seed') ?? '';
-		console.log('btnGenerateSaveMap');
-		mapWorker.postMessage('test');
-		mapWorker.postMessage({ action: 'GENERATE' });
+		// ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
+		// mapGenerator.generateMap(false);
+		// worldGrid.drawWalls(ctxWalls);
+		// wallDistance.calculateDistances(worldGrid);
+		// mapSeedInput.value =
+		// 	new URL(window.location.href).searchParams.get('seed') ?? '';
+		// console.log('btnGenerateSaveMap');
+		mapWorker.postMessage({ action: 'GENERATE', seed: getSeed(false) });
 	}
 });
 
@@ -758,10 +789,9 @@ btnSave.addEventListener('click', () => {
 			}
 		}
 		worldGrid.addBorderWalls();
+		wallDistance.calculateDistances(worldGrid);
 		worldGrid.drawWalls(ctxWalls);
 		ctxEdit.clearRect(0, 0, worldGrid.width, worldGrid.height);
-
-		wallDistance.calculateDistances(worldGrid);
 
 		// Hide edit panel after save
 		isEditMode = togglePanelAndButton(isEditMode, editPanel, btnEditMode);
@@ -887,11 +917,18 @@ function setup() {
 	colony.drawColony(ctxColony);
 
 	worldGrid.addBorderWalls();
-	worldGrid.drawWalls(ctxWalls);
+	// worldGrid.drawWalls(ctxWalls);
 
-	mapGenerator.generateMap(worldGrid, true);
-	worldGrid.drawWalls(ctxWalls);
-	wallDistance.calculateDistances(worldGrid);
+	// mapGenerator.generateMap(true);
+	// worldGrid.drawWalls(ctxWalls);
+	// wallDistance.calculateDistances(worldGrid);
+	console.log('seed', getSeed(true));
+
+	mapWorker.postMessage({
+		action: 'GENERATE',
+		setup: true,
+		seed: getSeed(true),
+	});
 
 	toggleButton(false, btnAntsLayer);
 	toggleButton(!isDrawingDensity, btnDensityLayer);
@@ -1241,7 +1278,7 @@ function zoomCanvas(event: WheelEvent) {
 }
 
 function panCanvas(event: MouseEvent) {
-	console.log(event);
+	// console.log(event);
 
 	cameraOffset.x = event.clientX / canvasScale - panStart.x;
 	cameraOffset.y = (event.clientY - offsetY) / canvasScale - panStart.y;
@@ -1255,12 +1292,12 @@ function panCanvas(event: MouseEvent) {
 		(event.clientX - canvasCenter.x) / canvasScale - panStart.x;
 	cameraOffsetTemp.y =
 		(event.clientY - offsetY - canvasCenter.y) / canvasScale - panStart.y;
-	console.log(`--- START ---`);
+	// console.log(`--- START ---`);
 
-	console.log(cameraOffset);
-	console.log(canvasCenter);
-	console.log(canvasScale);
-	console.log(cameraOffsetTemp);
+	// console.log(cameraOffset);
+	// console.log(canvasCenter);
+	// console.log(canvasScale);
+	// console.log(cameraOffsetTemp);
 
 	const zoomOffset = {
 		x: 0,
@@ -1270,23 +1307,23 @@ function panCanvas(event: MouseEvent) {
 	zoomOffset.x = event.clientX / canvasScale - cameraOffset.x;
 	zoomOffset.y = (event.clientY - offsetY) / canvasScale - cameraOffset.y;
 
-	console.log(zoomOffset);
-	console.log(event.clientX, event.clientY);
+	// console.log(zoomOffset);
+	// console.log(event.clientX, event.clientY);
 	cameraCenter.x =
 		(event.clientX - window.innerWidth / 2) / canvasScale - panStart.x;
 	cameraCenter.y =
 		(event.clientY - offsetY - window.innerHeight / 2) / canvasScale -
 		panStart.y;
-	console.log(cameraCenter);
-	console.log(window.innerWidth, window.innerHeight);
+	// console.log(cameraCenter);
+	// console.log(window.innerWidth, window.innerHeight);
 
 	(cameraCenter.x =
 		cameraCenter.x < 0 ? Math.abs(cameraCenter.x) : cameraCenter.x * -1),
 		(cameraCenter.y =
 			cameraCenter.y < 0 ? Math.abs(cameraCenter.y) : cameraCenter.y * -1),
-		console.log(`--- END ---`);
+		// console.log(`--- END ---`);
 
-	setCamera();
+		setCamera();
 }
 
 function moveCamera(x: number, y: number) {
@@ -1404,6 +1441,7 @@ function main(currentTime: number) {
 	performanceStats.startMeasurement('grid');
 	if (isDrawingMarkers && markersImageData) {
 		worldGrid.drawMarkers(ctxMarkers, markersImageData, isRunning);
+		// TODO: Remember the state of density view when switching to markers
 	} else if (isDrawingDensity && densityImageData) {
 		worldGrid.drawDensity(ctxMarkers, densityImageData, isRunning);
 	} else if (isDrawingAdvancedDensity && densityImageData) {
