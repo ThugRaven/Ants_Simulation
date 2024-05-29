@@ -1,4 +1,4 @@
-import { MapGeneratorOptions, MarkerOptions, MarkerTypes } from '../constants';
+import { MapOptions, MarkerOptions, MarkerTypes } from '../constants';
 import { Vector } from './Vector';
 import WorldCell from './WorldCell';
 
@@ -25,7 +25,7 @@ export default class WorldGrid {
 	}
 
 	addBorderWalls() {
-		const borderSize = MapGeneratorOptions.BORDER_SIZE;
+		const borderSize = MapOptions.BORDER_SIZE;
 		for (let x = 0; x < this.width; x++) {
 			for (let y = 0; y < borderSize; y++) {
 				const cellTop = this.cells[this.getIndexFromCoords(x, y)];
@@ -43,6 +43,14 @@ export default class WorldGrid {
 					this.cells[this.getIndexFromCoords(this.width - x - 1, y)];
 				cellLeft.wall = 1;
 				cellRight.wall = 1;
+			}
+		}
+	}
+
+	generateWalls(map: number[][]) {
+		for (let x = 0; x < this.width; x++) {
+			for (let y = 0; y < this.height; y++) {
+				this.cells[this.getIndexFromCoords(x, y)].wall = map[x][y] ? 1 : 0;
 			}
 		}
 	}
@@ -118,13 +126,13 @@ export default class WorldGrid {
 		}
 	}
 
-	drawWalls(ctx: CanvasRenderingContext2D) {
+	drawWalls(ctx: CanvasRenderingContext2D, includeDistances = true) {
 		ctx.fillStyle = 'rgb(163, 163, 163)';
 		for (let x = 0; x < this.width; x++) {
 			for (let y = 0; y < this.height; y++) {
 				const cell = this.cells[this.getIndexFromCoords(x, y)];
 				if (cell.wall === 1) {
-					cell.drawWall(ctx, x, y);
+					cell.drawWall(ctx, x, y, includeDistances);
 				}
 			}
 		}
@@ -201,6 +209,7 @@ export default class WorldGrid {
 		return x > -1 && x < this.width && y > -1 && y < this.height;
 	}
 
+	// TODO: Divide raycast to multiple smaller function to find what's causing such big garbage collection
 	rayCast(position: Vector, angle: number, maxDistance: number) {
 		const dX = maxDistance * Math.cos(angle);
 		const dY = maxDistance * Math.sin(angle);

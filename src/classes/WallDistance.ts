@@ -8,7 +8,7 @@ export default class WallDistance {
 				const cell = worldGrid.cells[worldGrid.getIndexFromCoords(x, y)];
 
 				if (cell.wall) {
-					cell.dist = this.getMinDistance(x, y, worldGrid, false, 20);
+					cell.dist = this.getMinDistance(x, y, worldGrid, false, 10);
 				} else {
 					cell.dist = this.getMinDistance(x, y, worldGrid, true, 3);
 				}
