@@ -21,6 +21,7 @@ import {
 	RIGHT_BUTTON,
 } from './constants';
 import './style.css';
+import { MapWorkerMessage } from './workers/mapWorker';
 import MapWorker from './workers/mapWorker?worker';
 
 const canvasContainer = document.getElementById(
@@ -208,6 +209,8 @@ mapWorker.onmessage = (event) => {
 			console.log('draw');
 			worldGrid.drawWalls(ctxWalls);
 		}
+
+		isGenerating = false;
 	}
 };
 
@@ -226,6 +229,7 @@ let isFoodMode = false;
 let isPanMode = false;
 let isFirstTime = true;
 let isInInputField = false;
+let isGenerating = false;
 
 let isColonyPanelVisible = false;
 let isCellPanelVisible = false;
@@ -409,14 +413,17 @@ const worldGrid = new WorldGrid({
 
 const wallDistance = new WallDistance();
 
-mapWorker.postMessage({
-	action: 'SETUP',
-	mapGeneratorOptions: {
-		width: worldGrid.width,
-		height: worldGrid.height,
-		fillRatio: MapOptions.FILL_RATIO,
+generateMap(
+	{
+		action: 'SETUP',
+		mapGeneratorOptions: {
+			width: worldGrid.width,
+			height: worldGrid.height,
+			fillRatio: MapOptions.FILL_RATIO,
+		},
 	},
-});
+	true,
+);
 
 // Markers image data
 const markersImageData = ctxMarkers?.createImageData(
@@ -472,7 +479,7 @@ window.addEventListener('keydown', (e) => {
 			if (e.ctrlKey) {
 				break;
 			}
-			mapWorker.postMessage({ action: 'GENERATE', seed: getSeed(false) });
+			generateMap({ action: 'GENERATE', seed: getSeed(false) });
 			break;
 		case 'Delete':
 			removeAnt();
@@ -696,7 +703,7 @@ mapForm.addEventListener('submit', (e) => {
 		// mapGenerator.generateMap(false, mapSeed);
 		// worldGrid.drawWalls(ctxWalls);
 		// wallDistance.calculateDistances(worldGrid);
-		mapWorker.postMessage({
+		generateMap({
 			action: 'GENERATE',
 			seed: getSeed(false, mapSeed),
 		});
@@ -715,7 +722,7 @@ btnGenerateSaveMap.addEventListener('click', () => {
 		// mapSeedInput.value =
 		// 	new URL(window.location.href).searchParams.get('seed') ?? '';
 		// console.log('btnGenerateSaveMap');
-		mapWorker.postMessage({ action: 'GENERATE', seed: getSeed(false) });
+		generateMap({ action: 'GENERATE', seed: getSeed(false) });
 	}
 });
 
@@ -916,15 +923,15 @@ function setup() {
 
 	colony.drawColony(ctxColony);
 
-	worldGrid.addBorderWalls();
+	// worldGrid.addBorderWalls();
 	// worldGrid.drawWalls(ctxWalls);
 
-	// mapGenerator.generateMap(true);
-	// worldGrid.drawWalls(ctxWalls);
+	// worldGrid.generateWalls(mapGenerator.generateMap(getSeed(true)));
 	// wallDistance.calculateDistances(worldGrid);
-	console.log('seed', getSeed(true));
+	// worldGrid.drawWalls(ctxWalls);
+	// console.log('seed', getSeed(true));
 
-	mapWorker.postMessage({
+	generateMap({
 		action: 'GENERATE',
 		setup: true,
 		seed: getSeed(true),
@@ -1044,6 +1051,13 @@ function toggleAnts() {
 	}
 
 	colony.isDrawingAnts = toggleButton(colony.isDrawingAnts, btnAntsLayer);
+}
+
+export function generateMap(message: MapWorkerMessage, skipLoading = false) {
+	if (!isGenerating || skipLoading) {
+		isGenerating = skipLoading ? false : true;
+		mapWorker.postMessage(message);
+	}
 }
 
 function selectAnt() {

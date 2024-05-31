@@ -6,27 +6,32 @@ const mapGenerator = new MapGenerator({
 	height: 0,
 	fillRatio: MapOptions.FILL_RATIO,
 });
+export interface MapWorkerSetupMessage {
+	action: 'SETUP';
+	seed?: string;
+	mapGeneratorOptions: MapGeneratorOptions;
+}
 
-self.onmessage = (
-	e: MessageEvent<{
-		action: 'SETUP' | 'GENERATE';
-		setup?: boolean;
-		seed: string;
-		mapGeneratorOptions: MapGeneratorOptions;
-	}>,
-) => {
+export interface MapWorkerGenerateMessage {
+	action: 'GENERATE';
+	setup?: boolean;
+	seed: string;
+}
+
+export type MapWorkerMessage = MapWorkerSetupMessage | MapWorkerGenerateMessage;
+
+self.onmessage = (e: MessageEvent<MapWorkerMessage>) => {
+	console.log('MapWorker message', e.data);
+
 	if (e.data.action === 'SETUP') {
 		mapGenerator.initialize(e.data.mapGeneratorOptions);
 	}
-
-	console.log('MapWorker message', e.data);
 
 	if (e.data.action === 'GENERATE') {
 		console.log('generate map');
 
 		if (e.data.setup) {
 			console.log('setup');
-
 			const map = mapGenerator.generateMap(e.data.seed);
 			postMessage({
 				action: 'GENERATE',
@@ -35,7 +40,6 @@ self.onmessage = (
 			});
 		} else {
 			console.log('normal');
-
 			mapGenerator.generateMapSteps(e.data.seed, (map, last) => {
 				postMessage({
 					action: last ? 'GENERATE' : 'GENERATE_PARTIAL',

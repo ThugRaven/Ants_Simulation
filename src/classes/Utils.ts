@@ -51,7 +51,6 @@ export function toggleButton(isEnabled: boolean, button: HTMLButtonElement) {
 export function getSeed(fromSeed = false, seed = '') {
 	const url = new URL(window.location.href);
 	const urlSeed = url.searchParams.get('seed');
-	console.log(fromSeed, urlSeed, seed);
 
 	if (fromSeed && urlSeed != null) {
 		return urlSeed;
