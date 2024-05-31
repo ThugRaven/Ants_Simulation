@@ -1,5 +1,5 @@
 import seedrandom from 'seedrandom';
-import { MapOptions } from '../constants';
+import { ColonyOptions, MapOptions } from '../constants';
 import { seededRandom } from './Utils';
 
 export interface MapGeneratorOptions {
@@ -49,6 +49,7 @@ export default class MapGenerator {
 		const rng = seedrandom(seed);
 
 		this.randomFillMap(rng);
+		this.clearColonySpace();
 
 		for (let i = 0; i < 20; i++) {
 			this.smoothMap();
@@ -78,30 +79,35 @@ export default class MapGenerator {
 			}
 
 			if (step == 1) {
+				this.clearColonySpace();
+				generate(this.map, false);
+			}
+
+			if (step == 2) {
 				for (let i = 0; i < 20; i++) {
 					this.smoothMap();
 					generate(this.map, false);
 				}
 			}
 
-			if (step == 2) {
+			if (step == 3) {
 				this.addBorderWalls();
 				generate(this.map, false);
 			}
 
-			if (step == 3) {
+			if (step == 4) {
 				this.processMap();
 				generate(this.map, false);
 			}
 
-			if (step == 4) {
+			if (step == 5) {
 				for (let i = 0; i < 5; i++) {
 					this.smoothMap();
 					generate(this.map, i == 4 ? true : false);
 				}
 			}
 
-			if (step == 5) {
+			if (step == 6) {
 				return;
 			}
 
@@ -331,6 +337,13 @@ export default class MapGenerator {
 				}
 			}
 		}
+	}
+
+	clearColonySpace() {
+		this.drawCircle(
+			{ x: Math.round(this.width / 2), y: Math.round(this.height / 2) },
+			ColonyOptions.COLONY_RADIUS * 3,
+		);
 	}
 
 	getLine(from: Coord, to: Coord) {
