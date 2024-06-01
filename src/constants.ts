@@ -27,7 +27,7 @@ export const MarkerOptions = {
 	SIZE: 16,
 } as const;
 
-export const EVAPORATE_AMOUNT = 0.0002;
+export const EVAPORATE_AMOUNT = 0.0002 / 10;
 
 // COLONY
 export const ColonyOptions = {
