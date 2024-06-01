@@ -42,6 +42,7 @@ export default class Ant {
 	foodAmount: number;
 	maxAutonomy: number;
 	hits: number;
+	foundCell: boolean;
 
 	constructor(
 		ctx: CanvasRenderingContext2D,
@@ -77,6 +78,7 @@ export default class Ant {
 		this.foodAmount = 0;
 		this.maxAutonomy = AntOptions.AUTONOMY_MAX - random(0, 50);
 		this.hits = 0;
+		this.foundCell = false;
 	}
 
 	updatePosition(worldGrid: WorldGrid) {
@@ -170,6 +172,7 @@ export default class Ant {
 				) {
 					maxDirection = angleToCell;
 					this.direction.setDirectionAngle(maxDirection.heading());
+					this.foundCell = true;
 					return;
 				}
 
@@ -188,6 +191,7 @@ export default class Ant {
 			}
 
 			if (maxIntensity == minIntensity) {
+				this.foundCell = false;
 				return;
 			}
 
@@ -196,6 +200,9 @@ export default class Ant {
 					maxCell.density = [0, 100, 0];
 				}
 				this.direction.setDirectionAngle(maxDirection.heading());
+				this.foundCell = true;
+			} else {
+				this.foundCell = false;
 			}
 		}
 	}
@@ -215,12 +222,21 @@ export default class Ant {
 		}
 
 		this.direction.update(dt);
-		this.direction.setAndAddDirectionAngle(
-			random(
-				-AntOptions.DIRECTION_NOISE_RANGE,
-				AntOptions.DIRECTION_NOISE_RANGE,
-			),
-		);
+		if (!this.foundCell) {
+			this.direction.setAndAddDirectionAngle(
+				random(
+					-AntOptions.DIRECTION_NOISE_RANGE,
+					AntOptions.DIRECTION_NOISE_RANGE,
+				),
+			);
+		} else {
+			this.direction.setAndAddDirectionAngle(
+				random(
+					-AntOptions.DIRECTION_NOISE_RANGE / 5,
+					AntOptions.DIRECTION_NOISE_RANGE / 5,
+				),
+			);
+		}
 		this.updatePosition(worldGrid);
 
 		const cell = worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y);
