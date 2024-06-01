@@ -477,7 +477,11 @@ window.addEventListener('keydown', (e) => {
 			toggleTrack();
 			break;
 		case 'KeyC':
-			alignCamera();
+			if (isEditMode) {
+				clearEdit();
+			} else {
+				alignCamera();
+			}
 			break;
 		case 'KeyR':
 			if (e.ctrlKey) {
@@ -495,6 +499,23 @@ window.addEventListener('keydown', (e) => {
 			break;
 		case 'KeyF':
 			performanceStats.changeMode();
+			break;
+		case 'KeyQ':
+			if (isEditMode) {
+				toggleWallMode();
+			}
+			break;
+		case 'KeyE':
+			if (isEditMode) {
+				toggleFoodMode();
+			} else {
+				toggleEditMode();
+			}
+			break;
+		case 'KeyS':
+			if (isEditMode) {
+				saveEdit();
+			}
 			break;
 		case 'ArrowUp':
 			moveCamera(0, CAMERA_MOVE_BY);
@@ -529,6 +550,9 @@ window.addEventListener('keydown', (e) => {
 			}
 			if (isMapPanelVisible) {
 				isMapPanelVisible = togglePanelAndButton(isMapPanelVisible, mapPanel);
+			}
+			if (isEditMode) {
+				toggleEditMode();
 			}
 			break;
 		default:
@@ -731,6 +755,10 @@ btnGenerateSaveMap.addEventListener('click', () => {
 });
 
 btnEditMode.addEventListener('click', () => {
+	toggleEditMode();
+});
+
+function toggleEditMode() {
 	isEditMode = togglePanelAndButton(isEditMode, editPanel, btnEditMode);
 	if (isEditMode) {
 		canvasEdit.style.display = 'block';
@@ -739,25 +767,45 @@ btnEditMode.addEventListener('click', () => {
 		canvasEdit.style.display = 'none';
 		canvasEditPreview.style.display = 'none';
 	}
-});
+}
 
 btnWallBrush.addEventListener('click', () => {
+	toggleWallMode();
+});
+
+function toggleWallMode() {
+	if (isWallMode && !isFoodMode) {
+		return;
+	}
+
 	isWallMode = toggleButton(isWallMode, btnWallBrush);
 	if (isWallMode) {
 		isFoodMode = true;
 		isFoodMode = toggleButton(isWallMode, btnFoodBrush);
 	}
-});
+}
 
 btnFoodBrush.addEventListener('click', () => {
+	toggleFoodMode();
+});
+
+function toggleFoodMode() {
+	if (isFoodMode && !isWallMode) {
+		return;
+	}
+
 	isFoodMode = toggleButton(isFoodMode, btnFoodBrush);
 	if (isFoodMode) {
 		isWallMode = true;
 		isWallMode = toggleButton(isFoodMode, btnWallBrush);
 	}
-});
+}
 
 btnSave.addEventListener('click', () => {
+	saveEdit();
+});
+
+function saveEdit() {
 	if (ctxEdit && ctxWalls) {
 		const imageData = ctxEdit.getImageData(
 			0,
@@ -809,7 +857,13 @@ btnSave.addEventListener('click', () => {
 		canvasEdit.style.display = 'none';
 		canvasEditPreview.style.display = 'none';
 	}
-});
+}
+
+function clearEdit() {
+	if (ctxEdit && ctxWalls) {
+		ctxEdit.clearRect(0, 0, worldGrid.width, worldGrid.height);
+	}
+}
 
 brushSizeInput.addEventListener('input', () => {
 	brushSize = parseInt(brushSizeInput.value);
