@@ -66,6 +66,10 @@ const antLifespanPreview = document.querySelector<HTMLDivElement>(
 	'[data-lifespan-preview]',
 );
 const antLifespan = document.querySelector<HTMLSpanElement>('[data-lifespan]');
+const antMarkerPreview = document.querySelector<HTMLDivElement>(
+	'[data-marker-preview]',
+);
+const antMarker = document.querySelector<HTMLSpanElement>('[data-marker]');
 const btnTrack = document.getElementById('btn-track') as HTMLButtonElement;
 const btnRemove = document.getElementById('btn-remove') as HTMLButtonElement;
 
@@ -1106,7 +1110,9 @@ function updateAntInfo() {
 		!antVel ||
 		!antState ||
 		!antLifespanPreview ||
-		!antLifespan
+		!antLifespan ||
+		!antMarkerPreview ||
+		!antMarker
 	) {
 		return;
 	}
@@ -1141,6 +1147,13 @@ function updateAntInfo() {
 	antLifespan.textContent = `${selectedAnt.internalClock.toFixed(
 		2,
 	)} | ${selectedAnt.maxAutonomy.toFixed(2)}`;
+	const intensity =
+		AntOptions.MARKER_DEFAULT_INTENSITY *
+		Math.exp(-0.15 * selectedAnt.markerIntensityClock);
+	antMarkerPreview.style.setProperty('--width', `${(intensity / 1) * 100}%`);
+	antMarker.textContent = `${intensity.toFixed(
+		2,
+	)} | ${1} | ${selectedAnt.markerIntensityClock.toFixed(2)}`;
 }
 
 function updateCellInfo(x: number, y: number) {
