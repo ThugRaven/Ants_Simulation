@@ -128,14 +128,25 @@ export default class Ant {
 			let minIntensity = 1;
 			let maxDirection = this.direction.getVec();
 			let maxCell = null;
+			const currentAngle = maxDirection.heading();
+
 			// const angle = (Math.PI * (1 / 3) * 2) / 32;
 			for (let i = 0; i < 32; i++) {
 				const randAngle = random(-Math.PI * (1 / 3), Math.PI * (1 / 3));
 				// const randAngle = -Math.PI * (1 / 3) + angle * i;
 				// const distance = random(0, this.maxSpeed);
-				const distance = random(0, MarkerOptions.SIZE * 12);
+				// let distance = 0;
+				// if (randAngle > -Math.PI * (1 / 18) && randAngle < Math.PI * (1 / 18)) {
+				// 	distance = random(MarkerOptions.SIZE * 3, MarkerOptions.SIZE * 24);
+				// } else {
+				// 	distance = random(MarkerOptions.SIZE * 3, MarkerOptions.SIZE * 12);
+				// }
 				// const distance = MarkerOptions.SIZE * 12;
-				const currentAngle = maxDirection.heading();
+				const distance = random(
+					MarkerOptions.SIZE * 3,
+					MarkerOptions.SIZE * 12,
+				);
+
 				const sampleAngle = currentAngle + randAngle;
 				const angleToCell = createVector(
 					Math.cos(sampleAngle),
