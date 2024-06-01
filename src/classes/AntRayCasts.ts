@@ -35,6 +35,7 @@ export default class Ant {
 	internalClock: number;
 	markerPeriod: number;
 	markerClock: number;
+	markerIntensityClock: number;
 	directionPeriod: number;
 	directionClock: number;
 	isDead: boolean;
@@ -58,7 +59,7 @@ export default class Ant {
 		this.id = options.id;
 		this.pos = createVector(options.pos.x, options.pos.y);
 		this.direction = new Direction(random(-Math.PI * 2, Math.PI * 2));
-		this.maxSpeed = 3;
+		this.maxSpeed = 2;
 		this.state = AntStates.TO_FOOD;
 		this.debug = options.debug || false;
 		this.internalClock = 0;
@@ -66,6 +67,7 @@ export default class Ant {
 			AntOptions.MARKER_PERIOD +
 			random(-AntOptions.MARKER_PERIOD * 0.25, AntOptions.MARKER_PERIOD * 0.25);
 		this.markerClock = random(0, AntOptions.MARKER_PERIOD);
+		this.markerIntensityClock = 0;
 		this.directionPeriod =
 			AntOptions.DIRECTION_PERIOD +
 			random(
@@ -209,6 +211,7 @@ export default class Ant {
 
 	update(worldGrid: WorldGrid, dt: number, colony: Colony) {
 		this.internalClock += dt;
+		this.markerIntensityClock += dt;
 		this.directionClock += dt;
 		if (
 			this.internalClock >= AntOptions.AUTONOMY_REFILL &&
@@ -255,7 +258,16 @@ export default class Ant {
 			this.foodAmount = cell.pick();
 			this.direction.addImmediate(Math.PI);
 			this.internalClock = 0;
+			this.markerIntensityClock = 0;
 			return;
+		}
+
+		if (cell && cell.food.quantity > 0 && this.state === AntStates.TO_HOME) {
+			this.markerIntensityClock = 0;
+		}
+
+		if (cell && cell.colony && this.state === AntStates.TO_FOOD) {
+			this.markerIntensityClock = 0;
 		}
 
 		if (
@@ -275,6 +287,7 @@ export default class Ant {
 			}
 			this.state = AntStates.TO_FOOD;
 			this.internalClock = 0;
+			this.markerIntensityClock = 0;
 			return;
 		}
 	}
@@ -329,7 +342,12 @@ export default class Ant {
 
 			const intensity =
 				AntOptions.MARKER_DEFAULT_INTENSITY *
-				Math.exp(-0.15 * this.internalClock);
+				Math.exp(-0.15 * this.markerIntensityClock);
+
+			if (intensity < 0.01) {
+				this.markerClock = 0;
+				return;
+			}
 
 			let state = -1;
 			switch (this.state) {
