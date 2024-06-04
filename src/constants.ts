@@ -7,6 +7,7 @@ export const CanvasOptions = {
 // MAP GENERATION
 export const MapOptions = {
 	FILL_RATIO: 0.47,
+	FILL_RATIO_FOOD: 0.4,
 	BORDER_SIZE: 5,
 };
 

@@ -204,7 +204,7 @@ mapWorker.onmessage = (event) => {
 		mapSeedInput.value =
 			new URL(window.location.href).searchParams.get('seed') ?? '';
 
-		if (ctxWalls) {
+		if (ctxWalls && ctxFood) {
 			ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
 			worldGrid.generateWalls(event.data.map);
 			console.log('calculate');
@@ -212,6 +212,9 @@ mapWorker.onmessage = (event) => {
 			wallDistance.calculateDistances(worldGrid);
 			console.log('draw');
 			worldGrid.drawWalls(ctxWalls);
+
+			worldGrid.generateFood(event.data.foodMap);
+			wallDistance.calculateFoodDistances(worldGrid);
 		}
 
 		isGenerating = false;
@@ -424,6 +427,7 @@ generateMap(
 			width: worldGrid.width,
 			height: worldGrid.height,
 			fillRatio: MapOptions.FILL_RATIO,
+			fillRatioFood: MapOptions.FILL_RATIO_FOOD,
 		},
 	},
 	true,
