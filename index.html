@@ -11,8 +11,8 @@
 			rel="stylesheet"
 		/>
 		<title>Ants Simulation</title>
-		<script type="module" crossorigin src="/Ants_Simulation/assets/index.5402b07a.js"></script>
-		<link rel="stylesheet" href="/Ants_Simulation/assets/index.473d36f9.css">
+		<script type="module" crossorigin src="/Ants_Simulation/assets/index.e1e35cb7.js"></script>
+		<link rel="stylesheet" href="/Ants_Simulation/assets/index.3e7d3822.css">
 	</head>
 	<body class="bg-black h-screen overflow-hidden flex flex-col">
 		<header class="bg-neutral-800 flex">
@@ -203,25 +203,57 @@
 						></div>
 					</div>
 					<div class="flex flex-col items-center justify-center gap-2">
-						<span
-							class="text-neutral-100 text-2xl font-bold"
-							data-brush-size
-						></span>
-						<input type="range" id="brushSizeInput" class="accent-red-500" />
+						<div class="flex justify-between w-full">
+							<button id="brush-size-minus" title="Decrease brush size (,)">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									height="24px"
+									viewBox="0 -960 960 960"
+									width="24px"
+									class="w-8 h-8 fill-white"
+								>
+									<path
+										d="M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z"
+									/>
+								</svg>
+							</button>
+							<span
+								class="text-neutral-100 text-2xl font-bold"
+								data-brush-size
+							></span>
+							<button id="brush-size-plus" title="Increase brush size (.)">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									height="24px"
+									viewBox="0 -960 960 960"
+									width="24px"
+									class="w-8 h-8 fill-white"
+								>
+									<path
+										d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"
+									/>
+								</svg>
+							</button>
+						</div>
+						<input
+							type="range"
+							id="brushSizeInput"
+							class="accent-red-500 w-full"
+						/>
 					</div>
 					<h2 class="text-4xl font-bold text-center">Brushes</h2>
 					<div class="grid grid-cols-2 items-center justify-center gap-2 my-2">
 						<button
 							id="btn-wall-brush"
 							class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 px-4 py-2 rounded-lg border-2 border-red-500 shadow-md"
-							title="Wall brush"
+							title="Wall brush (Q)"
 						>
 							Wall
 						</button>
 						<button
 							id="btn-food-brush"
 							class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 px-4 py-2 rounded-lg border-2 border-red-500 shadow-md"
-							title="Food brush"
+							title="Food brush (E)"
 						>
 							Food
 						</button>
@@ -229,9 +261,16 @@
 					<button
 						id="btn-save"
 						class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 text-xl font-bold px-4 py-2 w-full rounded-lg shadow-md"
-						title="Save edit"
+						title="Save edit (S)"
 					>
 						Save
+					</button>
+					<button
+						id="btn-clear"
+						class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 text-xl font-bold px-4 py-2 w-full rounded-lg shadow-md mt-2"
+						title="Clear edit (C)"
+					>
+						Clear
 					</button>
 				</div>
 				<div
@@ -283,6 +322,12 @@
 						<li
 							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
 						>
+							<span class="text-lg font-bold">Coordinates</span>
+							<span class="text-neutral-100" data-coords>-</span>
+						</li>
+						<li
+							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						>
 							<span class="text-lg font-bold">Intensity - To Home</span>
 							<span class="text-neutral-100" data-intensity-home>-</span>
 						</li>
@@ -303,6 +348,18 @@
 						>
 							<span class="text-lg font-bold">Density</span>
 							<span class="text-neutral-100" data-density>-</span>
+						</li>
+						<li
+							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						>
+							<span class="text-lg font-bold">Wall Distance</span>
+							<span class="text-neutral-100" data-dist>-</span>
+						</li>
+						<li
+							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						>
+							<span class="text-lg font-bold">Colony</span>
+							<span class="text-neutral-100" data-colony>-</span>
 						</li>
 					</ul>
 				</div>
@@ -372,6 +429,16 @@
 								data-lifespan-preview
 							></div>
 							<span class="text-neutral-100" data-lifespan>- | -</span>
+						</li>
+						<li
+							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						>
+							<span class="text-lg font-bold">Marker intensity</span>
+							<div
+								class="lifespan-preview relative m-2 w-full h-3 rounded-full overflow-hidden bg-zinc-800 before:absolute before:inset-0 before:bg-red-500 before:rounded-full before:transition-all before:duration-75"
+								data-marker-preview
+							></div>
+							<span class="text-neutral-100" data-marker>- | -</span>
 						</li>
 					</ul>
 					<div class="flex w-full items-center justify-evenly">
@@ -573,275 +640,370 @@
 				</svg>
 			</button>
 		</div>
-		<div
-			id="controlsPanel"
-			class="text-white bg-neutral-800 rounded-lg p-4 fixed inset-0 lg:m-auto mx-4 my-auto lg:w-max h-max hidden z-10 shadow"
-		>
-			<h2 class="text-4xl font-bold text-center">Controls</h2>
-			<button
-				id="btn-close-controls"
-				class="bg-neutral-800 hover:bg-neutral-700 focus-visible:bg-neutral-700 m-2 p-3 rounded-full absolute top-0 right-0"
-				title="Close"
+		<div id="controlsPanel" class="hidden">
+			<div
+				class="text-white bg-neutral-800 rounded-lg p-4 fixed inset-0 lg:m-auto mx-4 lg:my-auto my-4 lg:w-max lg:h-2/4 z-10 shadow flex flex-col"
 			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					height="24px"
-					viewBox="0 0 24 24"
-					width="24px"
-					fill="#000000"
-					class="w-8 h-8 fill-white"
+				<h2 class="text-4xl font-bold text-center">Controls</h2>
+				<button
+					id="btn-close-controls"
+					class="bg-neutral-800 hover:bg-neutral-700 focus-visible:bg-neutral-700 m-2 p-3 rounded-full absolute top-0 right-0"
+					title="Close"
 				>
-					<path d="M0 0h24v24H0V0z" fill="none" />
-					<path
-						d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
-					/>
-				</svg>
-			</button>
-			<table class="table-auto">
-				<thead class="text-xl text-left">
-					<tr>
-						<th class="py-2">Key</th>
-						<th class="p-2">Description</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td class="py-2 pr-2">
-							<kbd
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
-								>Space</kbd
-							>
-						</td>
-						<td class="p-2">
-							<span class="text-neutral-100 text-lg"
-								>Play/pause the simulation</span
-							>
-						</td>
-					</tr>
-					<tr>
-						<td class="py-2 pr-2">
-							<kbd
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
-								>F</kbd
-							>
-						</td>
-						<td class="p-2">
-							<span class="text-neutral-100 text-lg"
-								>Toggle performance stats display</span
-							>
-						</td>
-					</tr>
-					<tr>
-						<td class="py-2 pr-2">
-							<kbd
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
-								>M</kbd
-							>
-						</td>
-						<td class="p-2">
-							<span class="text-neutral-100 text-lg"
-								>Toggle markers drawing</span
-							>
-						</td>
-					</tr>
-					<tr>
-						<td class="py-2 pr-2">
-							<kbd
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
-								>N</kbd
-							>
-						</td>
-						<td class="p-2">
-							<span class="text-neutral-100 text-lg"
-								>Toggle density drawing</span
-							>
-						</td>
-					</tr>
-					<tr>
-						<td class="py-2 pr-2">
-							<kbd
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
-								>A</kbd
-							>
-						</td>
-						<td class="p-2">
-							<span class="text-neutral-100 text-lg">Toggle ants drawing</span>
-						</td>
-					</tr>
-					<tr>
-						<td class="py-2 pr-2">
-							<kbd
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
-								>D</kbd
-							>
-						</td>
-						<td class="p-2">
-							<span class="text-neutral-100 text-lg">Toggle debug mode</span>
-						</td>
-					</tr>
-					<tr>
-						<td class="py-2 pr-2">
-							<kbd
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
-								>T</kbd
-							>
-						</td>
-						<td class="p-2">
-							<span class="text-neutral-100 text-lg"
-								>Toggle ant tracking mode</span
-							>
-						</td>
-					</tr>
-					<tr>
-						<td class="py-2 pr-2">
-							<kbd
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
-								>C</kbd
-							>
-						</td>
-						<td class="p-2">
-							<span class="text-neutral-100 text-lg"
-								>Align camera to center</span
-							>
-						</td>
-					</tr>
-					<tr>
-						<td class="py-2 pr-2">
-							<kbd
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
-								>Delete</kbd
-							>
-						</td>
-						<td class="p-2">
-							<span class="text-neutral-100 text-lg">Remove selected ant</span>
-						</td>
-					</tr>
-					<tr>
-						<td class="py-2 pr-2">
-							<kbd
-								title="Comma"
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
-								>,</kbd
-							>
-							<kbd
-								title="Period"
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
-								>.</kbd
-							>
-						</td>
-						<td class="p-2">
-							<span class="text-neutral-100 text-lg">Change brush size</span>
-						</td>
-					</tr>
-					<tr>
-						<td class="py-2 pr-2">
-							<kbd
-								title="Left Mouse Button"
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
-								>LMB</kbd
-							>
-						</td>
-						<td class="p-2">
-							<span class="text-neutral-100 text-lg"
-								>Select ant. When in edit mode draws walls/food</span
-							>
-						</td>
-					</tr>
-					<tr>
-						<td class="py-2 pr-2">
-							<kbd
-								title="Left Mouse Button"
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
-								>Hold LMB</kbd
-							>
-						</td>
-						<td class="p-2">
-							<span class="text-neutral-100 text-lg"
-								>Pan camera (only in normal mode, to pan in edit mode use
-								<kbd
-									title="Middle Mouse Button"
-									class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
-									>MMB</kbd
-								>)</span
-							>
-						</td>
-					</tr>
-					<tr>
-						<td class="py-2 pr-2">
-							<kbd
-								title="Right Mouse Button"
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
-								>RMB</kbd
-							>
-						</td>
-						<td class="p-2">
-							<span class="text-neutral-100 text-lg"
-								>Place food. Erase in edit mode</span
-							>
-						</td>
-					</tr>
-					<tr>
-						<td class="py-2 pr-2">
-							<kbd
-								title="Middle Mouse Button"
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
-								>Hold MMB</kbd
-							>
-						</td>
-						<td class="p-2">
-							<span class="text-neutral-100 text-lg">Pan camera</span>
-						</td>
-					</tr>
-					<tr>
-						<td class="py-2 pr-2">
-							<kbd
-								title="Arrow Up"
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
-								>↑</kbd
-							>
-							<kbd
-								title="Arrow Down"
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
-								>↓</kbd
-							>
-							<kbd
-								title="Arrow Left"
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
-								>←</kbd
-							>
-							<kbd
-								title="Arrow Right"
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
-								>→</kbd
-							>
-						</td>
-						<td class="p-2">
-							<span class="text-neutral-100 text-lg">Move camera</span>
-						</td>
-					</tr>
-					<tr>
-						<td class="py-2 pr-2">
-							<kbd
-								title="Scroll Wheel"
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
-								>Scroll</kbd
-							>
-							or
-							<kbd
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
-								>-</kbd
-							>
-							<kbd
-								class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
-								>=</kbd
-							>
-						</td>
-						<td class="p-2">
-							<span class="text-neutral-100 text-lg">Zoom camera</span>
-						</td>
-					</tr>
-				</tbody>
-			</table>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						height="24px"
+						viewBox="0 0 24 24"
+						width="24px"
+						fill="#000000"
+						class="w-8 h-8 fill-white"
+					>
+						<path d="M0 0h24v24H0V0z" fill="none" />
+						<path
+							d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+						/>
+					</svg>
+				</button>
+				<table class="table-auto">
+					<thead class="text-xl text-left">
+						<tr>
+							<th class="py-2">Key</th>
+							<th class="p-2">Description</th>
+						</tr>
+					</thead>
+				</table>
+				<div class="overflow-y-auto h-full">
+					<table class="table-auto">
+						<tbody>
+							<tr>
+								<td class="py-2 pr-2">
+									<kbd
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>Space</kbd
+									>
+								</td>
+								<td class="p-2">
+									<span class="text-neutral-100 text-lg"
+										>Play/pause the simulation</span
+									>
+								</td>
+							</tr>
+							<tr>
+								<td class="py-2 pr-2">
+									<kbd
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>F</kbd
+									>
+								</td>
+								<td class="p-2">
+									<span class="text-neutral-100 text-lg"
+										>Toggle performance stats display</span
+									>
+								</td>
+							</tr>
+							<tr>
+								<td class="py-2 pr-2">
+									<kbd
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>M</kbd
+									>
+								</td>
+								<td class="p-2">
+									<span class="text-neutral-100 text-lg"
+										>Toggle markers drawing</span
+									>
+								</td>
+							</tr>
+							<tr>
+								<td class="py-2 pr-2">
+									<kbd
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>N</kbd
+									>
+								</td>
+								<td class="p-2">
+									<span class="text-neutral-100 text-lg"
+										>Toggle density drawing</span
+									>
+								</td>
+							</tr>
+							<tr>
+								<td class="py-2 pr-2">
+									<kbd
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>A</kbd
+									>
+								</td>
+								<td class="p-2">
+									<span class="text-neutral-100 text-lg"
+										>Toggle ants drawing</span
+									>
+								</td>
+							</tr>
+							<tr>
+								<td class="py-2 pr-2">
+									<kbd
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>D</kbd
+									>
+								</td>
+								<td class="p-2">
+									<span class="text-neutral-100 text-lg"
+										>Toggle debug mode</span
+									>
+								</td>
+							</tr>
+							<tr>
+								<td class="py-2 pr-2">
+									<kbd
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>T</kbd
+									>
+								</td>
+								<td class="p-2">
+									<span class="text-neutral-100 text-lg"
+										>Toggle ant tracking mode</span
+									>
+								</td>
+							</tr>
+							<tr>
+								<td class="py-2 pr-2">
+									<kbd
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>C</kbd
+									>
+								</td>
+								<td class="p-2">
+									<span class="text-neutral-100 text-lg"
+										>Align camera to center</span
+									>
+								</td>
+							</tr>
+							<tr>
+								<td class="py-2 pr-2">
+									<kbd
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>R</kbd
+									>
+								</td>
+								<td class="p-2">
+									<span class="text-neutral-100 text-lg">Generate new map</span>
+								</td>
+							</tr>
+							<tr>
+								<td class="py-2 pr-2">
+									<kbd
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>Q</kbd
+									>
+								</td>
+								<td class="p-2">
+									<span class="text-neutral-100 text-lg"
+										>Toggle wall brush in edit mode</span
+									>
+								</td>
+							</tr>
+							<tr>
+								<td class="py-2 pr-2">
+									<kbd
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>E</kbd
+									>
+								</td>
+								<td class="p-2">
+									<span class="text-neutral-100 text-lg"
+										>Toggle food brush in edit mode/Confirm</span
+									>
+								</td>
+							</tr>
+							<tr>
+								<td class="py-2 pr-2">
+									<kbd
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>S</kbd
+									>
+								</td>
+								<td class="p-2">
+									<span class="text-neutral-100 text-lg">Save edit</span>
+								</td>
+							</tr>
+							<tr>
+								<td class="py-2 pr-2">
+									<kbd
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>C</kbd
+									>
+								</td>
+								<td class="p-2">
+									<span class="text-neutral-100 text-lg">Clear edit</span>
+								</td>
+							</tr>
+							<tr>
+								<td class="py-2 pr-2">
+									<kbd
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>Delete</kbd
+									>
+								</td>
+								<td class="p-2">
+									<span class="text-neutral-100 text-lg"
+										>Remove selected ant</span
+									>
+								</td>
+							</tr>
+							<tr>
+								<td class="py-2 pr-2">
+									<kbd
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>Insert</kbd
+									>
+								</td>
+								<td class="p-2">
+									<span class="text-neutral-100 text-lg"
+										>Add ant (hold
+										<kbd
+											class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+											>Ctrl</kbd
+										>
+										for x10 and
+										<kbd
+											class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+											>Shift</kbd
+										>
+										for x100)</span
+									>
+								</td>
+							</tr>
+							<tr>
+								<td class="py-2 pr-2">
+									<kbd
+										title="Comma"
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>,</kbd
+									>
+									<kbd
+										title="Period"
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>.</kbd
+									>
+								</td>
+								<td class="p-2">
+									<span class="text-neutral-100 text-lg"
+										>Change brush size</span
+									>
+								</td>
+							</tr>
+							<tr>
+								<td class="py-2 pr-2">
+									<kbd
+										title="Left Mouse Button"
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>LMB</kbd
+									>
+								</td>
+								<td class="p-2">
+									<span class="text-neutral-100 text-lg"
+										>Select ant. When in edit mode draws walls/food</span
+									>
+								</td>
+							</tr>
+							<tr>
+								<td class="py-2 pr-2">
+									<kbd
+										title="Left Mouse Button"
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>Hold LMB</kbd
+									>
+								</td>
+								<td class="p-2">
+									<span class="text-neutral-100 text-lg"
+										>Pan camera (only in normal mode, to pan in edit mode use
+										<kbd
+											title="Middle Mouse Button"
+											class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+											>MMB</kbd
+										>)</span
+									>
+								</td>
+							</tr>
+							<tr>
+								<td class="py-2 pr-2">
+									<kbd
+										title="Right Mouse Button"
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>RMB</kbd
+									>
+								</td>
+								<td class="p-2">
+									<span class="text-neutral-100 text-lg"
+										>Place food. Erase in edit mode</span
+									>
+								</td>
+							</tr>
+							<tr>
+								<td class="py-2 pr-2">
+									<kbd
+										title="Middle Mouse Button"
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>Hold MMB</kbd
+									>
+								</td>
+								<td class="p-2">
+									<span class="text-neutral-100 text-lg">Pan camera</span>
+								</td>
+							</tr>
+							<tr>
+								<td class="py-2 pr-2">
+									<kbd
+										title="Arrow Up"
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>↑</kbd
+									>
+									<kbd
+										title="Arrow Down"
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>↓</kbd
+									>
+									<kbd
+										title="Arrow Left"
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>←</kbd
+									>
+									<kbd
+										title="Arrow Right"
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>→</kbd
+									>
+								</td>
+								<td class="p-2">
+									<span class="text-neutral-100 text-lg">Move camera</span>
+								</td>
+							</tr>
+							<tr>
+								<td class="py-2 pr-2">
+									<kbd
+										title="Scroll Wheel"
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>Scroll</kbd
+									>
+									or
+									<kbd
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>-</kbd
+									>
+									<kbd
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>=</kbd
+									>
+								</td>
+								<td class="p-2">
+									<span class="text-neutral-100 text-lg">Zoom camera</span>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
 		</div>
 		<div
 			id="mapPanel"
@@ -926,6 +1088,34 @@
 			class="fixed inset-0 border-2 border-red-600 pointer-events-none"
 			data-pause
 		></div>
+		<div id="confirmDialog" class="hidden">
+			<div
+				class="text-white bg-neutral-800 rounded-lg p-4 fixed inset-0 lg:m-auto mx-4 my-auto lg:w-96 h-max z-10 shadow flex flex-col gap-4 text-xl"
+			>
+				<p>
+					Are you sure you want to
+					<span class="text-green-300">generate a new map</span> and
+					<span class="text-red-300">reset the simulation</span>?
+				</p>
+				<div class="flex justify-evenly gap-4">
+					<button
+						id="btn-confirm"
+						class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 rounded-lg px-1 py-3 border-2 border-green-500 flex-1"
+						type="submit"
+					>
+						Confirm (E)
+					</button>
+
+					<button
+						id="btn-cancel"
+						class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 rounded-lg px-1 py-3 border-2 border-red-500 flex-1"
+						type="button"
+					>
+						Cancel (Esc)
+					</button>
+				</div>
+			</div>
+		</div>
 		
 	</body>
 </html>
