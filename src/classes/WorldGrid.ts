@@ -24,6 +24,13 @@ export default class WorldGrid {
 		}
 	}
 
+	reset() {
+		this.cells = [];
+		for (let i = 0; i < this.width * this.height; i++) {
+			this.cells.push(new WorldCell());
+		}
+	}
+
 	addBorderWalls() {
 		const borderSize = MapOptions.BORDER_SIZE;
 		for (let x = 0; x < this.width; x++) {

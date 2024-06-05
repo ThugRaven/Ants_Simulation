@@ -14,6 +14,7 @@ import {
 	BrushOptions,
 	CAMERA_MOVE_BY,
 	CanvasOptions,
+	ColonyOptions,
 	FoodOptions,
 	MIDDLE_BUTTON,
 	MapOptions,
@@ -182,6 +183,13 @@ const btnMarkersLayer = document.getElementById(
 	'btn-markers-layer',
 ) as HTMLButtonElement;
 
+// Confirm dialog
+const confirmDialog = document.getElementById(
+	'confirmDialog',
+) as HTMLDivElement;
+const btnCancel = document.getElementById('btn-cancel') as HTMLButtonElement;
+const btnConfirm = document.getElementById('btn-confirm') as HTMLButtonElement;
+
 const mapWorker = new MapWorker();
 mapWorker.onmessage = (event) => {
 	console.log(`Worker said : ${event.data.action}`);
@@ -243,6 +251,7 @@ let isCellPanelVisible = false;
 let isAntPanelVisible = false;
 let isControlsPanelVisible = false;
 let isMapPanelVisible = false;
+let isConfirmDialogVisible = false;
 
 let lastUpdateTime = 0;
 const performanceStats = new PerformanceStats([
@@ -493,7 +502,17 @@ window.addEventListener('keydown', (e) => {
 			if (e.ctrlKey) {
 				break;
 			}
-			generateMap({ action: 'GENERATE', seed: getSeed(false) });
+
+			if (colony.ants.length > ColonyOptions.COLONY_STARTING_ANTS) {
+				isRunning = true;
+				toggleLoop();
+				isConfirmDialogVisible = togglePanelAndButton(
+					isConfirmDialogVisible,
+					confirmDialog,
+				);
+			} else {
+				generateMap({ action: 'GENERATE', seed: getSeed(false) });
+			}
 			break;
 		case 'Delete':
 			removeAnt();
@@ -512,6 +531,16 @@ window.addEventListener('keydown', (e) => {
 			}
 			break;
 		case 'KeyE':
+			if (isConfirmDialogVisible) {
+				resetSimulation();
+				generateMap({ action: 'GENERATE', seed: getSeed(false) });
+				isConfirmDialogVisible = togglePanelAndButton(
+					isConfirmDialogVisible,
+					confirmDialog,
+				);
+				break;
+			}
+
 			if (isEditMode) {
 				toggleFoodMode();
 			} else {
@@ -548,6 +577,13 @@ window.addEventListener('keydown', (e) => {
 			changeBrushSize(BrushOptions.STEP);
 			break;
 		case 'Escape':
+			if (isConfirmDialogVisible) {
+				isConfirmDialogVisible = togglePanelAndButton(
+					isConfirmDialogVisible,
+					confirmDialog,
+				);
+			}
+
 			if (isControlsPanelVisible) {
 				isControlsPanelVisible = togglePanelAndButton(
 					isControlsPanelVisible,
@@ -696,6 +732,22 @@ btnGenerateSeed.addEventListener('click', () => {
 	const seed = Math.random().toString(36).slice(2, 7);
 	console.log(seed);
 	mapSeedInput.value = seed;
+});
+
+btnConfirm.addEventListener('click', () => {
+	resetSimulation();
+	generateMap({ action: 'GENERATE', seed: getSeed(false) });
+	isConfirmDialogVisible = togglePanelAndButton(
+		isConfirmDialogVisible,
+		confirmDialog,
+	);
+});
+
+btnCancel.addEventListener('click', () => {
+	isConfirmDialogVisible = togglePanelAndButton(
+		isConfirmDialogVisible,
+		confirmDialog,
+	);
 });
 
 btnAntsLayer.addEventListener('click', () => {
@@ -1122,6 +1174,11 @@ export function generateMap(message: MapWorkerMessage, skipLoading = false) {
 		isGenerating = skipLoading ? false : true;
 		mapWorker.postMessage(message);
 	}
+}
+
+function resetSimulation() {
+	worldGrid.reset();
+	colony.reset(worldGrid);
 }
 
 function selectAnt() {
