@@ -123,6 +123,12 @@ const brushSizePreview = document.querySelector(
 const brushSizeText = document.querySelector(
 	'[data-brush-size]',
 ) as HTMLSpanElement;
+const brushSizeMinus = document.getElementById(
+	'brush-size-minus',
+) as HTMLInputElement;
+const brushSizePlus = document.getElementById(
+	'brush-size-plus',
+) as HTMLInputElement;
 const brushSizeInput = document.getElementById(
 	'brushSizeInput',
 ) as HTMLInputElement;
@@ -658,6 +664,14 @@ btnPlay.addEventListener('click', () => {
 
 btnPause.addEventListener('click', () => {
 	toggleLoop();
+});
+
+brushSizeMinus.addEventListener('click', () => {
+	changeBrushSize(-BrushOptions.STEP);
+});
+
+brushSizePlus.addEventListener('click', () => {
+	changeBrushSize(BrushOptions.STEP);
 });
 
 btnColonyPanel.addEventListener('click', () => {
