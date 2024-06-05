@@ -5,9 +5,12 @@ export const CanvasOptions = {
 } as const;
 
 // MAP GENERATION
-export const MapGeneratorOptions = {
+export const MapOptions = {
 	FILL_RATIO: 0.47,
-	BORDER_SIZE: 1,
+	FILL_RATIO_FOOD: 0.37,
+	THRESHOLD: 50,
+	THRESHOLD_FOOD: 20,
+	BORDER_SIZE: 5,
 };
 
 // MARKERS
@@ -27,7 +30,7 @@ export const MarkerOptions = {
 	SIZE: 16,
 } as const;
 
-export const EVAPORATE_AMOUNT = 0.0002;
+export const EVAPORATE_AMOUNT = 0.0002 / 10;
 
 // COLONY
 export const ColonyOptions = {

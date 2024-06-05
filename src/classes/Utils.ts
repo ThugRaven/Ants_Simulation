@@ -47,3 +47,16 @@ export function toggleButton(isEnabled: boolean, button: HTMLButtonElement) {
 
 	return isEnabled;
 }
+
+export function getSeed(fromSeed = false, seed = '') {
+	const url = new URL(window.location.href);
+	const urlSeed = url.searchParams.get('seed');
+
+	if (fromSeed && urlSeed != null) {
+		return urlSeed;
+	} else if (!fromSeed) {
+		const generatedSeed = Math.random().toString(36).slice(2, 7);
+		return seed != '' ? seed : generatedSeed;
+		// url.searchParams.set('seed', seed != '' ? seed : generatedSeed);
+	} else return '';
+}

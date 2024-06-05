@@ -69,6 +69,89 @@ export default class Colony {
 		this.maxFood = ColonyOptions.COLONY_MAX_FOOD;
 	}
 
+	initialize(
+		antIcon: HTMLImageElement,
+		antImageInstance: HTMLCanvasElement,
+		antFoodImageInstance: HTMLCanvasElement,
+		antsCtx: CanvasRenderingContext2D,
+		worldGrid: WorldGrid,
+	) {
+		this.antIcon = antIcon;
+		this.antImageInstance = antImageInstance;
+		this.antFoodImageInstance = antFoodImageInstance;
+		this.antsCtx = antsCtx;
+
+		for (let i = 0; i < this.startingAntsCount; i++) {
+			const ant = new AntRayCasts(
+				antsCtx,
+				antImageInstance,
+				antFoodImageInstance,
+				antIcon,
+				{
+					id: this.antId + 1,
+					pos: {
+						x: this.x,
+						y: this.y,
+					},
+				},
+			);
+			this.ants.push(ant);
+			this.antId++;
+			this.totalAnts++;
+		}
+
+		this.drawAndFillMidpointCircle(
+			worldGrid,
+			this.x,
+			this.y,
+			ColonyOptions.COLONY_RADIUS,
+		);
+	}
+
+	reset(worldGrid: WorldGrid) {
+		if (
+			!this.antsCtx ||
+			!this.antImageInstance ||
+			!this.antFoodImageInstance ||
+			!this.antIcon
+		) {
+			return;
+		}
+
+		this.ants = [];
+		this.antId = 0;
+		this.totalAnts = 0;
+		this.colonyClock = 0;
+		this.food = 0;
+		this.totalFood = 0;
+
+		for (let i = 0; i < this.startingAntsCount; i++) {
+			const ant = new AntRayCasts(
+				this.antsCtx,
+				this.antImageInstance,
+				this.antFoodImageInstance,
+				this.antIcon,
+				{
+					id: this.antId + 1,
+					pos: {
+						x: this.x,
+						y: this.y,
+					},
+				},
+			);
+			this.ants.push(ant);
+			this.antId++;
+			this.totalAnts++;
+		}
+
+		this.drawAndFillMidpointCircle(
+			worldGrid,
+			this.x,
+			this.y,
+			ColonyOptions.COLONY_RADIUS,
+		);
+	}
+
 	drawMidpointCircle(
 		worldGrid: WorldGrid,
 		centerX: number,
@@ -196,45 +279,6 @@ export default class Colony {
 				cell.colony = true;
 			}
 		}
-	}
-
-	initialize(
-		antIcon: HTMLImageElement,
-		antImageInstance: HTMLCanvasElement,
-		antFoodImageInstance: HTMLCanvasElement,
-		antsCtx: CanvasRenderingContext2D,
-		worldGrid: WorldGrid,
-	) {
-		this.antIcon = antIcon;
-		this.antImageInstance = antImageInstance;
-		this.antFoodImageInstance = antFoodImageInstance;
-		this.antsCtx = antsCtx;
-
-		for (let i = 0; i < this.startingAntsCount; i++) {
-			const ant = new AntRayCasts(
-				antsCtx,
-				antImageInstance,
-				antFoodImageInstance,
-				antIcon,
-				{
-					id: this.antId + 1,
-					pos: {
-						x: this.x,
-						y: this.y,
-					},
-				},
-			);
-			this.ants.push(ant);
-			this.antId++;
-			this.totalAnts++;
-		}
-
-		this.drawAndFillMidpointCircle(
-			worldGrid,
-			this.x,
-			this.y,
-			ColonyOptions.COLONY_RADIUS,
-		);
 	}
 
 	updateAndDrawAnts(worldGrid: WorldGrid, dt: number, draw = true) {

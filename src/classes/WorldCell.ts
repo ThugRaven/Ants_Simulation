@@ -29,7 +29,17 @@ export default class WorldCell {
 		return this.food.pick();
 	}
 
-	drawWall(ctx: CanvasRenderingContext2D, x: number, y: number) {
+	drawWall(
+		ctx: CanvasRenderingContext2D,
+		x: number,
+		y: number,
+		includeDistances: boolean,
+	) {
+		// const ratio = Math.min(2, 0.5 + dist);
+		if (includeDistances) {
+			const ratio = Math.min(1, 1 - this.dist + 0.15);
+			ctx.fillStyle = `rgb(${163 * ratio}, ${163 * ratio}, ${163 * ratio})`;
+		}
 		ctx.fillRect(x, y, 1, 1);
 	}
 

@@ -1,10 +1,9 @@
 import Colony from './classes/Colony';
 import ImageInstance from './classes/ImageInstance';
-import MapGenerator from './classes/MapGenerator';
 import PerformanceStats from './classes/PerformanceStats';
-import { circle, line, rect } from './classes/Shapes';
-import { toggleButton, togglePanelAndButton } from './classes/Utils';
-import { Vector, createVector } from './classes/Vector';
+import { circle } from './classes/Shapes';
+import { getSeed, toggleButton, togglePanelAndButton } from './classes/Utils';
+import { createVector } from './classes/Vector';
 import WallDistance from './classes/WallDistance';
 import WorldCanvas, { calcWorldSize } from './classes/WorldCanvas';
 import WorldGrid from './classes/WorldGrid';
@@ -15,13 +14,16 @@ import {
 	BrushOptions,
 	CAMERA_MOVE_BY,
 	CanvasOptions,
+	ColonyOptions,
 	FoodOptions,
 	MIDDLE_BUTTON,
-	MapGeneratorOptions,
+	MapOptions,
 	MarkerOptions,
 	RIGHT_BUTTON,
 } from './constants';
 import './style.css';
+import { MapWorkerMessage } from './workers/mapWorker';
+import MapWorker from './workers/mapWorker?worker';
 
 const canvasContainer = document.getElementById(
 	'canvas-container',
@@ -65,6 +67,10 @@ const antLifespanPreview = document.querySelector<HTMLDivElement>(
 	'[data-lifespan-preview]',
 );
 const antLifespan = document.querySelector<HTMLSpanElement>('[data-lifespan]');
+const antMarkerPreview = document.querySelector<HTMLDivElement>(
+	'[data-marker-preview]',
+);
+const antMarker = document.querySelector<HTMLSpanElement>('[data-marker]');
 const btnTrack = document.getElementById('btn-track') as HTMLButtonElement;
 const btnRemove = document.getElementById('btn-remove') as HTMLButtonElement;
 
@@ -117,6 +123,12 @@ const brushSizePreview = document.querySelector(
 const brushSizeText = document.querySelector(
 	'[data-brush-size]',
 ) as HTMLSpanElement;
+const brushSizeMinus = document.getElementById(
+	'brush-size-minus',
+) as HTMLInputElement;
+const brushSizePlus = document.getElementById(
+	'brush-size-plus',
+) as HTMLInputElement;
 const brushSizeInput = document.getElementById(
 	'brushSizeInput',
 ) as HTMLInputElement;
@@ -177,6 +189,52 @@ const btnMarkersLayer = document.getElementById(
 	'btn-markers-layer',
 ) as HTMLButtonElement;
 
+// Confirm dialog
+const confirmDialog = document.getElementById(
+	'confirmDialog',
+) as HTMLDivElement;
+const btnCancel = document.getElementById('btn-cancel') as HTMLButtonElement;
+const btnConfirm = document.getElementById('btn-confirm') as HTMLButtonElement;
+
+const mapWorker = new MapWorker();
+mapWorker.onmessage = (event) => {
+	console.log(`Worker said : ${event.data.action}`);
+
+	if (event.data.action == 'GENERATE_PARTIAL') {
+		if (ctxWalls) {
+			ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
+			worldGrid.generateWalls(event.data.map);
+			worldGrid.drawWalls(ctxWalls, false);
+		}
+	}
+
+	if (event.data.action == 'GENERATE') {
+		const seed = event.data.seed;
+		const url = new URL(window.location.href);
+		if (seed) {
+			url.searchParams.set('seed', seed);
+			window.history.pushState({ path: url.href }, '', url.href);
+		}
+		mapSeedInput.value =
+			new URL(window.location.href).searchParams.get('seed') ?? '';
+
+		if (ctxWalls && ctxFood) {
+			ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
+			worldGrid.generateWalls(event.data.map);
+			console.log('calculate');
+
+			wallDistance.calculateDistances(worldGrid);
+			console.log('draw');
+			worldGrid.drawWalls(ctxWalls);
+
+			worldGrid.generateFood(event.data.foodMap);
+			wallDistance.calculateFoodDistances(worldGrid);
+		}
+
+		isGenerating = false;
+	}
+};
+
 let isRunning = false;
 let isDrawingMarkers = true;
 let isDrawingDensity = false;
@@ -192,12 +250,14 @@ let isFoodMode = false;
 let isPanMode = false;
 let isFirstTime = true;
 let isInInputField = false;
+let isGenerating = false;
 
 let isColonyPanelVisible = false;
 let isCellPanelVisible = false;
 let isAntPanelVisible = false;
 let isControlsPanelVisible = false;
 let isMapPanelVisible = false;
+let isConfirmDialogVisible = false;
 
 let lastUpdateTime = 0;
 const performanceStats = new PerformanceStats([
@@ -375,11 +435,20 @@ const worldGrid = new WorldGrid({
 
 const wallDistance = new WallDistance();
 
-const mapGenerator = new MapGenerator({
-	width: worldGrid.width,
-	height: worldGrid.height,
-	fillRatio: MapGeneratorOptions.FILL_RATIO,
-});
+generateMap(
+	{
+		action: 'SETUP',
+		mapGeneratorOptions: {
+			width: worldGrid.width,
+			height: worldGrid.height,
+			fillRatio: MapOptions.FILL_RATIO,
+			fillRatioFood: MapOptions.FILL_RATIO_FOOD,
+			threshold: MapOptions.THRESHOLD,
+			thresholdFood: MapOptions.THRESHOLD_FOOD,
+		},
+	},
+	true,
+);
 
 // Markers image data
 const markersImageData = ctxMarkers?.createImageData(
@@ -403,7 +472,7 @@ const colony = new Colony({
 });
 
 window.addEventListener('keydown', (e) => {
-	console.log(e);
+	// console.log(e);
 	if (isInInputField) {
 		return;
 	}
@@ -429,7 +498,27 @@ window.addEventListener('keydown', (e) => {
 			toggleTrack();
 			break;
 		case 'KeyC':
-			alignCamera();
+			if (isEditMode) {
+				clearEdit();
+			} else {
+				alignCamera();
+			}
+			break;
+		case 'KeyR':
+			if (e.ctrlKey) {
+				break;
+			}
+
+			if (colony.ants.length > ColonyOptions.COLONY_STARTING_ANTS) {
+				isRunning = true;
+				toggleLoop();
+				isConfirmDialogVisible = togglePanelAndButton(
+					isConfirmDialogVisible,
+					confirmDialog,
+				);
+			} else {
+				generateMap({ action: 'GENERATE', seed: getSeed(false) });
+			}
 			break;
 		case 'Delete':
 			removeAnt();
@@ -441,6 +530,33 @@ window.addEventListener('keydown', (e) => {
 			break;
 		case 'KeyF':
 			performanceStats.changeMode();
+			break;
+		case 'KeyQ':
+			if (isEditMode) {
+				toggleWallMode();
+			}
+			break;
+		case 'KeyE':
+			if (isConfirmDialogVisible) {
+				resetSimulation();
+				generateMap({ action: 'GENERATE', seed: getSeed(false) });
+				isConfirmDialogVisible = togglePanelAndButton(
+					isConfirmDialogVisible,
+					confirmDialog,
+				);
+				break;
+			}
+
+			if (isEditMode) {
+				toggleFoodMode();
+			} else {
+				toggleEditMode();
+			}
+			break;
+		case 'KeyS':
+			if (isEditMode) {
+				saveEdit();
+			}
 			break;
 		case 'ArrowUp':
 			moveCamera(0, CAMERA_MOVE_BY);
@@ -467,6 +583,13 @@ window.addEventListener('keydown', (e) => {
 			changeBrushSize(BrushOptions.STEP);
 			break;
 		case 'Escape':
+			if (isConfirmDialogVisible) {
+				isConfirmDialogVisible = togglePanelAndButton(
+					isConfirmDialogVisible,
+					confirmDialog,
+				);
+			}
+
 			if (isControlsPanelVisible) {
 				isControlsPanelVisible = togglePanelAndButton(
 					isControlsPanelVisible,
@@ -475,6 +598,9 @@ window.addEventListener('keydown', (e) => {
 			}
 			if (isMapPanelVisible) {
 				isMapPanelVisible = togglePanelAndButton(isMapPanelVisible, mapPanel);
+			}
+			if (isEditMode) {
+				toggleEditMode();
 			}
 			break;
 		default:
@@ -538,6 +664,14 @@ btnPlay.addEventListener('click', () => {
 
 btnPause.addEventListener('click', () => {
 	toggleLoop();
+});
+
+brushSizeMinus.addEventListener('click', () => {
+	changeBrushSize(-BrushOptions.STEP);
+});
+
+brushSizePlus.addEventListener('click', () => {
+	changeBrushSize(BrushOptions.STEP);
 });
 
 btnColonyPanel.addEventListener('click', () => {
@@ -614,6 +748,22 @@ btnGenerateSeed.addEventListener('click', () => {
 	mapSeedInput.value = seed;
 });
 
+btnConfirm.addEventListener('click', () => {
+	resetSimulation();
+	generateMap({ action: 'GENERATE', seed: getSeed(false) });
+	isConfirmDialogVisible = togglePanelAndButton(
+		isConfirmDialogVisible,
+		confirmDialog,
+	);
+});
+
+btnCancel.addEventListener('click', () => {
+	isConfirmDialogVisible = togglePanelAndButton(
+		isConfirmDialogVisible,
+		confirmDialog,
+	);
+});
+
 btnAntsLayer.addEventListener('click', () => {
 	toggleButton(colony.isDrawingAnts, btnAntsLayer);
 	toggleAnts();
@@ -649,10 +799,14 @@ mapForm.addEventListener('submit', (e) => {
 	isMapPanelVisible = true;
 	isMapPanelVisible = togglePanelAndButton(isMapPanelVisible, mapPanel);
 	if (ctxWalls && mapSeed) {
-		ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
-		mapGenerator.generateMap(worldGrid, false, mapSeed);
-		worldGrid.drawWalls(ctxWalls);
-		wallDistance.calculateDistances(worldGrid);
+		// ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
+		// mapGenerator.generateMap(false, mapSeed);
+		// worldGrid.drawWalls(ctxWalls);
+		// wallDistance.calculateDistances(worldGrid);
+		generateMap({
+			action: 'GENERATE',
+			seed: getSeed(false, mapSeed),
+		});
 	}
 	e.preventDefault();
 });
@@ -661,16 +815,22 @@ btnGenerateSaveMap.addEventListener('click', () => {
 	isMapPanelVisible = true;
 	isMapPanelVisible = togglePanelAndButton(isMapPanelVisible, mapPanel);
 	if (ctxWalls) {
-		ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
-		mapGenerator.generateMap(worldGrid, false);
-		worldGrid.drawWalls(ctxWalls);
-		wallDistance.calculateDistances(worldGrid);
-		mapSeedInput.value =
-			new URL(window.location.href).searchParams.get('seed') ?? '';
+		// ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
+		// mapGenerator.generateMap(false);
+		// worldGrid.drawWalls(ctxWalls);
+		// wallDistance.calculateDistances(worldGrid);
+		// mapSeedInput.value =
+		// 	new URL(window.location.href).searchParams.get('seed') ?? '';
+		// console.log('btnGenerateSaveMap');
+		generateMap({ action: 'GENERATE', seed: getSeed(false) });
 	}
 });
 
 btnEditMode.addEventListener('click', () => {
+	toggleEditMode();
+});
+
+function toggleEditMode() {
 	isEditMode = togglePanelAndButton(isEditMode, editPanel, btnEditMode);
 	if (isEditMode) {
 		canvasEdit.style.display = 'block';
@@ -679,25 +839,45 @@ btnEditMode.addEventListener('click', () => {
 		canvasEdit.style.display = 'none';
 		canvasEditPreview.style.display = 'none';
 	}
-});
+}
 
 btnWallBrush.addEventListener('click', () => {
+	toggleWallMode();
+});
+
+function toggleWallMode() {
+	if (isWallMode && !isFoodMode) {
+		return;
+	}
+
 	isWallMode = toggleButton(isWallMode, btnWallBrush);
 	if (isWallMode) {
 		isFoodMode = true;
 		isFoodMode = toggleButton(isWallMode, btnFoodBrush);
 	}
-});
+}
 
 btnFoodBrush.addEventListener('click', () => {
+	toggleFoodMode();
+});
+
+function toggleFoodMode() {
+	if (isFoodMode && !isWallMode) {
+		return;
+	}
+
 	isFoodMode = toggleButton(isFoodMode, btnFoodBrush);
 	if (isFoodMode) {
 		isWallMode = true;
 		isWallMode = toggleButton(isFoodMode, btnWallBrush);
 	}
-});
+}
 
 btnSave.addEventListener('click', () => {
+	saveEdit();
+});
+
+function saveEdit() {
 	if (ctxEdit && ctxWalls) {
 		const imageData = ctxEdit.getImageData(
 			0,
@@ -740,17 +920,22 @@ btnSave.addEventListener('click', () => {
 			}
 		}
 		worldGrid.addBorderWalls();
+		wallDistance.calculateDistances(worldGrid);
 		worldGrid.drawWalls(ctxWalls);
 		ctxEdit.clearRect(0, 0, worldGrid.width, worldGrid.height);
-
-		wallDistance.calculateDistances(worldGrid);
 
 		// Hide edit panel after save
 		isEditMode = togglePanelAndButton(isEditMode, editPanel, btnEditMode);
 		canvasEdit.style.display = 'none';
 		canvasEditPreview.style.display = 'none';
 	}
-});
+}
+
+function clearEdit() {
+	if (ctxEdit && ctxWalls) {
+		ctxEdit.clearRect(0, 0, worldGrid.width, worldGrid.height);
+	}
+}
 
 brushSizeInput.addEventListener('input', () => {
 	brushSize = parseInt(brushSizeInput.value);
@@ -868,12 +1053,19 @@ function setup() {
 
 	colony.drawColony(ctxColony);
 
-	worldGrid.addBorderWalls();
-	worldGrid.drawWalls(ctxWalls);
+	// worldGrid.addBorderWalls();
+	// worldGrid.drawWalls(ctxWalls);
 
-	mapGenerator.generateMap(worldGrid, true);
-	worldGrid.drawWalls(ctxWalls);
-	wallDistance.calculateDistances(worldGrid);
+	// worldGrid.generateWalls(mapGenerator.generateMap(getSeed(true)));
+	// wallDistance.calculateDistances(worldGrid);
+	// worldGrid.drawWalls(ctxWalls);
+	// console.log('seed', getSeed(true));
+
+	generateMap({
+		action: 'GENERATE',
+		setup: true,
+		seed: getSeed(true),
+	});
 
 	toggleButton(false, btnAntsLayer);
 	toggleButton(!isDrawingDensity, btnDensityLayer);
@@ -991,6 +1183,18 @@ function toggleAnts() {
 	colony.isDrawingAnts = toggleButton(colony.isDrawingAnts, btnAntsLayer);
 }
 
+export function generateMap(message: MapWorkerMessage, skipLoading = false) {
+	if (!isGenerating || skipLoading) {
+		isGenerating = skipLoading ? false : true;
+		mapWorker.postMessage(message);
+	}
+}
+
+function resetSimulation() {
+	worldGrid.reset();
+	colony.reset(worldGrid);
+}
+
 function selectAnt() {
 	const mouseVector = createVector(
 		mouseX / canvasScale - cameraOffset.x,
@@ -1037,7 +1241,9 @@ function updateAntInfo() {
 		!antVel ||
 		!antState ||
 		!antLifespanPreview ||
-		!antLifespan
+		!antLifespan ||
+		!antMarkerPreview ||
+		!antMarker
 	) {
 		return;
 	}
@@ -1072,6 +1278,13 @@ function updateAntInfo() {
 	antLifespan.textContent = `${selectedAnt.internalClock.toFixed(
 		2,
 	)} | ${selectedAnt.maxAutonomy.toFixed(2)}`;
+	const intensity =
+		AntOptions.MARKER_DEFAULT_INTENSITY *
+		Math.exp(-0.15 * selectedAnt.markerIntensityClock);
+	antMarkerPreview.style.setProperty('--width', `${(intensity / 1) * 100}%`);
+	antMarker.textContent = `${intensity.toFixed(
+		2,
+	)} | ${1} | ${selectedAnt.markerIntensityClock.toFixed(2)}`;
 }
 
 function updateCellInfo(x: number, y: number) {
@@ -1223,7 +1436,7 @@ function zoomCanvas(event: WheelEvent) {
 }
 
 function panCanvas(event: MouseEvent) {
-	console.log(event);
+	// console.log(event);
 
 	cameraOffset.x = event.clientX / canvasScale - panStart.x;
 	cameraOffset.y = (event.clientY - offsetY) / canvasScale - panStart.y;
@@ -1237,12 +1450,12 @@ function panCanvas(event: MouseEvent) {
 		(event.clientX - canvasCenter.x) / canvasScale - panStart.x;
 	cameraOffsetTemp.y =
 		(event.clientY - offsetY - canvasCenter.y) / canvasScale - panStart.y;
-	console.log(`--- START ---`);
+	// console.log(`--- START ---`);
 
-	console.log(cameraOffset);
-	console.log(canvasCenter);
-	console.log(canvasScale);
-	console.log(cameraOffsetTemp);
+	// console.log(cameraOffset);
+	// console.log(canvasCenter);
+	// console.log(canvasScale);
+	// console.log(cameraOffsetTemp);
 
 	const zoomOffset = {
 		x: 0,
@@ -1252,23 +1465,23 @@ function panCanvas(event: MouseEvent) {
 	zoomOffset.x = event.clientX / canvasScale - cameraOffset.x;
 	zoomOffset.y = (event.clientY - offsetY) / canvasScale - cameraOffset.y;
 
-	console.log(zoomOffset);
-	console.log(event.clientX, event.clientY);
+	// console.log(zoomOffset);
+	// console.log(event.clientX, event.clientY);
 	cameraCenter.x =
 		(event.clientX - window.innerWidth / 2) / canvasScale - panStart.x;
 	cameraCenter.y =
 		(event.clientY - offsetY - window.innerHeight / 2) / canvasScale -
 		panStart.y;
-	console.log(cameraCenter);
-	console.log(window.innerWidth, window.innerHeight);
+	// console.log(cameraCenter);
+	// console.log(window.innerWidth, window.innerHeight);
 
 	(cameraCenter.x =
 		cameraCenter.x < 0 ? Math.abs(cameraCenter.x) : cameraCenter.x * -1),
 		(cameraCenter.y =
 			cameraCenter.y < 0 ? Math.abs(cameraCenter.y) : cameraCenter.y * -1),
-		console.log(`--- END ---`);
+		// console.log(`--- END ---`);
 
-	setCamera();
+		setCamera();
 }
 
 function moveCamera(x: number, y: number) {
@@ -1386,6 +1599,7 @@ function main(currentTime: number) {
 	performanceStats.startMeasurement('grid');
 	if (isDrawingMarkers && markersImageData) {
 		worldGrid.drawMarkers(ctxMarkers, markersImageData, isRunning);
+		// TODO: Remember the state of density view when switching to markers
 	} else if (isDrawingDensity && densityImageData) {
 		worldGrid.drawDensity(ctxMarkers, densityImageData, isRunning);
 	} else if (isDrawingAdvancedDensity && densityImageData) {
