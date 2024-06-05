@@ -630,8 +630,6 @@ canvasContainer.addEventListener('contextmenu', (e) => {
 	e.preventDefault();
 	if (isEditMode) return;
 	const target = createVector(
-		// (mouseX - cameraOffset.x * canvasScale) / canvasScale,
-		// (mouseY - cameraOffset.y * canvasScale) / canvasScale,
 		Math.floor((mouseX / canvasScale - cameraOffset.x) / MarkerOptions.SIZE),
 		Math.floor((mouseY / canvasScale - cameraOffset.y) / MarkerOptions.SIZE),
 	);
@@ -799,10 +797,6 @@ mapForm.addEventListener('submit', (e) => {
 	isMapPanelVisible = true;
 	isMapPanelVisible = togglePanelAndButton(isMapPanelVisible, mapPanel);
 	if (ctxWalls && mapSeed) {
-		// ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
-		// mapGenerator.generateMap(false, mapSeed);
-		// worldGrid.drawWalls(ctxWalls);
-		// wallDistance.calculateDistances(worldGrid);
 		generateMap({
 			action: 'GENERATE',
 			seed: getSeed(false, mapSeed),
@@ -815,13 +809,6 @@ btnGenerateSaveMap.addEventListener('click', () => {
 	isMapPanelVisible = true;
 	isMapPanelVisible = togglePanelAndButton(isMapPanelVisible, mapPanel);
 	if (ctxWalls) {
-		// ctxWalls.clearRect(0, 0, worldGrid.width, worldGrid.height);
-		// mapGenerator.generateMap(false);
-		// worldGrid.drawWalls(ctxWalls);
-		// wallDistance.calculateDistances(worldGrid);
-		// mapSeedInput.value =
-		// 	new URL(window.location.href).searchParams.get('seed') ?? '';
-		// console.log('btnGenerateSaveMap');
 		generateMap({ action: 'GENERATE', seed: getSeed(false) });
 	}
 });
@@ -1002,35 +989,6 @@ function setup() {
 		antImage.src = image64;
 		antImage.onload = () => {
 			const antImageInstance = canvasAntInstance.createInstance((ctx) => {
-				// const temp = new ImageInstance({
-				// 	width: AntOptions.IMG_WIDTH,
-				// 	height: AntOptions.IMG_HEIGHT,
-				// });
-				// ctx.imageSmoothingEnabled = false;
-
-				// temp.createInstance((tempCtx, tempCanvas) => {
-				// 	tempCanvas.width = antImage.width * 0.5;
-				// 	tempCanvas.height = antImage.height * 0.5;
-				// 	tempCtx.drawImage(
-				// 		antImage,
-				// 		0,
-				// 		0,
-				// 		tempCanvas.width,
-				// 		tempCanvas.height,
-				// 	);
-				// 	ctx.drawImage(
-				// 		tempCanvas,
-				// 		0,
-				// 		0,
-				// 		tempCanvas.width,
-				// 		tempCanvas.height,
-				// 		0,
-				// 		0,
-				// 		canvasAntInstance.width,
-				// 		canvasAntInstance.height,
-				// 	);
-				// });
-
 				ctx.drawImage(antImage, 0, 0);
 			});
 			const antFoodImageInstance = canvasAntFoodInstance.createInstance(
@@ -1052,14 +1010,6 @@ function setup() {
 	}
 
 	colony.drawColony(ctxColony);
-
-	// worldGrid.addBorderWalls();
-	// worldGrid.drawWalls(ctxWalls);
-
-	// worldGrid.generateWalls(mapGenerator.generateMap(getSeed(true)));
-	// wallDistance.calculateDistances(worldGrid);
-	// worldGrid.drawWalls(ctxWalls);
-	// console.log('seed', getSeed(true));
 
 	generateMap({
 		action: 'GENERATE',
@@ -1334,7 +1284,6 @@ function updateColonyInfo() {
 
 function updatePerformanceDisplay() {
 	const avgMap = performanceStats.update();
-	// console.log(...avgMap);
 
 	fpsDisplay.textContent = `${Math.round(avgMap.get('fps') * 100) / 100} fps`;
 	msDisplay.textContent = `${Math.round(avgMap.get('ms') * 100) / 100} ms`;
@@ -1436,8 +1385,6 @@ function zoomCanvas(event: WheelEvent) {
 }
 
 function panCanvas(event: MouseEvent) {
-	// console.log(event);
-
 	cameraOffset.x = event.clientX / canvasScale - panStart.x;
 	cameraOffset.y = (event.clientY - offsetY) / canvasScale - panStart.y;
 
@@ -1450,12 +1397,6 @@ function panCanvas(event: MouseEvent) {
 		(event.clientX - canvasCenter.x) / canvasScale - panStart.x;
 	cameraOffsetTemp.y =
 		(event.clientY - offsetY - canvasCenter.y) / canvasScale - panStart.y;
-	// console.log(`--- START ---`);
-
-	// console.log(cameraOffset);
-	// console.log(canvasCenter);
-	// console.log(canvasScale);
-	// console.log(cameraOffsetTemp);
 
 	const zoomOffset = {
 		x: 0,
@@ -1465,22 +1406,16 @@ function panCanvas(event: MouseEvent) {
 	zoomOffset.x = event.clientX / canvasScale - cameraOffset.x;
 	zoomOffset.y = (event.clientY - offsetY) / canvasScale - cameraOffset.y;
 
-	// console.log(zoomOffset);
-	// console.log(event.clientX, event.clientY);
 	cameraCenter.x =
 		(event.clientX - window.innerWidth / 2) / canvasScale - panStart.x;
 	cameraCenter.y =
 		(event.clientY - offsetY - window.innerHeight / 2) / canvasScale -
 		panStart.y;
-	// console.log(cameraCenter);
-	// console.log(window.innerWidth, window.innerHeight);
 
 	(cameraCenter.x =
 		cameraCenter.x < 0 ? Math.abs(cameraCenter.x) : cameraCenter.x * -1),
 		(cameraCenter.y =
 			cameraCenter.y < 0 ? Math.abs(cameraCenter.y) : cameraCenter.y * -1),
-		// console.log(`--- END ---`);
-
 		setCamera();
 }
 
@@ -1559,8 +1494,6 @@ function setCamera() {
 	scheduleRegularDraw = true;
 }
 
-// let angle = Math.PI * 0.5;
-
 function main(currentTime: number) {
 	if (
 		ctxMarkers == null ||
@@ -1618,11 +1551,6 @@ function main(currentTime: number) {
 		mouseY / canvasScale - cameraOffset.y,
 	);
 
-	const center = createVector(
-		cameraCenter.x > 0 ? Math.abs(cameraCenter.x) : cameraCenter.x * -1,
-		cameraCenter.y > 0 ? Math.abs(cameraCenter.y) : cameraCenter.y * -1,
-	);
-
 	if (isEditMode) {
 		// Draw brush preview
 		ctxEditPreview.clearRect(0, 0, worldGrid.width, worldGrid.height);
@@ -1664,26 +1592,6 @@ function main(currentTime: number) {
 		ctxAnts.fillStyle = 'red';
 		circle(ctxAnts, target.x, target.y, 4);
 		updateCellInfo(target.x, target.y);
-
-		// if (antsDrawClock > ANTS_DRAW_PERIOD / canvasScale) {
-		// 	ctxAnts.fillStyle = 'rgb(255, 0, 0, 0.1)';
-		// 	const padding = {
-		// 		x: AntOptions.IMG_HEIGHT * canvasScale,
-		// 		y: AntOptions.IMG_HEIGHT * canvasScale,
-		// 	};
-
-		// 	const size = {
-		// 		x: (window.innerWidth + padding.x) / canvasScale,
-		// 		y: (window.innerHeight - offsetY + padding.y) / canvasScale,
-		// 	};
-		// 	rect(
-		// 		ctxAnts,
-		// 		center.x - size.x / 2,
-		// 		center.y - offsetY / 2 / canvasScale - size.y / 2,
-		// 		size.x,
-		// 		size.y,
-		// 	);
-		// }
 	}
 
 	updateColonyInfo();
@@ -1693,100 +1601,6 @@ function main(currentTime: number) {
 		performanceStats.endMeasurement('all');
 		updatePerformanceDisplay();
 	}
-
-	// if (readyToDraw) {
-	// const mouseCell = new Vector(target.x, target.y);
-	// const rayStart = new Vector(width / 2, height / 2);
-	// const rayDir = mouseCell.copy().sub(rayStart).normalize();
-
-	// ctxAnts.fillStyle = 'red';
-	// circle(ctxAnts, rayStart.x, rayStart.y, 4);
-	// ctxAnts.fillStyle = 'green';
-	// circle(ctxAnts, mouseCell.x, mouseCell.y, 4);
-	// ctxAnts.strokeStyle = 'white';
-	// line(ctxAnts, rayStart.x, rayStart.y, mouseCell.x, mouseCell.y);
-
-	// angle += Math.PI * 0.005;
-	// const rayCast = worldGrid.rayCast(
-	// 	mouseCell,
-	// 	new Direction(
-	// 		angle + random(Math.PI * 0.5, Math.PI * 1.5),
-	// 		Math.PI * 0.5,
-	// 		5,
-	// 	),
-	// 	2000,
-	// );
-
-	// const rayUnitStepSize = new Vector(
-	// 	Math.sqrt(1 + (rayDir.y / rayDir.x) * (rayDir.y / rayDir.x)),
-	// 	Math.sqrt(1 + (rayDir.x / rayDir.y) * (rayDir.x / rayDir.y)),
-	// );
-
-	// const mapCheck = rayStart.copy();
-	// const rayLength = new Vector(0, 0);
-	// const step = new Vector(0, 0);
-
-	// if (rayDir.x < 0) {
-	// 	step.x = -1;
-	// 	rayLength.x = (rayStart.x - Math.round(mapCheck.x)) * rayUnitStepSize.x;
-	// } else {
-	// 	step.x = 1;
-	// 	rayLength.x = (Math.round(mapCheck.x + 1) - rayStart.x) * rayUnitStepSize.x;
-	// }
-
-	// if (rayDir.y < 0) {
-	// 	step.y = -1;
-	// 	rayLength.y = (rayStart.y - Math.round(mapCheck.y)) * rayUnitStepSize.y;
-	// } else {
-	// 	step.y = 1;
-	// 	rayLength.y = (Math.round(mapCheck.y + 1) - rayStart.y) * rayUnitStepSize.y;
-	// }
-
-	// let tileFound = false;
-	// const maxDistance = 2000;
-	// let distance = 0;
-	// while (!tileFound && distance < maxDistance) {
-	// 	if (rayLength.x < rayLength.y) {
-	// 		mapCheck.x += step.x;
-	// 		distance = rayLength.x;
-	// 		rayLength.x += rayUnitStepSize.x;
-	// 	} else {
-	// 		mapCheck.y += step.y;
-	// 		distance = rayLength.y;
-	// 		rayLength.y += rayUnitStepSize.y;
-	// 	}
-	// 	const cell = worldGrid.getCellFromCoordsSafe(mapCheck.x, mapCheck.y);
-
-	// 	if (cell) {
-	// 		cell.density = [100, 100, 100];
-	// 		// cell.marker = new Marker([0.1, 0]);
-	// 	}
-	// 	if (
-	// 		mapCheck.x >= 0 &&
-	// 		mapCheck.x < width &&
-	// 		mapCheck.y >= 0 &&
-	// 		mapCheck.y < height
-	// 	) {
-	// 		// console.log(worldGrid.getCellFromCoordsSafe(mapCheck.x, mapCheck.y));
-	// 		const cell = worldGrid.getCellFromCoordsSafe(mapCheck.x, mapCheck.y);
-
-	// 		if (worldGrid.getCellFromCoordsSafe(mapCheck.x, mapCheck.y)?.wall == 1) {
-	// 			console.log('Tile found');
-	// 			tileFound = true;
-	// 		}
-	// 	}
-	// }
-
-	// let intersection = new Vector();
-	// if (tileFound) {
-	// 	intersection = rayStart.add(rayDir.mult(distance));
-	// }
-
-	// if (rayCast) {
-	// 	ctxAnts.fillStyle = 'red';
-	// 	circle(ctxAnts, rayCast.intersection.x, rayCast.intersection.y, 10);
-	// }
-	// }
 
 	if (readyToDraw) {
 		scheduleRegularDraw = false;
