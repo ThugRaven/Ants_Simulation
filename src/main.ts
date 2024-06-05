@@ -14,7 +14,6 @@ import {
 	BrushOptions,
 	CAMERA_MOVE_BY,
 	CanvasOptions,
-	ColonyOptions,
 	FoodOptions,
 	MIDDLE_BUTTON,
 	MapOptions,
@@ -793,6 +792,7 @@ mapForm.addEventListener('submit', (e) => {
 	isMapPanelVisible = true;
 	isMapPanelVisible = togglePanelAndButton(isMapPanelVisible, mapPanel);
 	if (ctxWalls && mapSeed) {
+		resetSimulation();
 		generateMap({
 			action: 'GENERATE',
 			seed: getSeed(false, mapSeed),
@@ -805,6 +805,7 @@ btnGenerateSaveMap.addEventListener('click', () => {
 	isMapPanelVisible = true;
 	isMapPanelVisible = togglePanelAndButton(isMapPanelVisible, mapPanel);
 	if (ctxWalls) {
+		resetSimulation();
 		generateMap({ action: 'GENERATE', seed: getSeed(false) });
 	}
 });
