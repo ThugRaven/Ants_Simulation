@@ -509,16 +509,12 @@ window.addEventListener('keydown', (e) => {
 				break;
 			}
 
-			if (colony.ants.length > ColonyOptions.COLONY_STARTING_ANTS) {
-				isRunning = true;
-				toggleLoop();
-				isConfirmDialogVisible = togglePanelAndButton(
-					isConfirmDialogVisible,
-					confirmDialog,
-				);
-			} else {
-				generateMap({ action: 'GENERATE', seed: getSeed(false) });
-			}
+			isRunning = true;
+			toggleLoop();
+			isConfirmDialogVisible = togglePanelAndButton(
+				isConfirmDialogVisible,
+				confirmDialog,
+			);
 			break;
 		case 'Delete':
 			removeAnt();
