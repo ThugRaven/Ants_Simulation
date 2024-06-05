@@ -7,6 +7,8 @@ export interface MapGeneratorOptions {
 	height: number;
 	fillRatio: number;
 	fillRatioFood: number;
+	threshold: number;
+	thresholdFood: number;
 }
 
 interface Coord {
@@ -31,9 +33,8 @@ export default class MapGenerator {
 		this.foodMap = Array.from(Array(this.width), () => new Array(this.height));
 		this.fillRatio = mapGeneratorOptions.fillRatio;
 		this.fillRatioFood = mapGeneratorOptions.fillRatioFood;
-		// this.threshold = (this.width + this.height) / 2;
-		this.threshold = 50;
-		this.thresholdFood = 0;
+		this.threshold = mapGeneratorOptions.threshold;
+		this.thresholdFood = mapGeneratorOptions.thresholdFood;
 	}
 
 	initialize(mapGeneratorOptions: MapGeneratorOptions) {
@@ -43,9 +44,8 @@ export default class MapGenerator {
 		this.foodMap = Array.from(Array(this.width), () => new Array(this.height));
 		this.fillRatio = mapGeneratorOptions.fillRatio;
 		this.fillRatioFood = mapGeneratorOptions.fillRatioFood;
-		// this.threshold = (this.width + this.height) / 2;
-		this.threshold = 50;
-		this.thresholdFood = 0;
+		this.threshold = mapGeneratorOptions.threshold;
+		this.thresholdFood = mapGeneratorOptions.thresholdFood;
 	}
 
 	generateMap(seed: string) {
@@ -66,11 +66,11 @@ export default class MapGenerator {
 		}
 
 		this.addBorderWalls();
-		this.processMap();
+		const rooms = this.processMap();
 		for (let i = 0; i < 5; i++) {
 			this.map = this.smoothMap(this.map, 1);
 		}
-		this.foodMap = this.generateFoodMap(seed);
+		this.foodMap = this.generateFoodMap(seed, rooms);
 
 		return { map: this.map, foodMap: this.foodMap };
 	}
@@ -82,6 +82,7 @@ export default class MapGenerator {
 		console.log('Generate Map Steps');
 		let step = 0;
 		const rng = seedrandom(seed);
+		let rooms: Room[] | undefined;
 
 		const generateStep = () => {
 			if (step == 0) {
@@ -107,7 +108,7 @@ export default class MapGenerator {
 			}
 
 			if (step == 4) {
-				this.processMap();
+				rooms = this.processMap();
 				generate(this.map, this.foodMap, false);
 			}
 
@@ -119,7 +120,7 @@ export default class MapGenerator {
 			}
 
 			if (step == 6) {
-				this.foodMap = this.generateFoodMap(seed);
+				this.foodMap = this.generateFoodMap(seed, rooms);
 				generate(this.map, this.foodMap, true);
 			}
 
@@ -135,19 +136,34 @@ export default class MapGenerator {
 		generateStep();
 	}
 
-	generateFoodMap(seed: string) {
+	generateFoodMap(seed: string, rooms?: Room[]) {
 		console.log('Generate Food Map');
 		console.log(seed);
 		if (!seed) {
 			return this.foodMap;
 		}
 
+		for (let x = 0; x < this.foodMap.length; x++) {
+			for (let y = 0; y < this.foodMap[x].length; y++) {
+				this.foodMap[x][y] = 0;
+			}
+		}
+
 		const rng = seedrandom(seed);
 
-		this.foodMap = this.randomFillMap(rng, this.fillRatioFood, 100);
+		this.randomFillRegions(rng, 0.5, 100, rooms);
+		for (let i = 0; i < 5; i++) {
+			this.foodMap = this.smoothMap(this.foodMap, 100, true);
+		}
 
+		this.foodMap = this.randomFillMap(
+			rng,
+			this.fillRatioFood,
+			100,
+			this.foodMap,
+		);
 		for (let i = 0; i < 20; i++) {
-			this.foodMap = this.smoothMap(this.foodMap, 100);
+			this.foodMap = this.smoothMap(this.foodMap, 100, false);
 		}
 
 		const foodRegions = this.getRegions(this.foodMap, 100);
@@ -168,21 +184,33 @@ export default class MapGenerator {
 		return this.foodMap;
 	}
 
-	randomFillMap(rng: seedrandom.PRNG, fillRatio: number, cellType: number) {
-		const map = Array.from(Array(this.width), () => new Array(this.height));
+	randomFillMap(
+		rng: seedrandom.PRNG,
+		fillRatio: number,
+		cellType: number,
+		foodMap?: number[][],
+	) {
+		const map = foodMap
+			? foodMap
+			: Array.from(Array(this.width), () => new Array(this.height));
 
-		for (
-			let x = MapOptions.BORDER_SIZE;
-			x < this.width - MapOptions.BORDER_SIZE;
-			x++
-		) {
-			for (
-				let y = MapOptions.BORDER_SIZE;
-				y < this.height - MapOptions.BORDER_SIZE;
-				y++
-			) {
+		for (let x = 0; x < this.width; x++) {
+			for (let y = 0; y < this.height; y++) {
+				if (
+					cellType === 1 &&
+					((x >= 0 && x <= MapOptions.BORDER_SIZE) ||
+						(x >= this.width - MapOptions.BORDER_SIZE && x <= this.width) ||
+						(y >= 0 && y <= MapOptions.BORDER_SIZE) ||
+						(y >= this.height - MapOptions.BORDER_SIZE && y <= this.height))
+				) {
+					map[x][y] = 1;
+					continue;
+				}
+
 				if (cellType === 100 && this.map[x][y]) {
 					map[x][y] = 0;
+				} else if (cellType === 100 && map[x][y] === 100) {
+					map[x][y] = 100;
 				} else {
 					map[x][y] =
 						seededRandom(0, 1, rng) < fillRatio
@@ -197,7 +225,33 @@ export default class MapGenerator {
 		return map;
 	}
 
-	smoothMap(map: number[][], cellType: number) {
+	randomFillRegions(
+		rng: seedrandom.PRNG,
+		fillRatio: number,
+		cellType: number,
+		rooms?: Room[],
+	) {
+		if (!rooms) {
+			return;
+		}
+
+		for (const room of rooms) {
+			if (room.roomSize < 1000) {
+				for (let i = 0; i < room.tiles.length; i++) {
+					const cell = room.tiles[i];
+					this.foodMap[cell.x][cell.y] =
+						seededRandom(0, 1, rng) <
+						(room.roomSize < 500 ? 1 : room.roomSize < 1000 ? 0.75 : fillRatio)
+							? cellType === 100
+								? 100
+								: 1
+							: 0;
+				}
+			}
+		}
+	}
+
+	smoothMap(map: number[][], cellType: number, food = false) {
 		const mapCopy = [];
 		for (let i = 0; i < map.length; i++) {
 			mapCopy[i] = map[i].slice();
@@ -205,9 +259,15 @@ export default class MapGenerator {
 
 		for (let x = 0; x < this.width; x++) {
 			for (let y = 0; y < this.height; y++) {
-				const count = this.getNeighbourCount(map, x, y);
+				const count = this.getNeighbourCount(map, x, y, food);
 				if (count > 4) {
-					mapCopy[x][y] = cellType == 100 ? 100 : 1;
+					if (food) {
+						if (!this.map[x][y]) {
+							mapCopy[x][y] = 100;
+						}
+					} else {
+						mapCopy[x][y] = cellType === 100 ? 100 : 1;
+					}
 				} else if (count < 4) {
 					mapCopy[x][y] = 0;
 				}
@@ -218,13 +278,22 @@ export default class MapGenerator {
 		return map;
 	}
 
-	getNeighbourCount(map: number[][], cellX: number, cellY: number) {
+	getNeighbourCount(
+		map: number[][],
+		cellX: number,
+		cellY: number,
+		food = false,
+	) {
 		let count = 0;
 		for (let x = cellX - 1; x <= cellX + 1; x++) {
 			for (let y = cellY - 1; y <= cellY + 1; y++) {
 				if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
 					if (x !== cellX || y !== cellY) {
-						count += map[x][y] == 1 || map[x][y] == 100 ? 1 : 0;
+						if (food) {
+							count += this.map[x][y] == 1 || map[x][y] == 100 ? 1 : 0;
+						} else {
+							count += map[x][y] == 1 || map[x][y] == 100 ? 1 : 0;
+						}
 					}
 				} else {
 					count++;
@@ -286,10 +355,12 @@ export default class MapGenerator {
 			}
 		}
 
+		const rooms = survivingRooms;
 		survivingRooms.sort((roomA, roomB) => roomB.roomSize - roomA.roomSize);
 		survivingRooms[0].isMainRoom = true;
 		survivingRooms[0].isAccessibleFromMainRoom = true;
 		this.connectClosestRooms(survivingRooms);
+		return rooms;
 	}
 
 	connectClosestRooms(
@@ -468,7 +539,7 @@ export default class MapGenerator {
 		for (let x = 0; x < this.width; x++) {
 			for (let y = 0; y < this.height; y++) {
 				if (mapFlags[x][y] === 0 && map[x][y] === cellType) {
-					const newRegion = this.getRegionCells(map, x, y);
+					const newRegion = this.getRegionCells(map, x, y, cellType === 100);
 
 					if (!newRegion) {
 						return;
@@ -477,7 +548,7 @@ export default class MapGenerator {
 					regions.push(newRegion);
 
 					for (const cell of newRegion) {
-						mapFlags[cell.x][cell.y] = 1;
+						mapFlags[cell.x][cell.y] = cellType === 100 ? 100 : 1;
 					}
 				}
 			}
@@ -486,7 +557,7 @@ export default class MapGenerator {
 		return regions;
 	}
 
-	getRegionCells(map: number[][], cellX: number, cellY: number) {
+	getRegionCells(map: number[][], cellX: number, cellY: number, food: boolean) {
 		const cells: Coord[] = [];
 		const mapFlags = Array.from(Array(this.width), () =>
 			new Array(this.height).fill(0),
@@ -495,7 +566,7 @@ export default class MapGenerator {
 
 		const queue: Coord[] = [];
 		queue.push({ x: cellX, y: cellY });
-		mapFlags[cellX][cellY] = 1;
+		mapFlags[cellX][cellY] = food ? 100 : 1;
 
 		while (queue.length > 0) {
 			const cell = queue.shift();
@@ -509,7 +580,7 @@ export default class MapGenerator {
 				for (let y = cell.y - 1; y <= cell.y + 1; y++) {
 					if (this.isInMapRange(x, y) && (y === cell.y || x === cell.x)) {
 						if (mapFlags[x][y] === 0 && map[x][y] === cellType) {
-							mapFlags[x][y] = 1;
+							mapFlags[x][y] = food ? 100 : 1;
 							queue.push({ x, y });
 						}
 					}

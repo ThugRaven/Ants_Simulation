@@ -428,6 +428,8 @@ generateMap(
 			height: worldGrid.height,
 			fillRatio: MapOptions.FILL_RATIO,
 			fillRatioFood: MapOptions.FILL_RATIO_FOOD,
+			threshold: MapOptions.THRESHOLD,
+			thresholdFood: MapOptions.THRESHOLD_FOOD,
 		},
 	},
 	true,

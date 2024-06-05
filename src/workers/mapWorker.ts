@@ -6,6 +6,8 @@ const mapGenerator = new MapGenerator({
 	height: 0,
 	fillRatio: MapOptions.FILL_RATIO,
 	fillRatioFood: MapOptions.FILL_RATIO_FOOD,
+	threshold: MapOptions.THRESHOLD,
+	thresholdFood: MapOptions.THRESHOLD_FOOD,
 });
 export interface MapWorkerSetupMessage {
 	action: 'SETUP';
