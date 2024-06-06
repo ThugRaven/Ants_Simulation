@@ -65,7 +65,8 @@ export default class WorldGrid {
 	generateFood(map: number[][]) {
 		for (let x = 0; x < this.width; x++) {
 			for (let y = 0; y < this.height; y++) {
-				this.cells[this.getIndexFromCoords(x, y)].food.quantity = map[x][y];
+				this.cells[this.getIndexFromCoords(x, y)].food.quantity =
+					map[x][y] ?? 0;
 				this.cells[this.getIndexFromCoords(x, y)].food.changed = true;
 			}
 		}
