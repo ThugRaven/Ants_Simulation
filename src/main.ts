@@ -1165,6 +1165,14 @@ btnSimulationPanel.addEventListener('click', () => {
 });
 
 btnSimulationAdvanced.addEventListener('click', () => {
+	if (colony.simulationType === SimulationType.ADVANCED) {
+		isSimulationTypeDialogVisible = togglePanelAndButton(
+			isSimulationTypeDialogVisible,
+			simulationTypeDialog,
+		);
+		return;
+	}
+
 	colony.simulationType = SimulationType.ADVANCED;
 	toggleButton(false, btnSimulationAdvanced);
 	toggleButton(true, btnSimulationSimple);
@@ -1180,6 +1188,14 @@ btnSimulationAdvanced.addEventListener('click', () => {
 });
 
 btnSimulationSimple.addEventListener('click', () => {
+	if (colony.simulationType === SimulationType.SIMPLE) {
+		isSimulationTypeDialogVisible = togglePanelAndButton(
+			isSimulationTypeDialogVisible,
+			simulationTypeDialog,
+		);
+		return;
+	}
+
 	colony.simulationType = SimulationType.SIMPLE;
 	toggleButton(true, btnSimulationAdvanced);
 	toggleButton(false, btnSimulationSimple);
