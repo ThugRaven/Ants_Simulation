@@ -1,3 +1,5 @@
+import Ant from './classes/Ant';
+import AntRayCasts from './classes/AntRayCasts';
 import Colony from './classes/Colony';
 import ImageInstance from './classes/ImageInstance';
 import PerformanceStats from './classes/PerformanceStats';
@@ -19,6 +21,7 @@ import {
 	MapOptions,
 	MarkerOptions,
 	RIGHT_BUTTON,
+	SimulationType,
 } from './constants';
 import './style.css';
 import { MapWorkerMessage } from './workers/mapWorker';
@@ -195,6 +198,23 @@ const confirmDialog = document.getElementById(
 const btnCancel = document.getElementById('btn-cancel') as HTMLButtonElement;
 const btnConfirm = document.getElementById('btn-confirm') as HTMLButtonElement;
 
+// Simulation type
+const btnSimulationPanel = document.getElementById(
+	'btn-simulation-panel',
+) as HTMLButtonElement;
+const simulationTypeDialog = document.getElementById(
+	'simulationTypeDialog',
+) as HTMLDivElement;
+const btnSimulationAdvanced = document.getElementById(
+	'btn-simulation-advanced',
+) as HTMLButtonElement;
+const btnSimulationSimple = document.getElementById(
+	'btn-simulation-simple',
+) as HTMLButtonElement;
+const btnCloseSimulationTypeDialog = document.getElementById(
+	'btn-close-simulation-type-dialog',
+) as HTMLButtonElement;
+
 const mapWorker = new MapWorker();
 mapWorker.onmessage = (event) => {
 	console.log(`Worker said : ${event.data.action}`);
@@ -257,6 +277,7 @@ let isAntPanelVisible = false;
 let isControlsPanelVisible = false;
 let isMapPanelVisible = false;
 let isConfirmDialogVisible = false;
+let isSimulationTypeDialogVisible = false;
 
 let lastUpdateTime = 0;
 const performanceStats = new PerformanceStats([
@@ -1068,12 +1089,6 @@ function toggleDensity(normal?: boolean, advanced?: boolean) {
 		isDrawingMarkers = false;
 		toggleButton(true, btnMarkersLayer);
 	}
-	console.log(
-		isDrawingDensity,
-		isDrawingAdvancedDensity,
-		disableDensity,
-		isDrawingMarkers,
-	);
 	toggleButton(!isDrawingDensity, btnDensityLayer);
 	toggleButton(!isDrawingAdvancedDensity, btnDensityAllLayer);
 }
@@ -1142,6 +1157,51 @@ function resetSimulation() {
 	colony.reset(worldGrid);
 }
 
+btnSimulationPanel.addEventListener('click', () => {
+	isSimulationTypeDialogVisible = togglePanelAndButton(
+		isSimulationTypeDialogVisible,
+		simulationTypeDialog,
+	);
+});
+
+btnSimulationAdvanced.addEventListener('click', () => {
+	colony.simulationType = SimulationType.ADVANCED;
+	toggleButton(false, btnSimulationAdvanced);
+	toggleButton(true, btnSimulationSimple);
+	isSimulationTypeDialogVisible = togglePanelAndButton(
+		isSimulationTypeDialogVisible,
+		simulationTypeDialog,
+	);
+	resetSimulation();
+	generateMap({
+		action: 'GENERATE',
+		seed: getSeed(true),
+	});
+});
+
+btnSimulationSimple.addEventListener('click', () => {
+	colony.simulationType = SimulationType.SIMPLE;
+	toggleButton(true, btnSimulationAdvanced);
+	toggleButton(false, btnSimulationSimple);
+	isSimulationTypeDialogVisible = togglePanelAndButton(
+		isSimulationTypeDialogVisible,
+		simulationTypeDialog,
+	);
+	resetSimulation();
+	generateMap({
+		action: 'GENERATE',
+		seed: getSeed(true),
+	});
+});
+
+btnCloseSimulationTypeDialog.addEventListener('click', () => {
+	isSimulationTypeDialogVisible = true;
+	isSimulationTypeDialogVisible = togglePanelAndButton(
+		isSimulationTypeDialogVisible,
+		simulationTypeDialog,
+	);
+});
+
 function selectAnt() {
 	const mouseVector = createVector(
 		mouseX / canvasScale - cameraOffset.x,
@@ -1199,9 +1259,15 @@ function updateAntInfo() {
 	antPos.textContent = `${selectedAnt.pos.x.toFixed(
 		2,
 	)} : ${selectedAnt.pos.y.toFixed(2)}`;
-	antVel.textContent = `${selectedAnt.direction.vector.x.toFixed(
-		2,
-	)} : ${selectedAnt.direction.vector.y.toFixed(2)}`;
+	if (selectedAnt instanceof Ant) {
+		antVel.textContent = `${selectedAnt.vel.x.toFixed(
+			2,
+		)} : ${selectedAnt.vel.y.toFixed(2)}`;
+	} else {
+		antVel.textContent = `${selectedAnt.direction.vector.x.toFixed(
+			2,
+		)} : ${selectedAnt.direction.vector.y.toFixed(2)}`;
+	}
 	let state = '';
 	switch (selectedAnt.state) {
 		case AntStates.TO_HOME:
@@ -1225,13 +1291,15 @@ function updateAntInfo() {
 	antLifespan.textContent = `${selectedAnt.internalClock.toFixed(
 		2,
 	)} | ${selectedAnt.maxAutonomy.toFixed(2)}`;
-	const intensity =
-		AntOptions.MARKER_DEFAULT_INTENSITY *
-		Math.exp(-0.15 * selectedAnt.markerIntensityClock);
-	antMarkerPreview.style.setProperty('--width', `${(intensity / 1) * 100}%`);
-	antMarker.textContent = `${intensity.toFixed(
-		2,
-	)} | ${1} | ${selectedAnt.markerIntensityClock.toFixed(2)}`;
+	if (selectedAnt instanceof AntRayCasts) {
+		const intensity =
+			AntOptions.MARKER_DEFAULT_INTENSITY *
+			Math.exp(-0.15 * selectedAnt.markerIntensityClock);
+		antMarkerPreview.style.setProperty('--width', `${(intensity / 1) * 100}%`);
+		antMarker.textContent = `${intensity.toFixed(
+			2,
+		)} | ${1} | ${selectedAnt.markerIntensityClock.toFixed(2)}`;
+	}
 }
 
 function updateCellInfo(x: number, y: number) {

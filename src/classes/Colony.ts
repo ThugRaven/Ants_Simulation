@@ -1,4 +1,9 @@
-import { AntOptions, ColonyOptions, MarkerOptions } from '../constants';
+import {
+	AntOptions,
+	ColonyOptions,
+	MarkerOptions,
+	SimulationType,
+} from '../constants';
 import {
 	cameraCenter,
 	canvasScale,
@@ -6,6 +11,7 @@ import {
 	windowHeight,
 	windowWidth,
 } from '../main';
+import Ant from './Ant';
 import AntRayCasts from './AntRayCasts';
 import { circle } from './Shapes';
 import { Vector } from './Vector';
@@ -26,7 +32,7 @@ export default class Colony {
 	y: number;
 	startingAntsCount: number;
 	maxAntsCount: number;
-	ants: AntRayCasts[];
+	ants: AntRayCasts[] | Ant[];
 	totalAnts: number;
 	colonyColor: number[];
 	antIcon: HTMLImageElement | null;
@@ -38,7 +44,8 @@ export default class Colony {
 	isDebugMode: boolean;
 	colonyClock: number;
 	antsCtx: CanvasRenderingContext2D | null;
-	selectedAnt: AntRayCasts | null;
+	selectedAnt: AntRayCasts | Ant | null;
+	simulationType: SimulationType;
 
 	food: number;
 	totalFood: number;
@@ -63,6 +70,7 @@ export default class Colony {
 		this.colonyClock = 0;
 		this.antsCtx = null;
 		this.selectedAnt = null;
+		this.simulationType = SimulationType.ADVANCED;
 
 		this.food = 0;
 		this.totalFood = 0;
@@ -82,20 +90,38 @@ export default class Colony {
 		this.antsCtx = antsCtx;
 
 		for (let i = 0; i < this.startingAntsCount; i++) {
-			const ant = new AntRayCasts(
-				antsCtx,
-				antImageInstance,
-				antFoodImageInstance,
-				antIcon,
-				{
-					id: this.antId + 1,
-					pos: {
-						x: this.x,
-						y: this.y,
+			if (this.simulationType === SimulationType.ADVANCED) {
+				const ant = new AntRayCasts(
+					antsCtx,
+					antImageInstance,
+					antFoodImageInstance,
+					antIcon,
+					{
+						id: this.antId + 1,
+						pos: {
+							x: this.x,
+							y: this.y,
+						},
 					},
-				},
-			);
-			this.ants.push(ant);
+				);
+				(this.ants as AntRayCasts[]).push(ant);
+			} else {
+				const ant = new Ant(
+					antsCtx,
+					antImageInstance,
+					antFoodImageInstance,
+					antIcon,
+					{
+						id: this.antId + 1,
+						pos: {
+							x: this.x,
+							y: this.y,
+						},
+					},
+				);
+				(this.ants as Ant[]).push(ant);
+			}
+
 			this.antId++;
 			this.totalAnts++;
 		}
@@ -126,20 +152,38 @@ export default class Colony {
 		this.totalFood = 0;
 
 		for (let i = 0; i < this.startingAntsCount; i++) {
-			const ant = new AntRayCasts(
-				this.antsCtx,
-				this.antImageInstance,
-				this.antFoodImageInstance,
-				this.antIcon,
-				{
-					id: this.antId + 1,
-					pos: {
-						x: this.x,
-						y: this.y,
+			if (this.simulationType === SimulationType.ADVANCED) {
+				const ant = new AntRayCasts(
+					this.antsCtx,
+					this.antImageInstance,
+					this.antFoodImageInstance,
+					this.antIcon,
+					{
+						id: this.antId + 1,
+						pos: {
+							x: this.x,
+							y: this.y,
+						},
 					},
-				},
-			);
-			this.ants.push(ant);
+				);
+				(this.ants as AntRayCasts[]).push(ant);
+			} else {
+				const ant = new Ant(
+					this.antsCtx,
+					this.antImageInstance,
+					this.antFoodImageInstance,
+					this.antIcon,
+					{
+						id: this.antId + 1,
+						pos: {
+							x: this.x,
+							y: this.y,
+						},
+					},
+				);
+				(this.ants as Ant[]).push(ant);
+			}
+
 			this.antId++;
 			this.totalAnts++;
 		}
@@ -286,9 +330,15 @@ export default class Colony {
 		for (let i = 0; i < this.ants.length; i++) {
 			if (this.isRunning) {
 				// Update ants
-				this.ants[i].find(worldGrid);
-				this.ants[i].update(worldGrid, dt, this);
-				this.ants[i].addMarker(worldGrid, dt);
+				if (this.simulationType === SimulationType.ADVANCED) {
+					(this.ants[i] as AntRayCasts).find(worldGrid);
+					(this.ants[i] as AntRayCasts).update(worldGrid, dt, this);
+					(this.ants[i] as AntRayCasts).addMarker(worldGrid, dt);
+				} else {
+					(this.ants[i] as Ant).searchSimple(worldGrid, this);
+					(this.ants[i] as Ant).update(dt);
+					(this.ants[i] as Ant).addMarker(worldGrid, dt);
+				}
 
 				// Mark ant for deletion
 				if (this.ants[i].isDead) {
@@ -356,26 +406,48 @@ export default class Colony {
 			this.antFoodImageInstance &&
 			this.antsCtx
 		) {
-			const ant = new AntRayCasts(
-				this.antsCtx,
-				this.antImageInstance,
-				this.antFoodImageInstance,
-				this.antIcon,
-				{
-					id: this.antId + 1,
-					pos: {
-						x: this.x,
-						y: this.y,
+			if (this.simulationType === SimulationType.ADVANCED) {
+				const ant = new AntRayCasts(
+					this.antsCtx,
+					this.antImageInstance,
+					this.antFoodImageInstance,
+					this.antIcon,
+					{
+						id: this.antId + 1,
+						pos: {
+							x: this.x,
+							y: this.y,
+						},
 					},
-				},
-			);
-			this.ants.push(ant);
+				);
+				(this.ants as AntRayCasts[]).push(ant);
+
+				if (this.isDebugMode) {
+					console.log('Created ant: ', ant);
+				}
+			} else {
+				const ant = new Ant(
+					this.antsCtx,
+					this.antImageInstance,
+					this.antFoodImageInstance,
+					this.antIcon,
+					{
+						id: this.antId + 1,
+						pos: {
+							x: this.x,
+							y: this.y,
+						},
+					},
+				);
+				(this.ants as Ant[]).push(ant);
+
+				if (this.isDebugMode) {
+					console.log('Created ant: ', ant);
+				}
+			}
+
 			this.antId++;
 			this.totalAnts++;
-
-			if (this.isDebugMode) {
-				console.log('Created ant: ', ant);
-			}
 		} else {
 			if (this.isDebugMode) {
 				console.log("Can't create new ant - max count reached");

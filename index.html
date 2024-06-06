@@ -56,6 +56,24 @@
 						/>
 					</svg>
 				</button>
+				<button
+					id="btn-simulation-panel"
+					class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 p-3 rounded-lg shadow-md aspect-square flex justify-center items-center"
+					title="Choose simulation type"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						height="24px"
+						viewBox="0 -960 960 960"
+						width="24px"
+						fill="#000000"
+						class="w-8 h-8 fill-white"
+					>
+						<path
+							d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm-40-82v-78q-33 0-56.5-23.5T360-320v-40L168-552q-3 18-5.5 36t-2.5 36q0 121 79.5 212T440-162Zm276-102q20-22 36-47.5t26.5-53q10.5-27.5 16-56.5t5.5-59q0-98-54.5-179T600-776v16q0 33-23.5 56.5T520-680h-80v80q0 17-11.5 28.5T400-560h-80v80h240q17 0 28.5 11.5T600-440v120h40q26 0 47 15.5t29 40.5Z"
+						/>
+					</svg>
+				</button>
 			</div>
 			<div class="flex gap-2 p-2 justify-center">
 				<button
@@ -1099,7 +1117,7 @@
 					<button
 						id="btn-confirm"
 						class="bg-neutral-700 hover:bg-neutral-600 focus-visible:bg-neutral-600 rounded-lg px-1 py-3 border-2 border-green-500 flex-1"
-						type="submit"
+						type="button"
 					>
 						Confirm (E)
 					</button>
@@ -1110,6 +1128,83 @@
 						type="button"
 					>
 						Cancel (Esc)
+					</button>
+				</div>
+			</div>
+		</div>
+		<div id="simulationTypeDialog" class="hidden">
+			<div
+				class="text-white bg-neutral-800 rounded-lg p-4 fixed inset-0 lg:m-auto mx-4 my-auto w-max h-max z-10 shadow flex flex-col gap-4 text-xl"
+			>
+				<button
+					id="btn-close-simulation-type-dialog"
+					class="bg-neutral-800 hover:bg-neutral-700 focus-visible:bg-neutral-700 m-2 p-3 rounded-full absolute top-0 right-0"
+					title="Close"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						height="24px"
+						viewBox="0 0 24 24"
+						width="24px"
+						fill="#000000"
+						class="w-8 h-8 fill-white"
+					>
+						<path d="M0 0h24v24H0V0z" fill="none" />
+						<path
+							d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+						/>
+					</svg>
+				</button>
+				<h2 class="text-4xl font-bold text-center">Select simulation type</h2>
+				<div class="flex justify-evenly gap-4">
+					<button
+						id="btn-simulation-advanced"
+						type="button"
+						class="flex flex-col gap-2 justify-between hover:bg-neutral-700 focus-visible:bg-neutral-700 rounded-lg border-2 border-green-500 w-96 overflow-hidden"
+					>
+						<div class="flex flex-col gap-2">
+							<img
+								src="/src/assets/simulation_advanced.png"
+								alt="Advanced simulation image"
+								class="aspect-square overflow-hidden w-96 h-96"
+							/>
+							<h3 class="text-2xl font-bold">Advanced</h3>
+							<span class="text-sm text-green-200">Recommended</span>
+						</div>
+						<div class="flex flex-col gap-2 justify-between px-2 py-3">
+							<ol class="text-sm text-left list-disc flex flex-col list-inside">
+								<li>Uses raycasting to find markers and update ant position</li>
+								<li>More realistic simulation</li>
+								<li>
+									Minor performance impact for simulations under 2000 ants
+								</li>
+							</ol>
+						</div>
+					</button>
+
+					<button
+						id="btn-simulation-simple"
+						type="button"
+						class="flex flex-col gap-2 justify-between hover:bg-neutral-700 focus-visible:bg-neutral-700 rounded-lg border-2 border-red-500 w-96 overflow-hidden"
+					>
+						<div class="flex flex-col gap-2">
+							<img
+								src="/src/assets/simulation_simple.png"
+								alt="Simple simulation image"
+								class="aspect-square overflow-hidden w-96 h-96"
+							/>
+							<h3 class="text-2xl font-bold">Simple</h3>
+							<span class="text-sm text-red-200">Obsolete</span>
+						</div>
+						<div class="flex flex-col gap-2 justify-between px-2 py-3">
+							<ol class="text-sm text-left list-disc flex flex-col list-inside">
+								<li>Randomly sample the world to find markers</li>
+								<li>Simpler simulation (ants can see through walls)</li>
+								<li>
+									Better performance for large scale simulations (2000+ ants)
+								</li>
+							</ol>
+						</div>
 					</button>
 				</div>
 			</div>

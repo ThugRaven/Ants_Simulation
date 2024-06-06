@@ -43,6 +43,11 @@ export const ColonyOptions = {
 	ANT_REFILL_FOOD_AMOUNT: 0.25,
 };
 
+export enum SimulationType {
+	ADVANCED = 0,
+	SIMPLE = 1,
+}
+
 // ANTS
 export enum AntStates {
 	TO_HOME = 0,
