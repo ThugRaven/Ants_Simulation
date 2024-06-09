@@ -150,6 +150,7 @@ export default class Colony {
 		this.colonyClock = 0;
 		this.food = 0;
 		this.totalFood = 0;
+		this.selectedAnt = null;
 
 		for (let i = 0; i < this.startingAntsCount; i++) {
 			if (this.simulationType === SimulationType.ADVANCED) {

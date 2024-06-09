@@ -1158,6 +1158,14 @@ export function generateMap(message: MapWorkerMessage, skipLoading = false) {
 function resetSimulation() {
 	worldGrid.reset();
 	colony.reset(worldGrid);
+	if (!colony.selectedAnt) {
+		isAntPanelVisible = true;
+		isAntPanelVisible = togglePanelAndButton(
+			isAntPanelVisible,
+			antPanel,
+			btnAntPanel,
+		);
+	}
 }
 
 btnSimulationPanel.addEventListener('click', () => {
