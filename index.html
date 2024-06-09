@@ -11,7 +11,7 @@
 			rel="stylesheet"
 		/>
 		<title>Ants Simulation</title>
-		<script type="module" crossorigin src="/Ants_Simulation/assets/index.8afafb56.js"></script>
+		<script type="module" crossorigin src="/Ants_Simulation/assets/index.e7389daf.js"></script>
 		<link rel="stylesheet" href="/Ants_Simulation/assets/index.dbf815f3.css">
 	</head>
 	<body class="bg-black h-screen overflow-hidden flex flex-col">
@@ -317,7 +317,13 @@
 							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
 						>
 							<span class="text-lg font-bold">Food</span>
-							<span class="text-neutral-100" data-colony-food>- | -</span>
+							<span class="text-neutral-100" data-colony-food>-</span>
+						</li>
+						<li
+							class="bg-neutral-700 w-full flex flex-col items-center justify-center px-2 py-1 rounded-lg"
+						>
+							<span class="text-lg font-bold">Total Food</span>
+							<span class="text-neutral-100" data-colony-total-food>-</span>
 						</li>
 					</ul>
 				</div>
@@ -994,7 +1000,38 @@
 									>
 								</td>
 								<td class="p-2">
-									<span class="text-neutral-100 text-lg">Move camera</span>
+									<span class="text-neutral-100 text-lg"
+										>Move camera (hold
+										<kbd
+											class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+											>Ctrl</kbd
+										>
+										to move faster, hold
+										<kbd
+											class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+											>Shift</kbd
+										>
+										to align to grid)</span
+									>
+								</td>
+							</tr>
+							<tr>
+								<td class="py-2 pr-2">
+									<kbd
+										title="Arrow Left"
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>←</kbd
+									>
+									<kbd
+										title="Arrow Right"
+										class="text-xl bg-neutral-700 border border-gray-600 rounded-md px-1.5 py-[1px] font-mono shadow whitespace-nowrap"
+										>→</kbd
+									>
+								</td>
+								<td class="p-2">
+									<span class="text-neutral-100 text-lg"
+										>Change current selected ant (while in ant tracking mode)
+									</span>
 								</td>
 							</tr>
 							<tr>
