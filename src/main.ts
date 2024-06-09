@@ -1556,19 +1556,22 @@ function zoomCamera(zoomIn: boolean) {
 	};
 
 	zoomOffset.x = window.innerWidth / 2 / canvasScale - cameraOffset.x;
-	zoomOffset.y = window.innerHeight / 2 / canvasScale - cameraOffset.y;
+	zoomOffset.y =
+		(window.innerHeight - offsetY) / 2 / canvasScale - cameraOffset.y;
 
 	canvasScale *= 0.999 ** (zoomIn ? -100 : 100);
 	canvasScale = Math.min(Math.max(0.15, canvasScale), 16);
 
 	cameraOffset.x = window.innerWidth / 2 / canvasScale - zoomOffset.x;
-	cameraOffset.y = window.innerHeight / 2 / canvasScale - zoomOffset.y;
+	cameraOffset.y =
+		(window.innerHeight - offsetY) / 2 / canvasScale - zoomOffset.y;
 
 	cameraCenter.x =
 		(window.innerWidth / 2 - window.innerWidth / 2) / canvasScale -
 		zoomOffset.x;
 	cameraCenter.y =
-		(window.innerHeight / 2 - window.innerHeight / 2) / canvasScale -
+		((window.innerHeight - offsetY) / 2 - window.innerHeight / 2) /
+			canvasScale -
 		zoomOffset.y;
 	cameraCenter.x =
 		cameraCenter.x < 0 ? Math.abs(cameraCenter.x) : cameraCenter.x * -1;
@@ -1581,7 +1584,7 @@ function zoomCamera(zoomIn: boolean) {
 function alignCamera() {
 	const canvasCenter = {
 		x: window.innerWidth / 2 - width / 2,
-		y: window.innerHeight / 2 - height / 2,
+		y: (window.innerHeight - offsetY) / 2 - height / 2,
 	};
 
 	canvasScale = 1;
