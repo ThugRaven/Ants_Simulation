@@ -584,10 +584,25 @@ window.addEventListener('keydown', (e) => {
 			moveCamera(0, -CAMERA_MOVE_BY);
 			break;
 		case 'ArrowLeft':
-			moveCamera(CAMERA_MOVE_BY, 0);
+			if (isTracking && colony.selectedAnt) {
+				const id = colony.selectedAnt.id;
+				const index = colony.ants.findIndex((ant) => ant.id === id);
+				const length = colony.ants.length;
+				colony.selectedAnt =
+					colony.ants[index - 1 >= 0 ? index - 1 : length - 1];
+			} else {
+				moveCamera(CAMERA_MOVE_BY, 0);
+			}
 			break;
 		case 'ArrowRight':
-			moveCamera(-CAMERA_MOVE_BY, 0);
+			if (isTracking && colony.selectedAnt) {
+				const id = colony.selectedAnt.id;
+				const index = colony.ants.findIndex((ant) => ant.id === id);
+				const length = colony.ants.length;
+				colony.selectedAnt = colony.ants[index + 1 < length ? index + 1 : 0];
+			} else {
+				moveCamera(-CAMERA_MOVE_BY, 0);
+			}
 			break;
 		case 'Minus':
 			zoomCamera(false);
