@@ -108,6 +108,9 @@ const colonyPopulation =
 	document.querySelector<HTMLSpanElement>('[data-colony-pop]');
 const colonyFood =
 	document.querySelector<HTMLSpanElement>('[data-colony-food]');
+const colonyTotalFood = document.querySelector<HTMLSpanElement>(
+	'[data-colony-total-food]',
+);
 
 // Time controls
 const pauseIndicator = document.querySelector<HTMLDivElement>('[data-pause]');
@@ -1353,12 +1356,13 @@ function updateCellInfo(x: number, y: number) {
 function updateColonyInfo() {
 	if (!colony) return;
 
-	if (!colonyPopulation || !colonyFood || !colonyPreview) {
+	if (!colonyPopulation || !colonyFood || !colonyTotalFood || !colonyPreview) {
 		return;
 	}
 
 	colonyPopulation.textContent = `${colony.ants.length} | ${colony.totalAnts}`;
-	colonyFood.textContent = `${colony.food.toFixed(2)} | ${colony.totalFood}`;
+	colonyFood.textContent = colony.food.toFixed(2);
+	colonyTotalFood.textContent = colony.totalFood.toFixed(2);
 	const color = colony.colonyColor;
 	colonyPreview.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
 }
