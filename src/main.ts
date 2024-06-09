@@ -578,10 +578,10 @@ window.addEventListener('keydown', (e) => {
 			}
 			break;
 		case 'ArrowUp':
-			moveCamera(0, CAMERA_MOVE_BY);
+			moveCamera(0, CAMERA_MOVE_BY, e.shiftKey ? true : false);
 			break;
 		case 'ArrowDown':
-			moveCamera(0, -CAMERA_MOVE_BY);
+			moveCamera(0, -CAMERA_MOVE_BY, e.shiftKey ? true : false);
 			break;
 		case 'ArrowLeft':
 			if (isTracking && colony.selectedAnt) {
@@ -591,7 +591,7 @@ window.addEventListener('keydown', (e) => {
 				colony.selectedAnt =
 					colony.ants[index - 1 >= 0 ? index - 1 : length - 1];
 			} else {
-				moveCamera(CAMERA_MOVE_BY, 0);
+				moveCamera(CAMERA_MOVE_BY, 0, e.shiftKey ? true : false);
 			}
 			break;
 		case 'ArrowRight':
@@ -601,7 +601,7 @@ window.addEventListener('keydown', (e) => {
 				const length = colony.ants.length;
 				colony.selectedAnt = colony.ants[index + 1 < length ? index + 1 : 0];
 			} else {
-				moveCamera(-CAMERA_MOVE_BY, 0);
+				moveCamera(-CAMERA_MOVE_BY, 0, e.shiftKey ? true : false);
 			}
 			break;
 		case 'Minus':
@@ -1527,7 +1527,19 @@ function panCanvas(event: MouseEvent) {
 		setCamera();
 }
 
-function moveCamera(x: number, y: number) {
+function moveCamera(x: number, y: number, align = false) {
+	if (align) {
+		cameraOffset.x =
+			Math.round(cameraOffset.x / MarkerOptions.SIZE) * MarkerOptions.SIZE;
+		cameraOffset.y =
+			Math.round(cameraOffset.y / MarkerOptions.SIZE) * MarkerOptions.SIZE;
+
+		cameraCenter.x =
+			Math.round(cameraCenter.x / MarkerOptions.SIZE) * MarkerOptions.SIZE;
+		cameraCenter.y =
+			Math.round(cameraCenter.y / MarkerOptions.SIZE) * MarkerOptions.SIZE;
+	}
+
 	cameraOffset.x += x;
 	cameraOffset.y += y;
 
