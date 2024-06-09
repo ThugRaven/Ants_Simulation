@@ -578,10 +578,18 @@ window.addEventListener('keydown', (e) => {
 			}
 			break;
 		case 'ArrowUp':
-			moveCamera(0, CAMERA_MOVE_BY, e.shiftKey ? true : false);
+			moveCamera(
+				0,
+				!e.ctrlKey ? CAMERA_MOVE_BY : CAMERA_MOVE_BY * 5,
+				e.shiftKey ? true : false,
+			);
 			break;
 		case 'ArrowDown':
-			moveCamera(0, -CAMERA_MOVE_BY, e.shiftKey ? true : false);
+			moveCamera(
+				0,
+				!e.ctrlKey ? -CAMERA_MOVE_BY : -CAMERA_MOVE_BY * 5,
+				e.shiftKey ? true : false,
+			);
 			break;
 		case 'ArrowLeft':
 			if (isTracking && colony.selectedAnt) {
@@ -591,7 +599,11 @@ window.addEventListener('keydown', (e) => {
 				colony.selectedAnt =
 					colony.ants[index - 1 >= 0 ? index - 1 : length - 1];
 			} else {
-				moveCamera(CAMERA_MOVE_BY, 0, e.shiftKey ? true : false);
+				moveCamera(
+					!e.ctrlKey ? CAMERA_MOVE_BY : CAMERA_MOVE_BY * 5,
+					0,
+					e.shiftKey ? true : false,
+				);
 			}
 			break;
 		case 'ArrowRight':
@@ -601,7 +613,11 @@ window.addEventListener('keydown', (e) => {
 				const length = colony.ants.length;
 				colony.selectedAnt = colony.ants[index + 1 < length ? index + 1 : 0];
 			} else {
-				moveCamera(-CAMERA_MOVE_BY, 0, e.shiftKey ? true : false);
+				moveCamera(
+					!e.ctrlKey ? -CAMERA_MOVE_BY : -CAMERA_MOVE_BY * 5,
+					0,
+					e.shiftKey ? true : false,
+				);
 			}
 			break;
 		case 'Minus':
