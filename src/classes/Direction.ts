@@ -7,7 +7,7 @@ export default class Direction {
 	vector: Vector;
 	targetVector: Vector;
 
-	constructor(angle: number, rotationSpeed = 10) {
+	constructor(angle: number, rotationSpeed = 0.1) {
 		this.angle = angle;
 		this.targetAngle = angle;
 		this.rotationSpeed = rotationSpeed;
@@ -18,14 +18,14 @@ export default class Direction {
 		this.targetVector = this.vector.copy();
 	}
 
-	update(dt: number) {
+	update() {
 		this.updateVector();
 		const directionNormalized = createVector(-this.vector.y, this.vector.x);
 		const directionDelta = this.targetVector
 			.copy()
 			.dot(directionNormalized.x, directionNormalized.y);
 
-		this.angle += this.rotationSpeed * directionDelta * dt;
+		this.angle += this.rotationSpeed * directionDelta;
 	}
 
 	setDirectionImmediate(d: Vector) {

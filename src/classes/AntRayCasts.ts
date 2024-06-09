@@ -235,7 +235,7 @@ export default class Ant {
 			this.isDead = true;
 		}
 
-		this.direction.update(dt);
+		this.direction.update();
 		if (!this.foundCell) {
 			this.direction.setAndAddDirectionAngle(
 				random(
