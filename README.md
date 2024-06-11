@@ -12,6 +12,9 @@ Project was mainly inspired by [Pezzza's Work](https://www.youtube.com/watch?v=8
 
 Live demo: https://thugraven.github.io/Ants_Simulation/
 
+![Simulation on a randomly generated map with food](img_01.png)
+![Close-up of ants collecting food](img_02.png)
+![Ant tracking](img_03.png)
 ![Simulation with 1000 ants and user placed food](gif_02.gif)
 ![Simulation with 10000 ants and density layer enabled](gif_03.gif)
 
