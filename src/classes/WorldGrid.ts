@@ -311,7 +311,7 @@ export default class WorldGrid {
 					cell,
 					distance,
 					normal,
-					intersection: position.add(rayDir.mult(distance)),
+					intersection: position.add(rayDir.multSimple(distance)),
 					rayEnd,
 				};
 			}
