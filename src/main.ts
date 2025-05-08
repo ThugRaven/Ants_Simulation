@@ -37,6 +37,8 @@ const btnFullscreen = document.getElementById(
 	'btn-fullscreen',
 ) as HTMLButtonElement;
 const btnPan = document.getElementById('btn-pan') as HTMLButtonElement;
+const btnZoomIn = document.getElementById('btn-zoom-in') as HTMLButtonElement;
+const btnZoomOut = document.getElementById('btn-zoom-out') as HTMLButtonElement;
 // Canvases
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 const canvasMarkers = document.getElementById(
@@ -696,6 +698,14 @@ canvasContainer.addEventListener('wheel', (e) => {
 
 btnFullscreen.addEventListener('click', () => {
 	alignCamera();
+});
+
+btnZoomIn.addEventListener('click', () => {
+	zoomCamera(true);
+});
+
+btnZoomOut.addEventListener('click', () => {
+	zoomCamera(false);
 });
 
 btnTrack.addEventListener('click', () => {
