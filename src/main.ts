@@ -349,6 +349,9 @@ const urlSeed = url.searchParams.get('seed');
 let mapSeed = urlSeed ?? '';
 mapSeedInput.value = mapSeed;
 
+const urlPerfTest = url.searchParams.has('perf-test');
+const isPerfTest = urlPerfTest ?? false;
+
 export let windowWidth = window.innerWidth;
 export let windowHeight = window.innerHeight;
 
@@ -1096,6 +1099,7 @@ function toggleLoop() {
 	}
 
 	isRunning = !isRunning;
+	isPerfTest && performanceStats.startPerformanceTest();
 
 	colony.isRunning = isRunning;
 
@@ -1643,6 +1647,8 @@ function setCamera() {
 	scheduleRegularDraw = true;
 }
 
+let perfTestStartTime: number | null = null;
+
 function main(currentTime: number) {
 	if (
 		ctxMarkers == null ||
@@ -1656,6 +1662,12 @@ function main(currentTime: number) {
 		return;
 
 	window.requestAnimationFrame(main);
+	if (isPerfTest && performanceStats.isPerfTest && !perfTestStartTime) {
+		perfTestStartTime = performance.now();
+		setTimeout(() => {
+			performanceStats.endPerformanceTest();
+		}, 5 * 1000);
+	}
 	performanceStats.startMeasurement('all');
 
 	const deltaTime = (currentTime - lastUpdateTime) / 1000;
