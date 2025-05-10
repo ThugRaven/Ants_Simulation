@@ -204,8 +204,21 @@ export default class PerformanceStats {
 	}
 
 	endPerformanceTest() {
-		console.log(this.performanceTest);
 		this.isPerfTest = false;
+
+		console.log('--- Performance Test Results ---');
+		console.log('--- Average ---');
+		this.performanceTest.avgMap.forEach((v, k) =>
+			console.log(k, parseFloat(v.toFixed(4))),
+		);
+		console.log('--- Highest ---');
+		this.performanceTest.highestMap.forEach((v, k) =>
+			console.log(k, parseFloat(v.toFixed(4))),
+		);
+		console.log('--- Lowest ---');
+		this.performanceTest.lowestMap.forEach((v, k) =>
+			console.log(k, parseFloat(v.toFixed(4))),
+		);
 	}
 
 	add(

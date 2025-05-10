@@ -15,13 +15,13 @@ import {
 	AntStates,
 	BrushOptions,
 	CAMERA_MOVE_BY,
-	COLONY_ANTS_PERF_TEST,
 	CanvasOptions,
 	ColonyOptions,
 	FoodOptions,
 	MIDDLE_BUTTON,
 	MapOptions,
 	MarkerOptions,
+	PerfTestOptions,
 	RIGHT_BUTTON,
 	SimulationType,
 } from './constants';
@@ -1078,7 +1078,7 @@ function setup() {
 				performanceStats.setMode(1);
 				for (
 					let i = 0;
-					i < COLONY_ANTS_PERF_TEST - ColonyOptions.COLONY_STARTING_ANTS;
+					i < PerfTestOptions.COLONY_ANTS - ColonyOptions.COLONY_STARTING_ANTS;
 					i++
 				) {
 					colony.createAnt(true);
@@ -1111,9 +1111,11 @@ function toggleLoop() {
 		return;
 	}
 
-	isRunning = !isRunning;
-	isPerfTest && performanceStats.startPerformanceTest();
+	if (!isRunning) {
+		isPerfTest && performanceStats.startPerformanceTest();
+	}
 
+	isRunning = !isRunning;
 	colony.isRunning = isRunning;
 
 	pauseIndicator.style.display = isRunning ? 'none' : 'block';
@@ -1679,7 +1681,8 @@ function main(currentTime: number) {
 		perfTestStartTime = performance.now();
 		setTimeout(() => {
 			performanceStats.endPerformanceTest();
-		}, 5 * 1000);
+			toggleLoop();
+		}, PerfTestOptions.TEST_DURATION);
 	}
 	performanceStats.startMeasurement('all');
 

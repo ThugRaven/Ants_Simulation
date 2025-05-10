@@ -43,7 +43,12 @@ export const ColonyOptions = {
 	ANT_REFILL_FOOD_AMOUNT: 0.25,
 };
 
-export const COLONY_ANTS_PERF_TEST = 5000;
+// PERFORMANCE TESTING
+export const PerfTestOptions = {
+	COLONY_ANTS: 5000,
+	// 10 seconds
+	TEST_DURATION: 10 * 1000,
+};
 
 export enum SimulationType {
 	ADVANCED = 0,
