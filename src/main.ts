@@ -1075,6 +1075,7 @@ function setup() {
 			);
 
 			if (isPerfTest) {
+				performanceStats.setMode(1);
 				for (
 					let i = 0;
 					i < COLONY_ANTS_PERF_TEST - ColonyOptions.COLONY_STARTING_ANTS;

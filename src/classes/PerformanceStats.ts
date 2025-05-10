@@ -64,6 +64,13 @@ export default class PerformanceStats {
 		this.toggleDisplayVisibility();
 	}
 
+	setMode(mode: number) {
+		if (this.modes.find((v) => v === mode)) {
+			this.mode = mode;
+			this.toggleDisplayVisibility();
+		}
+	}
+
 	toggleDisplayVisibility() {
 		for (const value of this.measurementArray.values()) {
 			if (!value.element) {
