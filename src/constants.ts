@@ -43,6 +43,8 @@ export const ColonyOptions = {
 	ANT_REFILL_FOOD_AMOUNT: 0.25,
 };
 
+export const COLONY_ANTS_PERF_TEST = 5000;
+
 export enum SimulationType {
 	ADVANCED = 0,
 	SIMPLE = 1,

@@ -15,7 +15,9 @@ import {
 	AntStates,
 	BrushOptions,
 	CAMERA_MOVE_BY,
+	COLONY_ANTS_PERF_TEST,
 	CanvasOptions,
+	ColonyOptions,
 	FoodOptions,
 	MIDDLE_BUTTON,
 	MapOptions,
@@ -1071,6 +1073,16 @@ function setup() {
 				ctxAnts,
 				worldGrid,
 			);
+
+			if (isPerfTest) {
+				for (
+					let i = 0;
+					i < COLONY_ANTS_PERF_TEST - ColonyOptions.COLONY_STARTING_ANTS;
+					i++
+				) {
+					colony.createAnt(true);
+				}
+			}
 		};
 	}
 
