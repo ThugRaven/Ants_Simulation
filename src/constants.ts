@@ -45,7 +45,7 @@ export const ColonyOptions = {
 
 // PERFORMANCE TESTING
 export const PerfTestOptions = {
-	COLONY_ANTS: 6000,
+	COLONY_ANTS: 7500,
 	// 10 seconds
 	TEST_DURATION: 10 * 1000,
 	HIDE_ANTS: true,
