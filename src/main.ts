@@ -1076,6 +1076,9 @@ function setup() {
 
 			if (isPerfTest) {
 				performanceStats.setMode(1);
+				if (PerfTestOptions.HIDE_ANTS) {
+					toggleAnts();
+				}
 				for (
 					let i = 0;
 					i < PerfTestOptions.COLONY_ANTS - ColonyOptions.COLONY_STARTING_ANTS;

@@ -45,9 +45,10 @@ export const ColonyOptions = {
 
 // PERFORMANCE TESTING
 export const PerfTestOptions = {
-	COLONY_ANTS: 5000,
+	COLONY_ANTS: 6000,
 	// 10 seconds
 	TEST_DURATION: 10 * 1000,
+	HIDE_ANTS: true,
 };
 
 export enum SimulationType {
