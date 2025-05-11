@@ -23,6 +23,12 @@ export default class PerformanceStats {
 	isMeasuring: boolean;
 	modes: number[];
 	mode: number;
+	performanceTest: {
+		lowestMap: Map<string, number>;
+		avgMap: Map<string, number>;
+		highestMap: Map<string, number>;
+	};
+	isPerfTest: boolean;
 
 	constructor(performanceOptions: PerformanceOptions[]) {
 		this.measurementArray = new Map();
@@ -30,6 +36,12 @@ export default class PerformanceStats {
 		this.isMeasuring = true;
 		this.modes = [];
 		this.mode = 0;
+		this.performanceTest = {
+			lowestMap: new Map(),
+			avgMap: new Map(),
+			highestMap: new Map(),
+		};
+		this.isPerfTest = false;
 		this.getModes(performanceOptions);
 		this.createMeasurementArray(performanceOptions);
 	}
@@ -50,6 +62,13 @@ export default class PerformanceStats {
 		}
 
 		this.toggleDisplayVisibility();
+	}
+
+	setMode(mode: number) {
+		if (this.modes.find((v) => v === mode)) {
+			this.mode = mode;
+			this.toggleDisplayVisibility();
+		}
 	}
 
 	toggleDisplayVisibility() {
@@ -123,16 +142,14 @@ export default class PerformanceStats {
 	}
 
 	update() {
+		const lowestMap = new Map();
+		const highestMap = new Map();
 		const avgMap = new Map();
 
 		for (const key of this.measurementArray.keys()) {
+			lowestMap.set(key, 0);
+			highestMap.set(key, 0);
 			avgMap.set(key, 0);
-		}
-
-		for (const [key, value] of this.measurementArray) {
-			for (let i = 0; i < value.performanceArray.length; i++) {
-				avgMap.set(key, avgMap.get(key) + value.performanceArray[i]);
-			}
 		}
 
 		for (const [key, value] of this.measurementArray) {
@@ -140,7 +157,30 @@ export default class PerformanceStats {
 				break;
 			}
 
-			avgMap.set(key, avgMap.get(key) / value.performanceArray.length);
+			let lowestValue = Infinity;
+			let highestValue = 0;
+			let sum = 0;
+
+			for (let i = 0; i < value.performanceArray.length; i++) {
+				const performanceValue = value.performanceArray[i];
+				if (performanceValue < lowestValue && performanceValue !== 0) {
+					lowestValue = performanceValue;
+				}
+
+				sum += performanceValue;
+
+				if (performanceValue > highestValue) {
+					highestValue = performanceValue;
+				}
+			}
+
+			lowestMap.set(key, lowestValue);
+			highestMap.set(key, highestValue);
+			avgMap.set(key, sum / value.performanceArray.length);
+
+			if (this.isPerfTest) {
+				this.add(lowestMap, highestMap, avgMap);
+			}
 
 			if (value.mode <= this.mode) {
 				value.index++;
@@ -151,5 +191,75 @@ export default class PerformanceStats {
 		}
 
 		return avgMap;
+	}
+
+	startPerformanceTest() {
+		for (const key of this.measurementArray.keys()) {
+			this.performanceTest.lowestMap.set(key, Infinity);
+			this.performanceTest.highestMap.set(key, 0);
+			this.performanceTest.avgMap.set(key, 0);
+		}
+
+		this.isPerfTest = true;
+	}
+
+	endPerformanceTest() {
+		this.isPerfTest = false;
+
+		console.log('--- Performance Test Results ---');
+		console.log('--- Average ---');
+		this.performanceTest.avgMap.forEach((v, k) =>
+			console.log(k, parseFloat(v.toFixed(4))),
+		);
+		console.log('--- Highest ---');
+		this.performanceTest.highestMap.forEach((v, k) =>
+			console.log(k, parseFloat(v.toFixed(4))),
+		);
+		console.log('--- Lowest ---');
+		this.performanceTest.lowestMap.forEach((v, k) =>
+			console.log(k, parseFloat(v.toFixed(4))),
+		);
+	}
+
+	add(
+		lowestMap: Map<string, number>,
+		highestMap: Map<string, number>,
+		avgMap: Map<string, number>,
+	) {
+		for (const key of this.measurementArray.keys()) {
+			const lowestValue = this.performanceTest.lowestMap.get(key);
+			const newPossibleLowestValue = lowestMap.get(key);
+
+			if (
+				lowestValue !== undefined &&
+				newPossibleLowestValue !== undefined &&
+				newPossibleLowestValue < lowestValue &&
+				newPossibleLowestValue !== 0
+			) {
+				this.performanceTest.lowestMap.set(key, newPossibleLowestValue);
+			}
+
+			const highestValue = this.performanceTest.highestMap.get(key);
+			const newPossibleHighestValue = highestMap.get(key);
+
+			if (
+				highestValue !== undefined &&
+				newPossibleHighestValue !== undefined &&
+				newPossibleHighestValue > highestValue
+			) {
+				this.performanceTest.highestMap.set(key, newPossibleHighestValue);
+			}
+
+			const averageValue = this.performanceTest.avgMap.get(key);
+			const newAverageValue = avgMap.get(key);
+			if (averageValue !== undefined && newAverageValue !== undefined) {
+				this.performanceTest.avgMap.set(
+					key,
+					averageValue === 0
+						? newAverageValue
+						: (averageValue + newAverageValue) / 2,
+				);
+			}
+		}
 	}
 }

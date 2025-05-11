@@ -16,10 +16,12 @@ import {
 	BrushOptions,
 	CAMERA_MOVE_BY,
 	CanvasOptions,
+	ColonyOptions,
 	FoodOptions,
 	MIDDLE_BUTTON,
 	MapOptions,
 	MarkerOptions,
+	PerfTestOptions,
 	RIGHT_BUTTON,
 	SimulationType,
 } from './constants';
@@ -348,6 +350,9 @@ const url = new URL(window.location.href);
 const urlSeed = url.searchParams.get('seed');
 let mapSeed = urlSeed ?? '';
 mapSeedInput.value = mapSeed;
+
+const urlPerfTest = url.searchParams.has('perf-test');
+const isPerfTest = urlPerfTest ?? false;
 
 export let windowWidth = window.innerWidth;
 export let windowHeight = window.innerHeight;
@@ -1068,6 +1073,17 @@ function setup() {
 				ctxAnts,
 				worldGrid,
 			);
+
+			if (isPerfTest) {
+				performanceStats.setMode(1);
+				for (
+					let i = 0;
+					i < PerfTestOptions.COLONY_ANTS - ColonyOptions.COLONY_STARTING_ANTS;
+					i++
+				) {
+					colony.createAnt(true);
+				}
+			}
 		};
 	}
 
@@ -1095,8 +1111,11 @@ function toggleLoop() {
 		return;
 	}
 
-	isRunning = !isRunning;
+	if (!isRunning) {
+		isPerfTest && performanceStats.startPerformanceTest();
+	}
 
+	isRunning = !isRunning;
 	colony.isRunning = isRunning;
 
 	pauseIndicator.style.display = isRunning ? 'none' : 'block';
@@ -1643,6 +1662,8 @@ function setCamera() {
 	scheduleRegularDraw = true;
 }
 
+let perfTestStartTime: number | null = null;
+
 function main(currentTime: number) {
 	if (
 		ctxMarkers == null ||
@@ -1656,6 +1677,13 @@ function main(currentTime: number) {
 		return;
 
 	window.requestAnimationFrame(main);
+	if (isPerfTest && performanceStats.isPerfTest && !perfTestStartTime) {
+		perfTestStartTime = performance.now();
+		setTimeout(() => {
+			performanceStats.endPerformanceTest();
+			toggleLoop();
+		}, PerfTestOptions.TEST_DURATION);
+	}
 	performanceStats.startMeasurement('all');
 
 	const deltaTime = (currentTime - lastUpdateTime) / 1000;
