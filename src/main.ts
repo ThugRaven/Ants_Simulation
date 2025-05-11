@@ -1735,13 +1735,14 @@ function main(currentTime: number) {
 		// Draw brush preview
 		ctxEditPreview.clearRect(0, 0, worldGrid.width, worldGrid.height);
 		ctxEditPreview.fillStyle = 'grey';
-		const pos = worldGrid.getCellCoords(target.x, target.y);
-		circle(ctxEditPreview, pos[0], pos[1], brushSize);
+		const posX = worldGrid.getCellCoords(target.x);
+		const posY = worldGrid.getCellCoords(target.y);
+		circle(ctxEditPreview, posX, posY, brushSize);
 
 		if (isErasing) {
 			// Erase
 			ctxEdit.fillStyle = 'black';
-			circle(ctxEdit, pos[0], pos[1], brushSize);
+			circle(ctxEdit, posX, posY, brushSize);
 		} else if (isHolding) {
 			// Draw walls/food
 			if (isWallMode) {
@@ -1749,7 +1750,7 @@ function main(currentTime: number) {
 			} else if (isFoodMode) {
 				ctxEdit.fillStyle = 'rgb(66, 153, 66, 0.25)';
 			}
-			circle(ctxEdit, pos[0], pos[1], brushSize);
+			circle(ctxEdit, posX, posY, brushSize);
 		}
 	}
 

@@ -348,7 +348,8 @@ export default class Ant {
 	addMarker(worldGrid: WorldGrid, dt: number) {
 		this.markerClock += dt;
 		if (this.markerClock >= this.markerPeriod) {
-			const [x, y] = worldGrid.getCellCoords(this.pos.x, this.pos.y);
+			const x = worldGrid.getCellCoords(this.pos.x);
+			const y = worldGrid.getCellCoords(this.pos.y);
 			if (!worldGrid.checkCoords(x, y)) return;
 
 			const intensity =

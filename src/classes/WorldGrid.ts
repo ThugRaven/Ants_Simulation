@@ -200,21 +200,21 @@ export default class WorldGrid {
 		return [x, y];
 	}
 
-	getCellCoords(x: number, y: number) {
-		const xCell = Math.floor(x / MarkerOptions.SIZE);
-		const yCell = Math.floor(y / MarkerOptions.SIZE);
-		return [xCell, yCell];
+	getCellCoords(coord: number) {
+		return Math.floor(coord / MarkerOptions.SIZE);
 	}
 
 	getCellFromCoords(x: number, y: number, safe = false) {
 		if (!safe) {
-			[x, y] = this.getCellCoords(x, y);
+			x = this.getCellCoords(x);
+			y = this.getCellCoords(y);
 		}
 		return this.cells[this.getIndexFromCoords(x, y)];
 	}
 
 	getCellFromCoordsSafe(x: number, y: number) {
-		const [xCell, yCell] = this.getCellCoords(x, y);
+		const xCell = this.getCellCoords(x);
+		const yCell = this.getCellCoords(y);
 		if (this.checkCoords(xCell, yCell)) {
 			return this.getCellFromCoords(xCell, yCell, true);
 		} else {
