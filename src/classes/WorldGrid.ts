@@ -228,32 +228,19 @@ export default class WorldGrid {
 
 	// TODO: Divide raycast to multiple smaller function to find what's causing such big garbage collection
 	rayCast(position: Vector, angle: number, maxDistance: number) {
-		const dX = maxDistance * Math.cos(angle);
-		const dY = maxDistance * Math.sin(angle);
-		// const rayEnd = { x: position.x, y: position.y, z: position.z };
-		const rayEnd = position.copy();
-		rayEnd.x += dX;
-		rayEnd.y += dY;
-
-		const rayDir = rayEnd.copy().sub(position).normalize();
-		// const rayDir = normalize(sub(rayEnd, { x: position.x, y: position.y, z: position.z }));
-		// rayDir = { x:normalize(...{...sub(rayEnd.x, rayEnd.y, 0)})
-		// 	 };
-		// ctx.fillStyle = 'green';
-		// circle(ctx, position.x, position.y, 5, true);
-		// ctx.fillStyle = 'red';
-		// circle(ctx, rayEnd.x, rayEnd.y, 5, true);
+		const rayDirX = Math.cos(angle);
+		const rayDirY = Math.sin(angle);
 
 		const rayUnitStepSize = {
-			x: Math.sqrt(1 + (rayDir.y / rayDir.x) * (rayDir.y / rayDir.x)),
-			y: Math.sqrt(1 + (rayDir.x / rayDir.y) * (rayDir.x / rayDir.y)),
+			x: Math.sqrt(1 + (rayDirY / rayDirX) * (rayDirY / rayDirX)),
+			y: Math.sqrt(1 + (rayDirX / rayDirY) * (rayDirX / rayDirY)),
 		};
 
 		const mapCheck = { x: position.x, y: position.y };
 		const rayLength = { x: 0, y: 0 };
 		const step = { x: 0, y: 0 };
 
-		if (rayDir.x < 0) {
+		if (rayDirX < 0) {
 			step.x = -1;
 			rayLength.x = (position.x - Math.round(mapCheck.x)) * rayUnitStepSize.x;
 		} else {
@@ -262,7 +249,7 @@ export default class WorldGrid {
 				(Math.round(mapCheck.x + 1) - position.x) * rayUnitStepSize.x;
 		}
 
-		if (rayDir.y < 0) {
+		if (rayDirY < 0) {
 			step.y = -1;
 			rayLength.y = (position.y - Math.round(mapCheck.y)) * rayUnitStepSize.y;
 		} else {
@@ -311,8 +298,6 @@ export default class WorldGrid {
 					cell,
 					distance,
 					normal,
-					intersection: position.add(rayDir.multSimple(distance)),
-					rayEnd,
 				};
 			}
 		}
