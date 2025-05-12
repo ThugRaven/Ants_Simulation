@@ -13,6 +13,7 @@ export default class WorldGrid {
 	height: number;
 	cellSize: number;
 	cells: WorldCell[];
+	walls: Uint8Array;
 
 	constructor(worldGridOptions: WorldGridOptions) {
 		this.width = worldGridOptions.width;
@@ -22,6 +23,7 @@ export default class WorldGrid {
 		for (let i = 0; i < this.width * this.height; i++) {
 			this.cells.push(new WorldCell());
 		}
+		this.walls = new Uint8Array(this.width * this.height);
 	}
 
 	reset() {
@@ -52,12 +54,15 @@ export default class WorldGrid {
 				cellRight.wall = 1;
 			}
 		}
+
+		this.cells.forEach((cell, i) => (this.walls[i] = cell.wall));
 	}
 
 	generateWalls(map: number[][]) {
 		for (let x = 0; x < this.width; x++) {
 			for (let y = 0; y < this.height; y++) {
 				this.cells[this.getIndexFromCoords(x, y)].wall = map[x][y] ? 1 : 0;
+				this.walls[this.getIndexFromCoords(x, y)] = map[x][y] ? 1 : 0;
 			}
 		}
 	}
@@ -212,6 +217,14 @@ export default class WorldGrid {
 		return this.cells[this.getIndexFromCoords(x, y)];
 	}
 
+	getWallFromCoords(x: number, y: number, safe = false) {
+		if (!safe) {
+			x = this.getCellCoords(x);
+			y = this.getCellCoords(y);
+		}
+		return this.walls[this.getIndexFromCoords(x, y)];
+	}
+
 	getCellFromCoordsSafe(x: number, y: number) {
 		const xCell = this.getCellCoords(x);
 		const yCell = this.getCellCoords(y);
@@ -285,9 +298,9 @@ export default class WorldGrid {
 				break;
 			}
 
-			const cell = this.getCellFromCoords(mapCheck.x, mapCheck.y);
+			const cell = this.getWallFromCoords(mapCheck.x, mapCheck.y);
 
-			if (cell && cell.wall == 1) {
+			if (cell) {
 				tileFound = true;
 				const normal = {
 					x: rayLength.x < rayLength.y ? 1 : 0,
