@@ -87,7 +87,7 @@ export default class Ant {
 		const v = this.direction.getVec();
 
 		const rayCast = worldGrid.rayCast(
-			this.pos.copy(),
+			this.pos,
 			this.direction.vector.heading(),
 			AntOptions.IMG_HEIGHT / 2 + this.maxSpeed,
 		);
@@ -224,15 +224,16 @@ export default class Ant {
 		this.internalClock += dt;
 		this.markerIntensityClock += dt;
 		this.directionClock += dt;
+
+		if (this.internalClock >= this.maxAutonomy) {
+			this.isDead = true;
+		}
+
 		if (
 			this.internalClock >= AntOptions.AUTONOMY_REFILL &&
 			this.state === AntStates.TO_FOOD
 		) {
 			this.state = AntStates.REFILL;
-		}
-
-		if (this.internalClock >= this.maxAutonomy) {
-			this.isDead = true;
 		}
 
 		this.direction.update();
@@ -255,10 +256,12 @@ export default class Ant {
 
 		const cell = worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y);
 
-		cell?.addDensity(
-			this.state === AntStates.TO_HOME,
-			this.state === AntStates.REFILL,
-		);
+		if (cell) {
+			cell.addDensity(
+				this.state === AntStates.TO_HOME,
+				this.state === AntStates.REFILL,
+			);
+		}
 
 		if (
 			cell &&

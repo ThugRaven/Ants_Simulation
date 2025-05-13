@@ -20,11 +20,11 @@ export default class Direction {
 
 	update() {
 		this.updateVector();
-		const directionNormalized = createVector(-this.vector.y, this.vector.x);
-		const directionDelta = this.targetVector
-			.copy()
-			.dot(directionNormalized.x, directionNormalized.y);
-
+		const directionNormalizedX = -this.vector.y;
+		const directionNormalizedY = this.vector.x;
+		const directionDelta =
+			this.targetVector.x * directionNormalizedX +
+			this.targetVector.y * directionNormalizedY;
 		this.angle += this.rotationSpeed * directionDelta;
 	}
 
