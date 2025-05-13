@@ -148,6 +148,7 @@ const btnFoodBrush = document.getElementById(
 	'btn-food-brush',
 ) as HTMLButtonElement;
 const btnSave = document.getElementById('btn-save') as HTMLButtonElement;
+const btnClear = document.getElementById('btn-clear') as HTMLButtonElement;
 
 // Controls
 const btnControls = document.getElementById(
@@ -929,6 +930,10 @@ function toggleFoodMode() {
 
 btnSave.addEventListener('click', () => {
 	saveEdit();
+});
+
+btnClear.addEventListener('click', () => {
+	clearEdit();
 });
 
 function saveEdit() {
