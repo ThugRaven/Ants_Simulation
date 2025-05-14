@@ -150,25 +150,20 @@ export default class Ant {
 					sampleAngle,
 					distance,
 				);
-
-				if (rayCast?.cell) {
+				if (rayCast && rayCast.cell) {
+					continue;
+				}
+				if (!rayCast.cellIndex) {
 					continue;
 				}
 
-				const cellVector = this.pos
-					.copy()
-					.add(angleToCell.multSimple(distance));
-				const cell = worldGrid.getCellFromCoordsSafe(
-					cellVector.x,
-					cellVector.y,
-				);
-
-				if (cell && this.debug) {
-					cell.density = [cell.density[0], cell.density[1], 100];
-				}
-
+				const cell = worldGrid.getCellFromIndex(rayCast.cellIndex);
 				if (!cell) {
 					continue;
+				}
+
+				if (this.debug) {
+					cell.density = [cell.density[0], cell.density[1], 100];
 				}
 
 				if (

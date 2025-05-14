@@ -217,14 +217,6 @@ export default class WorldGrid {
 		return this.cells[this.getIndexFromCoords(x, y)];
 	}
 
-	getWallFromCoords(x: number, y: number, safe = false) {
-		if (!safe) {
-			x = this.getCellCoords(x);
-			y = this.getCellCoords(y);
-		}
-		return this.walls[this.getIndexFromCoords(x, y)];
-	}
-
 	getCellFromCoordsSafe(x: number, y: number) {
 		const xCell = this.getCellCoords(x);
 		const yCell = this.getCellCoords(y);
@@ -233,6 +225,14 @@ export default class WorldGrid {
 		} else {
 			return null;
 		}
+	}
+
+	getCellFromIndex(index: number) {
+		return this.cells[index];
+	}
+
+	getWallFromIndex(index: number) {
+		return this.walls[index];
 	}
 
 	checkCoords(x: number, y: number) {
@@ -250,6 +250,7 @@ export default class WorldGrid {
 		};
 
 		const mapCheck = { x: posX, y: posY };
+		let lastCellIndex = 0;
 		const rayLength = { x: 0, y: 0 };
 		const step = { x: 0, y: 0 };
 
@@ -296,7 +297,11 @@ export default class WorldGrid {
 				break;
 			}
 
-			const cell = this.getWallFromCoords(mapCheck.x, mapCheck.y);
+			lastCellIndex = this.getIndexFromCoords(
+				this.getCellCoords(mapCheck.x),
+				this.getCellCoords(mapCheck.y),
+			);
+			const cell = this.getWallFromIndex(lastCellIndex);
 
 			if (cell) {
 				tileFound = true;
@@ -313,6 +318,6 @@ export default class WorldGrid {
 			}
 		}
 
-		return null;
+		return { cellIndex: lastCellIndex };
 	}
 }
