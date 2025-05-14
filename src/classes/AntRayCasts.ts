@@ -240,15 +240,16 @@ export default class Ant {
 
 		const cell = worldGrid.getCellFromCoordsSafe(this.pos.x, this.pos.y);
 
-		if (cell) {
-			cell.addDensity(
-				this.state === AntStates.TO_HOME,
-				this.state === AntStates.REFILL,
-			);
+		if (!cell) {
+			return;
 		}
 
+		cell.addDensity(
+			this.state === AntStates.TO_HOME,
+			this.state === AntStates.REFILL,
+		);
+
 		if (
-			cell &&
 			cell.food.quantity > 0 &&
 			(this.state === AntStates.TO_FOOD || this.state === AntStates.REFILL)
 		) {
@@ -260,16 +261,15 @@ export default class Ant {
 			return;
 		}
 
-		if (cell && cell.food.quantity > 0 && this.state === AntStates.TO_HOME) {
+		if (cell.food.quantity > 0 && this.state === AntStates.TO_HOME) {
 			this.markerIntensityClock = 0;
 		}
 
-		if (cell && cell.colony && this.state === AntStates.TO_FOOD) {
+		if (cell.colony && this.state === AntStates.TO_FOOD) {
 			this.markerIntensityClock = 0;
 		}
 
 		if (
-			cell &&
 			cell.colony &&
 			(this.state === AntStates.REFILL || this.state === AntStates.TO_HOME)
 		) {

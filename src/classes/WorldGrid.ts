@@ -1,5 +1,4 @@
 import { MapOptions, MarkerOptions, MarkerTypes } from '../constants';
-import { Vector } from './Vector';
 import WorldCell from './WorldCell';
 
 interface WorldGridOptions {
