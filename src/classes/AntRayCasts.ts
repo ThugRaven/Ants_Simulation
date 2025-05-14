@@ -89,7 +89,7 @@ export default class Ant {
 		const rayCast = worldGrid.rayCast(
 			this.pos.x,
 			this.pos.y,
-			this.direction.vector.heading(),
+			this.direction.angle,
 			AntOptions.IMG_HEIGHT / 2 + this.maxSpeed,
 		);
 
@@ -104,7 +104,8 @@ export default class Ant {
 			const vec = v.copy();
 
 			if (this.hits > 16) {
-				vec.setHeading(vec.heading() + Math.PI / 2);
+				// Move 90 degrees when stuck
+				vec.setHeading(this.direction.angle + Math.PI / 2);
 			} else if (this.hits > 8) {
 				vec.x *= rayCast.normal.x != 0 ? 1 : -1;
 				vec.y *= rayCast.normal.y != 0 ? 1 : -1;
@@ -127,9 +128,9 @@ export default class Ant {
 
 			let maxIntensity = 0;
 			let minIntensity = 1;
-			let maxDirection = this.direction.getVec();
+			let maxAngle = this.direction.angle;
 			let maxCell = null;
-			const currentAngle = maxDirection.heading();
+			const currentAngle = maxAngle;
 
 			for (let i = 0; i < AntOptions.NUM_OF_RAYCASTS; i++) {
 				const angle = random(-Math.PI * (1 / 3), Math.PI * (1 / 3));
@@ -139,10 +140,6 @@ export default class Ant {
 				);
 
 				const sampleAngle = currentAngle + angle;
-				const angleToCell = createVector(
-					Math.cos(sampleAngle),
-					Math.sin(sampleAngle),
-				);
 
 				const rayCast = worldGrid.rayCast(
 					this.pos.x,
@@ -170,8 +167,8 @@ export default class Ant {
 					(cell.food.quantity > 0 && this.state === AntStates.TO_FOOD) ||
 					(this.state === AntStates.TO_HOME && cell.colony)
 				) {
-					maxDirection = angleToCell;
-					this.direction.setDirectionAngle(maxDirection.heading());
+					maxAngle = sampleAngle;
+					this.direction.setDirectionAngle(maxAngle);
 					this.foundCell = true;
 					return;
 				}
@@ -181,7 +178,7 @@ export default class Ant {
 
 				if (markerIntensity > maxIntensity) {
 					maxIntensity = markerIntensity;
-					maxDirection = angleToCell;
+					maxAngle = sampleAngle;
 					maxCell = cell;
 				}
 
@@ -199,7 +196,7 @@ export default class Ant {
 				if (maxCell && this.debug) {
 					maxCell.density = [0, 100, 0];
 				}
-				this.direction.setDirectionAngle(maxDirection.heading());
+				this.direction.setDirectionAngle(maxAngle);
 				this.foundCell = true;
 			} else {
 				this.foundCell = false;
@@ -295,7 +292,7 @@ export default class Ant {
 
 	draw() {
 		this.ctx.translate(this.pos.x, this.pos.y);
-		this.ctx.rotate(this.direction.vector.heading() + Math.PI / 2);
+		this.ctx.rotate(this.direction.angle + Math.PI / 2);
 
 		const horizontalOffset = -AntOptions.IMG_WIDTH / 2;
 		const verticalOffset = -AntOptions.IMG_HEIGHT / 2;
