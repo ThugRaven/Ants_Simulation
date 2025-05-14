@@ -87,7 +87,8 @@ export default class Ant {
 		const v = this.direction.getVec();
 
 		const rayCast = worldGrid.rayCast(
-			this.pos,
+			this.pos.x,
+			this.pos.y,
 			this.direction.vector.heading(),
 			AntOptions.IMG_HEIGHT / 2 + this.maxSpeed,
 		);
@@ -130,31 +131,22 @@ export default class Ant {
 			let maxCell = null;
 			const currentAngle = maxDirection.heading();
 
-			// const angle = (Math.PI * (1 / 3) * 2) / 32;
-			for (let i = 0; i < 32; i++) {
-				const randAngle = random(-Math.PI * (1 / 3), Math.PI * (1 / 3));
-				// const randAngle = -Math.PI * (1 / 3) + angle * i;
-				// const distance = random(0, this.maxSpeed);
-				// let distance = 0;
-				// if (randAngle > -Math.PI * (1 / 18) && randAngle < Math.PI * (1 / 18)) {
-				// 	distance = random(MarkerOptions.SIZE * 3, MarkerOptions.SIZE * 24);
-				// } else {
-				// 	distance = random(MarkerOptions.SIZE * 3, MarkerOptions.SIZE * 12);
-				// }
-				// const distance = MarkerOptions.SIZE * 12;
+			for (let i = 0; i < AntOptions.NUM_OF_RAYCASTS; i++) {
+				const angle = random(-Math.PI * (1 / 3), Math.PI * (1 / 3));
 				const distance = random(
 					MarkerOptions.SIZE * 3,
 					MarkerOptions.SIZE * 12,
 				);
 
-				const sampleAngle = currentAngle + randAngle;
+				const sampleAngle = currentAngle + angle;
 				const angleToCell = createVector(
 					Math.cos(sampleAngle),
 					Math.sin(sampleAngle),
 				);
 
 				const rayCast = worldGrid.rayCast(
-					this.pos.copy(),
+					this.pos.x,
+					this.pos.y,
 					sampleAngle,
 					distance,
 				);

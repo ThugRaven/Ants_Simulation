@@ -240,7 +240,7 @@ export default class WorldGrid {
 	}
 
 	// TODO: Divide raycast to multiple smaller function to find what's causing such big garbage collection
-	rayCast(position: Vector, angle: number, maxDistance: number) {
+	rayCast(posX: number, posY: number, angle: number, maxDistance: number) {
 		const rayDirX = Math.cos(angle);
 		const rayDirY = Math.sin(angle);
 
@@ -249,26 +249,24 @@ export default class WorldGrid {
 			y: Math.sqrt(1 + (rayDirX / rayDirY) * (rayDirX / rayDirY)),
 		};
 
-		const mapCheck = { x: position.x, y: position.y };
+		const mapCheck = { x: posX, y: posY };
 		const rayLength = { x: 0, y: 0 };
 		const step = { x: 0, y: 0 };
 
 		if (rayDirX < 0) {
 			step.x = -1;
-			rayLength.x = (position.x - Math.round(mapCheck.x)) * rayUnitStepSize.x;
+			rayLength.x = (posX - Math.round(mapCheck.x)) * rayUnitStepSize.x;
 		} else {
 			step.x = 1;
-			rayLength.x =
-				(Math.round(mapCheck.x + 1) - position.x) * rayUnitStepSize.x;
+			rayLength.x = (Math.round(mapCheck.x + 1) - posX) * rayUnitStepSize.x;
 		}
 
 		if (rayDirY < 0) {
 			step.y = -1;
-			rayLength.y = (position.y - Math.round(mapCheck.y)) * rayUnitStepSize.y;
+			rayLength.y = (posY - Math.round(mapCheck.y)) * rayUnitStepSize.y;
 		} else {
 			step.y = 1;
-			rayLength.y =
-				(Math.round(mapCheck.y + 1) - position.y) * rayUnitStepSize.y;
+			rayLength.y = (Math.round(mapCheck.y + 1) - posY) * rayUnitStepSize.y;
 		}
 
 		const mapSize = {

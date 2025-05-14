@@ -45,7 +45,7 @@ export const ColonyOptions = {
 
 // PERFORMANCE TESTING
 export const PerfTestOptions = {
-	COLONY_ANTS: 7500,
+	COLONY_ANTS: 20000,
 	// 10 seconds
 	TEST_DURATION: 10 * 1000,
 	HIDE_ANTS: true,
@@ -82,6 +82,8 @@ export const AntOptions = {
 	PERCEPTION_POINTS_HORIZONTAL: 8,
 	PERCEPTION_POINTS_VERTICAL: 5,
 	DIRECTION_PERIOD: 0.25,
+	// Raycast
+	NUM_OF_RAYCASTS: 8,
 	// Marker
 	MARKER_PERIOD: 0.15,
 	MARKER_DEFAULT_INTENSITY: 1,
