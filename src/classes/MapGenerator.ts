@@ -84,6 +84,11 @@ export default class MapGenerator {
 		const rng = seedrandom(seed);
 		let rooms: Room[] | undefined;
 
+		if (!seed) {
+			this.addBorderWalls();
+			return generate(this.map, this.foodMap, true);
+		}
+
 		const generateStep = () => {
 			if (step == 0) {
 				this.map = this.randomFillMap(rng, this.fillRatio, 1);
