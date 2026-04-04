@@ -294,6 +294,8 @@ const performanceStats = new PerformanceStats([
 		stats: [
 			{ name: 'fps', title: 'Frames per second' },
 			{ name: 'ms', title: 'Milliseconds to render a frame' },
+			{ name: 'tps', title: 'Ticks per second' },
+			{ name: 'sim', title: 'Simulation speed' },
 		],
 	},
 	{
@@ -314,6 +316,8 @@ const performanceStats = new PerformanceStats([
 const [
 	fpsDisplay,
 	msDisplay,
+	tpsDisplay,
+	simDisplay,
 	clearDisplay,
 	gridDisplay,
 	foodDisplay,
@@ -1448,6 +1452,8 @@ function updatePerformanceDisplay() {
 
 	fpsDisplay.textContent = `${Math.round(avgMap.get('fps') * 100) / 100} fps`;
 	msDisplay.textContent = `${Math.round(avgMap.get('ms') * 100) / 100} ms`;
+	tpsDisplay.textContent = `${Math.round(avgMap.get('tps'))} TPS`;
+	simDisplay.textContent = `x${Math.round(avgMap.get('sim') * 10) / 10}`;
 	clearDisplay.textContent = `${
 		Math.round(avgMap.get('clear') * 100) / 100
 	} ms`;
@@ -1672,6 +1678,13 @@ function setCamera() {
 
 let perfTestStartTime: number | null = null;
 
+const TICK_RATE = 144;
+const TARGET_FRAME_MS = 1000 / TICK_RATE;
+const FIXED_STEP = 1 / TICK_RATE;
+let ticksPerFrame = 1;
+
+const speedMultiplier = 8;
+
 function main(currentTime: number) {
 	if (
 		ctxMarkers == null ||
@@ -1685,6 +1698,8 @@ function main(currentTime: number) {
 		return;
 
 	window.requestAnimationFrame(main);
+	const frameStart = performance.now();
+
 	if (isPerfTest && performanceStats.isPerfTest && !perfTestStartTime) {
 		perfTestStartTime = performance.now();
 		setTimeout(() => {
@@ -1697,100 +1712,118 @@ function main(currentTime: number) {
 	const deltaTime = (currentTime - lastUpdateTime) / 1000;
 	antsDrawClock += deltaTime;
 
-	const readyToDraw =
-		((scheduleRegularDraw || isRunning) &&
-			antsDrawClock > ANTS_DRAW_PERIOD / canvasScale) ||
-		antsDrawClock > (ANTS_DRAW_PERIOD * 10) / canvasScale;
+	console.log(ticksPerFrame);
+	for (let i = 0; i < ticksPerFrame; i++) {
+		// console.log('draw');
+		const readyToDraw =
+			((scheduleRegularDraw || isRunning) &&
+				antsDrawClock > ANTS_DRAW_PERIOD / canvasScale) ||
+			antsDrawClock > (ANTS_DRAW_PERIOD * 10) / canvasScale;
 
-	if (performanceStats.isMeasuring) {
-		performanceStats.setPerformance('fps', 1 / deltaTime);
-		performanceStats.setPerformance('ms', currentTime - lastUpdateTime);
-	}
+		if (performanceStats.isMeasuring) {
+			performanceStats.setPerformance('fps', 1 / deltaTime);
+			performanceStats.setPerformance('ms', currentTime - lastUpdateTime);
+			performanceStats.setPerformance('tps', ticksPerFrame * (1 / deltaTime));
+			performanceStats.setPerformance(
+				'sim',
+				(ticksPerFrame * (1 / deltaTime)) / TICK_RATE,
+			);
+		}
 
-	performanceStats.startMeasurement('clear');
-	if (readyToDraw) {
-		ctxAnts.clearRect(0, 0, width, height);
-	}
-	ctxMarkers.clearRect(0, 0, worldGrid.width, worldGrid.height);
-	performanceStats.endMeasurement('clear');
+		performanceStats.startMeasurement('clear');
+		if (readyToDraw) {
+			ctxAnts.clearRect(0, 0, width, height);
+		}
+		ctxMarkers.clearRect(0, 0, worldGrid.width, worldGrid.height);
+		performanceStats.endMeasurement('clear');
 
-	performanceStats.startMeasurement('grid');
-	if (isDrawingMarkers && markersImageData) {
-		worldGrid.drawMarkers(ctxMarkers, markersImageData, isRunning);
-		// TODO: Remember the state of density view when switching to markers
-	} else if (isDrawingDensity && densityImageData) {
-		worldGrid.drawDensity(ctxMarkers, densityImageData, isRunning);
-	} else if (isDrawingAdvancedDensity && densityImageData) {
-		worldGrid.drawDensity(ctxMarkers, densityImageData, isRunning, true);
-	} else if (isRunning) {
-		worldGrid.update();
-	}
-	performanceStats.endMeasurement('grid');
+		performanceStats.startMeasurement('grid');
+		if (isDrawingMarkers && markersImageData) {
+			worldGrid.drawMarkers(ctxMarkers, markersImageData, isRunning);
+			// TODO: Remember the state of density view when switching to markers
+		} else if (isDrawingDensity && densityImageData) {
+			worldGrid.drawDensity(ctxMarkers, densityImageData, isRunning);
+		} else if (isDrawingAdvancedDensity && densityImageData) {
+			worldGrid.drawDensity(ctxMarkers, densityImageData, isRunning, true);
+		} else if (isRunning) {
+			worldGrid.update();
+		}
+		performanceStats.endMeasurement('grid');
 
-	performanceStats.startMeasurement('food');
-	worldGrid.drawFood(ctxFood);
-	performanceStats.endMeasurement('food');
+		performanceStats.startMeasurement('food');
+		worldGrid.drawFood(ctxFood);
+		performanceStats.endMeasurement('food');
 
-	const target = createVector(
-		mouseX / canvasScale - cameraOffset.x,
-		mouseY / canvasScale - cameraOffset.y,
-	);
+		const target = createVector(
+			mouseX / canvasScale - cameraOffset.x,
+			mouseY / canvasScale - cameraOffset.y,
+		);
 
-	if (isEditMode) {
-		// Draw brush preview
-		ctxEditPreview.clearRect(0, 0, worldGrid.width, worldGrid.height);
-		ctxEditPreview.fillStyle = 'grey';
-		const posX = worldGrid.getCellCoords(target.x);
-		const posY = worldGrid.getCellCoords(target.y);
-		circle(ctxEditPreview, posX, posY, brushSize);
+		if (isEditMode) {
+			// Draw brush preview
+			ctxEditPreview.clearRect(0, 0, worldGrid.width, worldGrid.height);
+			ctxEditPreview.fillStyle = 'grey';
+			const posX = worldGrid.getCellCoords(target.x);
+			const posY = worldGrid.getCellCoords(target.y);
+			circle(ctxEditPreview, posX, posY, brushSize);
 
-		if (isErasing) {
-			// Erase
-			ctxEdit.fillStyle = 'black';
-			circle(ctxEdit, posX, posY, brushSize);
-		} else if (isHolding) {
-			// Draw walls/food
-			if (isWallMode) {
-				ctxEdit.fillStyle = 'rgb(163, 163, 163)';
-			} else if (isFoodMode) {
-				ctxEdit.fillStyle = 'rgb(66, 153, 66, 0.25)';
+			if (isErasing) {
+				// Erase
+				ctxEdit.fillStyle = 'black';
+				circle(ctxEdit, posX, posY, brushSize);
+			} else if (isHolding) {
+				// Draw walls/food
+				if (isWallMode) {
+					ctxEdit.fillStyle = 'rgb(163, 163, 163)';
+				} else if (isFoodMode) {
+					ctxEdit.fillStyle = 'rgb(66, 153, 66, 0.25)';
+				}
+				circle(ctxEdit, posX, posY, brushSize);
 			}
-			circle(ctxEdit, posX, posY, brushSize);
+		}
+
+		colony.updateColony(FIXED_STEP);
+		performanceStats.startMeasurement('ants');
+		if (readyToDraw) {
+			colony.updateAndDrawAnts(worldGrid, FIXED_STEP);
+		} else {
+			colony.updateAndDrawAnts(worldGrid, FIXED_STEP, false);
+		}
+		performanceStats.endMeasurement('ants');
+
+		performanceStats.startMeasurement('panels');
+		updateAntInfo();
+		if (isTracking && colony.selectedAnt) {
+			trackAntCamera(colony.selectedAnt.pos.x, colony.selectedAnt.pos.y);
+		}
+
+		if (isDebugMode && readyToDraw) {
+			ctxAnts.fillStyle = 'red';
+			circle(ctxAnts, target.x, target.y, 4);
+			updateCellInfo(target.x, target.y);
+		}
+
+		updateColonyInfo();
+		performanceStats.endMeasurement('panels');
+
+		if (performanceStats.isMeasuring) {
+			performanceStats.endMeasurement('all');
+			updatePerformanceDisplay();
+		}
+
+		if (readyToDraw) {
+			scheduleRegularDraw = false;
+			antsDrawClock = 0;
 		}
 	}
 
-	colony.updateColony(deltaTime);
-	performanceStats.startMeasurement('ants');
-	if (readyToDraw) {
-		colony.updateAndDrawAnts(worldGrid, deltaTime);
-	} else {
-		colony.updateAndDrawAnts(worldGrid, deltaTime, false);
-	}
-	performanceStats.endMeasurement('ants');
+	const frameTime = performance.now() - frameStart;
+	if (frameTime < TARGET_FRAME_MS * 0.7) ticksPerFrame++;
+	else if (frameTime > TARGET_FRAME_MS)
+		ticksPerFrame = Math.max(1, ticksPerFrame - 1);
 
-	performanceStats.startMeasurement('panels');
-	updateAntInfo();
-	if (isTracking && colony.selectedAnt) {
-		trackAntCamera(colony.selectedAnt.pos.x, colony.selectedAnt.pos.y);
-	}
+	const ticksPerFrameTarget = speedMultiplier;
+	ticksPerFrame = Math.min(ticksPerFrame, ticksPerFrameTarget);
 
-	if (isDebugMode && readyToDraw) {
-		ctxAnts.fillStyle = 'red';
-		circle(ctxAnts, target.x, target.y, 4);
-		updateCellInfo(target.x, target.y);
-	}
-
-	updateColonyInfo();
-	performanceStats.endMeasurement('panels');
-
-	if (performanceStats.isMeasuring) {
-		performanceStats.endMeasurement('all');
-		updatePerformanceDisplay();
-	}
-
-	if (readyToDraw) {
-		scheduleRegularDraw = false;
-		antsDrawClock = 0;
-	}
 	lastUpdateTime = currentTime;
 }
