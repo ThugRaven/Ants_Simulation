@@ -341,7 +341,7 @@ export default class Ant {
 
 			const intensity =
 				AntOptions.MARKER_DEFAULT_INTENSITY *
-				Math.exp(-0.15 * this.markerIntensityClock);
+				Math.exp(AntOptions.DECAY_RATE * this.markerIntensityClock);
 
 			if (intensity < 0.01) {
 				this.markerClock = 0;

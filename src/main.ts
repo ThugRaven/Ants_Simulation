@@ -1678,12 +1678,12 @@ function setCamera() {
 
 let perfTestStartTime: number | null = null;
 
-const TICK_RATE = 144;
+const TICK_RATE = 60;
 const TARGET_FRAME_MS = 1000 / TICK_RATE;
 const FIXED_STEP = 1 / TICK_RATE;
 let ticksPerFrame = 1;
 
-const speedMultiplier = 8;
+const speedMultiplier = 1;
 
 function main(currentTime: number) {
 	if (
