@@ -120,6 +120,13 @@ const colonyTotalFood = document.querySelector<HTMLSpanElement>(
 const pauseIndicator = document.querySelector<HTMLDivElement>('[data-pause]');
 const btnPlay = document.getElementById('btn-play') as HTMLButtonElement;
 const btnPause = document.getElementById('btn-pause') as HTMLButtonElement;
+const btnSpeedX1 = document.getElementById('btn-speed-x1') as HTMLButtonElement;
+const btnSpeedX2 = document.getElementById('btn-speed-x2') as HTMLButtonElement;
+const btnSpeedX4 = document.getElementById('btn-speed-x4') as HTMLButtonElement;
+const btnSpeedX8 = document.getElementById('btn-speed-x8') as HTMLButtonElement;
+const btnSpeedX16 = document.getElementById(
+	'btn-speed-x16',
+) as HTMLButtonElement;
 
 // Edit panel
 const btnEditMode = document.getElementById(
@@ -288,6 +295,8 @@ let isConfirmDialogVisible = false;
 let isSimulationTypeDialogVisible = false;
 
 let lastUpdateTime = 0;
+let speedMultiplier = 1;
+
 const performanceStats = new PerformanceStats([
 	{
 		mode: 0,
@@ -513,6 +522,21 @@ window.addEventListener('keydown', (e) => {
 	}
 
 	switch (e.code) {
+		case 'Digit1':
+			setSpeedMultiplier(1);
+			break;
+		case 'Digit2':
+			setSpeedMultiplier(2);
+			break;
+		case 'Digit3':
+			setSpeedMultiplier(4);
+			break;
+		case 'Digit4':
+			setSpeedMultiplier(8);
+			break;
+		case 'Digit5':
+			setSpeedMultiplier(16);
+			break;
 		case 'Space':
 			e.preventDefault();
 			toggleLoop();
@@ -733,6 +757,59 @@ btnPlay.addEventListener('click', () => {
 btnPause.addEventListener('click', () => {
 	toggleLoop();
 });
+
+btnSpeedX1.addEventListener('click', () => {
+	setSpeedMultiplier(1);
+});
+btnSpeedX2.addEventListener('click', () => {
+	setSpeedMultiplier(2);
+});
+btnSpeedX4.addEventListener('click', () => {
+	setSpeedMultiplier(4);
+});
+btnSpeedX8.addEventListener('click', () => {
+	setSpeedMultiplier(8);
+});
+btnSpeedX16.addEventListener('click', () => {
+	setSpeedMultiplier(16);
+});
+
+const setSpeedMultiplier = (speed: number) => {
+	const btns = [btnSpeedX1, btnSpeedX2, btnSpeedX4, btnSpeedX8, btnSpeedX16];
+	const resetBtns = () => {
+		btns.forEach((btn) => toggleButton(true, btn));
+	};
+
+	switch (speed) {
+		case 1:
+			resetBtns();
+			toggleButton(false, btnSpeedX1);
+			speedMultiplier = 1;
+			break;
+		case 2:
+			resetBtns();
+			toggleButton(false, btnSpeedX2);
+			speedMultiplier = 2;
+			break;
+		case 4:
+			resetBtns();
+			toggleButton(false, btnSpeedX4);
+			speedMultiplier = 4;
+			break;
+		case 8:
+			resetBtns();
+			toggleButton(false, btnSpeedX8);
+			speedMultiplier = 8;
+			break;
+		case 16:
+			resetBtns();
+			toggleButton(false, btnSpeedX16);
+			speedMultiplier = 16;
+			break;
+	}
+};
+
+setSpeedMultiplier(1);
 
 brushSizeMinus.addEventListener('click', () => {
 	changeBrushSize(-BrushOptions.STEP);
@@ -1682,8 +1759,6 @@ const TICK_RATE = 60;
 const TARGET_FRAME_MS = 1000 / TICK_RATE;
 const FIXED_STEP = 1 / TICK_RATE;
 let ticksPerFrame = 1;
-
-const speedMultiplier = 1;
 
 function main(currentTime: number) {
 	if (
