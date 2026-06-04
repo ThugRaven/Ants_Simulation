@@ -109,12 +109,13 @@ export default class WorldGrid {
 		}
 	}
 
-	addFood(x: number, y: number, quantity: number) {
+	addFood(x: number, y: number, quantity: number, skipCap?: boolean) {
 		const index = this.getIndexFromCoords(x, y);
 		if (index > this.cells.length || index < 0) return;
 
 		const cell = this.cells[index];
-		cell.food.quantity = Math.min(cell.food.quantity + quantity, 100);
+		const newQuantity = cell.food.quantity + quantity;
+		cell.food.quantity = skipCap ? newQuantity : Math.min(newQuantity, 100);
 		cell.food.changed = true;
 	}
 

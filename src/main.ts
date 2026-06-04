@@ -1795,7 +1795,7 @@ function main(currentTime: number) {
 	const deltaTime = (currentTime - lastUpdateTime) / 1000;
 	antsDrawClock += deltaTime;
 
-	console.log(ticksPerFrame);
+	// console.log(ticksPerFrame);
 	for (let i = 0; i < ticksPerFrame; i++) {
 		// console.log('draw');
 		const readyToDraw =

@@ -211,6 +211,12 @@ export default class Ant {
 
 		if (this.internalClock >= this.maxAutonomy) {
 			this.isDead = true;
+			worldGrid.addFood(
+				worldGrid.getCellCoords(this.pos.x),
+				worldGrid.getCellCoords(this.pos.y),
+				this.foodAmount,
+				true,
+			);
 		}
 
 		if (
@@ -276,6 +282,7 @@ export default class Ant {
 			if (this.state === AntStates.TO_HOME) {
 				this.direction.addImmediate(Math.PI);
 				colony.addFood(this.foodAmount);
+				this.foodAmount = 0;
 			}
 			if (
 				this.state === AntStates.REFILL &&
