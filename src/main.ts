@@ -1207,6 +1207,13 @@ function toggleLoop() {
 	isRunning = !isRunning;
 	colony.isRunning = isRunning;
 
+	if (isRunning) {
+		ticksPerFrame = lastTicksPerFrame;
+	} else {
+		lastTicksPerFrame = ticksPerFrame;
+		ticksPerFrame = 1;
+	}
+
 	pauseIndicator.style.display = isRunning ? 'none' : 'block';
 	btnPlay.style.display = isRunning ? 'none' : 'flex';
 	btnPause.style.display = isRunning ? 'flex' : 'none';
@@ -1759,6 +1766,7 @@ const TICK_RATE = 60;
 const TARGET_FRAME_MS = 1000 / TICK_RATE;
 const FIXED_STEP = 1 / TICK_RATE;
 let ticksPerFrame = 1;
+let lastTicksPerFrame = 1;
 
 function main(currentTime: number) {
 	if (
@@ -1893,7 +1901,7 @@ function main(currentTime: number) {
 	}
 
 	const frameTime = performance.now() - frameStart;
-	if (frameTime < TARGET_FRAME_MS * 0.7) ticksPerFrame++;
+	if (isRunning && frameTime < TARGET_FRAME_MS * 0.7) ticksPerFrame++;
 	else if (frameTime > TARGET_FRAME_MS)
 		ticksPerFrame = Math.max(1, ticksPerFrame - 1);
 
